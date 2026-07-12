@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 56% 99%;
+    --foreground: 340 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 340 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 340 25% 12%;
+
+    --primary: 345 78% 70%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 35 50% 95%;
+    --secondary-foreground: 340 25% 18%;
+
+    --muted: 30 30% 95%;
+    --muted-foreground: 340 8% 45%;
+
+    --accent: 38 60% 56%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 340 18% 90%;
+    --input: 340 18% 90%;
+    --ring: 345 78% 70%;
+
+    --radius: 0.85rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .container-narrow {
+    @apply container max-w-6xl;
+  }
+
+  .heading-serif {
+    @apply font-serif tracking-tight;
+  }
+
+  .glass-card {
+    @apply rounded-2xl border border-border/60 bg-white/70 backdrop-blur-sm shadow-sm;
+  }
+
+  .hero-gradient {
+    background: radial-gradient(
+        circle at 10% 0%,
+        rgba(255, 196, 213, 0.55) 0%,
+        transparent 45%
+      ),
+      radial-gradient(
+        circle at 95% 10%,
+        rgba(252, 232, 200, 0.7) 0%,
+        transparent 50%
+      ),
+      linear-gradient(180deg, #fff8f5 0%, #fff5f1 100%);
+  }
+
+  .section-soft {
+    background: linear-gradient(180deg, #fffaf6 0%, #fff5f1 100%);
+  }
+}

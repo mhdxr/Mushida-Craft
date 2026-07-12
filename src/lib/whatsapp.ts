@@ -1,0 +1,45 @@
+import type { CustomOrderForm, Product } from "@/types";
+import { formatCurrency } from "@/lib/utils";
+
+const DEFAULT_NUMBER = "6281234567890";
+
+export function getWhatsAppNumber(): string {
+  return process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || DEFAULT_NUMBER;
+}
+
+export function buildWhatsAppUrl(message: string): string {
+  const number = getWhatsAppNumber();
+  const encoded = encodeURIComponent(message);
+  return `https://wa.me/${number}?text=${encoded}`;
+}
+
+export function buildProductOrderMessage(product: Product): string {
+  return [
+    "Halo Mushida! 🌸",
+    "",
+    "Saya tertarik dengan produk berikut:",
+    `• Nama: ${product.name}`,
+    `• Harga: ${formatCurrency(product.price)}`,
+    `• Kategori: ${product.category}`,
+    "",
+    "Boleh info lebih lanjut untuk pemesanannya? Terima kasih.",
+  ].join("\n");
+}
+
+export function buildCustomOrderMessage(form: CustomOrderForm): string {
+  return [
+    "Halo Mushida! 🌸",
+    "Saya ingin request *Custom Bouquet* dengan detail berikut:",
+    "",
+    `• Nama: ${form.name}`,
+    `• WhatsApp: ${form.whatsapp}`,
+    `• Jenis bouquet: ${form.bouquetType}`,
+    `• Budget: ${form.budget}`,
+    `• Tanggal dibutuhkan: ${form.neededDate}`,
+    form.notes ? `• Catatan: ${form.notes}` : "",
+    "",
+    "Mohon dibantu ya, terima kasih banyak!",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
