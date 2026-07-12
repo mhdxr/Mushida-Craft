@@ -20,6 +20,10 @@ import { productSchema, type ProductSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
 import type { Product, ProductBadge, ProductCategory } from "@/types";
 
+// Radix Select tidak mengizinkan empty string sebagai value,
+// jadi kita pakai sentinel "none" untuk merepresentasikan "tanpa badge".
+const NO_BADGE = "none";
+
 interface ProductFormProps {
   initial?: Product;
   onSubmit: (data: Omit<Product, "id" | "createdAt"> | Partial<Product>) => Promise<void>;
@@ -42,7 +46,7 @@ export function ProductForm({ initial, onSubmit, onCancel }: ProductFormProps) {
       price: initial?.price ?? 0,
       category: initial?.category ?? "hand-bouquet",
       images: initial?.images.join("\n") ?? "",
-      badge: initial?.badge ?? "",
+      badge: (initial?.badge ?? "") as ProductSchema["badge"],
       isAvailable: initial?.isAvailable ?? true,
     },
   });
@@ -55,7 +59,7 @@ export function ProductForm({ initial, onSubmit, onCancel }: ProductFormProps) {
         price: initial.price,
         category: initial.category,
         images: initial.images.join("\n"),
-        badge: initial.badge ?? "",
+        badge: (initial.badge ?? "") as ProductSchema["badge"],
         isAvailable: initial.isAvailable,
       });
     }
@@ -76,7 +80,7 @@ export function ProductForm({ initial, onSubmit, onCancel }: ProductFormProps) {
       price: Number(data.price),
       category: data.category,
       images,
-      badge: data.badge === "" ? undefined : (data.badge as ProductBadge),
+      badge: !data.badge ? undefined : (data.badge as ProductBadge),
       isAvailable: data.isAvailable,
       slug: initial?.slug ?? slugify(data.name),
     };
@@ -132,18 +136,20 @@ export function ProductForm({ initial, onSubmit, onCancel }: ProductFormProps) {
         <div className="space-y-2">
           <Label>Badge</Label>
           <Select
-            value={badge || ""}
+            value={badge || NO_BADGE}
             onValueChange={(v) =>
-              setValue("badge", v as ProductBadge | "", {
-                shouldValidate: true,
-              })
+              setValue(
+                "badge",
+                (v === NO_BADGE ? "" : v) as ProductBadge | "",
+                { shouldValidate: true },
+              )
             }
           >
             <SelectTrigger>
               <SelectValue placeholder="Tanpa badge" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Tanpa badge</SelectItem>
+              <SelectItem value={NO_BADGE}>Tanpa badge</SelectItem>
               <SelectItem value="best-seller">Best Seller</SelectItem>
               <SelectItem value="new">New</SelectItem>
               <SelectItem value="sold-out">Sold Out</SelectItem>

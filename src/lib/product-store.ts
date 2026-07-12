@@ -38,6 +38,7 @@ function writeAll(items: Product[]) {
 export interface ProductRepository {
   list(): Promise<Product[]>;
   getById(id: string): Promise<Product | undefined>;
+  getBySlug(slug: string): Promise<Product | undefined>;
   create(input: Omit<Product, "id" | "createdAt">): Promise<Product>;
   update(id: string, input: Partial<Product>): Promise<Product | undefined>;
   remove(id: string): Promise<void>;
@@ -50,6 +51,9 @@ export const localProductRepository: ProductRepository = {
   },
   async getById(id) {
     return readAll().find((p) => p.id === id);
+  },
+  async getBySlug(slug) {
+    return readAll().find((p) => p.slug === slug);
   },
   async create(input) {
     const items = readAll();
@@ -79,3 +83,17 @@ export const localProductRepository: ProductRepository = {
     writeAll(seedProducts);
   },
 };
+
+/**
+ * Ambil produk terkait berdasarkan kategori.
+ * Bekerja pada list hasil repository (localStorage) maupun seed statis.
+ */
+export function findRelatedProducts(
+  product: Product,
+  source: Product[],
+  limit = 4,
+): Product[] {
+  return source
+    .filter((p) => p.category === product.category && p.id !== product.id)
+    .slice(0, limit);
+}
