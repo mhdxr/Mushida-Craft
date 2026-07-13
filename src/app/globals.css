@@ -51,18 +51,6 @@
 }
 
 @layer components {
-  .container-narrow {
-    @apply container max-w-6xl;
-  }
-
-  .heading-serif {
-    @apply font-serif tracking-tight;
-  }
-
-  .glass-card {
-    @apply rounded-2xl border border-border/60 bg-white/70 backdrop-blur-sm shadow-sm;
-  }
-
   .hero-gradient {
     background: radial-gradient(
         circle at 10% 0%,
@@ -79,5 +67,24 @@
 
   .section-soft {
     background: linear-gradient(180deg, #fffaf6 0%, #fff5f1 100%);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion — hormati preferensi user yang sensitif terhadap animasi.
+   Nonaktifkan smooth scroll, animasi, dan transisi.
+--------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

@@ -57,6 +57,7 @@ export function CatalogFilters({
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Cari nama bouquet..."
+            aria-label="Cari bouquet"
             value={value.search}
             onChange={(e) =>
               onChange({ ...value, search: e.target.value })
@@ -71,7 +72,7 @@ export function CatalogFilters({
             onChange({ ...value, category: v as CatalogFiltersValue["category"] })
           }
         >
-          <SelectTrigger className="md:w-[200px]">
+          <SelectTrigger className="md:w-[200px]" aria-label="Filter kategori">
             <SelectValue placeholder="Kategori" />
           </SelectTrigger>
           <SelectContent>
@@ -90,7 +91,7 @@ export function CatalogFilters({
             onChange({ ...value, price: v as PriceRange })
           }
         >
-          <SelectTrigger className="md:w-[220px]">
+          <SelectTrigger className="md:w-[220px]" aria-label="Filter harga">
             <SelectValue placeholder="Rentang harga" />
           </SelectTrigger>
           <SelectContent>

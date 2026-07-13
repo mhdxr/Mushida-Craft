@@ -4,6 +4,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFab } from "@/components/common/whatsapp-fab";
 import { Toaster } from "@/components/common/toaster";
+import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -93,7 +94,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <Navbar />
-        <main className="min-h-screen">{children}</main>
+        <PostHogProvider>
+          <main className="min-h-screen">{children}</main>
+        </PostHogProvider>
         <Footer />
         <WhatsAppFab />
         <Toaster />

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Flower2, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,21 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  // Tutup menu saat route berubah.
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Tutup menu saat Escape ditekan.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-white/80 backdrop-blur-md">
@@ -57,7 +72,8 @@ export function Navbar() {
         </div>
 
         <button
-          aria-label="Toggle menu"
+          aria-label={open ? "Tutup menu" : "Buka menu"}
+          aria-expanded={open}
           className="md:hidden"
           onClick={() => setOpen(!open)}
         >

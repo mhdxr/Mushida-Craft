@@ -24,7 +24,10 @@ export function TestimonialsSection() {
             transition={{ duration: 0.4, delay: idx * 0.08 }}
             className="rounded-2xl border border-border/60 bg-white p-6 shadow-sm"
           >
-            <div className="flex items-center gap-1 text-amber-400">
+            <div
+              className="flex items-center gap-1 text-amber-400"
+              aria-label={`Rating ${t.rating} dari 5`}
+            >
               {Array.from({ length: t.rating }).map((_, i) => (
                 <Star key={i} className="h-4 w-4 fill-current" />
               ))}

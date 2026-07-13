@@ -24,3 +24,6 @@ Sentry.init({
   // Hanya aktif di environment yang punya DSN.
   enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 });
+
+// Instrumentasi navigasi untuk Sentry (Next.js 16 Turbopack).
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

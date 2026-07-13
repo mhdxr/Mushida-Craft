@@ -90,12 +90,19 @@ export function CatalogView() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="aspect-[4/5] animate-pulse rounded-2xl bg-secondary"
-            />
+              className="overflow-hidden rounded-2xl border border-border/60 bg-white shadow-sm"
+            >
+              <div className="aspect-[4/5] animate-pulse bg-secondary" />
+              <div className="space-y-2 p-4">
+                <div className="h-2.5 w-16 animate-pulse rounded bg-secondary" />
+                <div className="h-4 w-3/4 animate-pulse rounded bg-secondary" />
+                <div className="h-4 w-1/3 animate-pulse rounded bg-secondary" />
+              </div>
+            </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (

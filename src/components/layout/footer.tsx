@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { Flower2, Camera, MessageCircle, Mail } from "lucide-react";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
+
+const contactMessage = "Halo Mushida! 🌸 Saya ingin tanya-tanya tentang bouquet bunga.";
 
 export function Footer() {
+  const whatsappUrl = buildWhatsAppUrl(contactMessage);
+
   return (
     <footer className="border-t border-border/60 bg-cream-50">
       <div className="container py-12">
@@ -88,15 +93,34 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4 text-primary" />
-                <span>WhatsApp 0812-3456-7890</span>
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-foreground"
+                >
+                  WhatsApp 0812-3456-7890
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <Camera className="h-4 w-4 text-primary" />
-                <span>@Mushida.id</span>
+                <a
+                  href="https://instagram.com/Mushida.id"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-foreground"
+                >
+                  @Mushida.id
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary" />
-                <span>hello@Mushida.id</span>
+                <a
+                  href="mailto:hello@Mushida.id"
+                  className="transition-colors hover:text-foreground"
+                >
+                  hello@Mushida.id
+                </a>
               </li>
             </ul>
           </div>

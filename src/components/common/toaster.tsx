@@ -21,7 +21,11 @@ export function Toaster() {
   const { items, dismiss } = useToasts();
 
   return (
-    <div className="pointer-events-none fixed bottom-24 right-5 z-50 flex w-[min(360px,calc(100vw-2.5rem))] flex-col gap-2 md:bottom-6 md:right-24">
+    <div
+      role="status"
+      aria-live="polite"
+      className="pointer-events-none fixed bottom-24 right-5 z-50 flex w-[min(360px,calc(100vw-2.5rem))] flex-col gap-2 md:bottom-6 md:right-24"
+    >
       <AnimatePresence>
         {items.map((t) => {
           const Icon = iconMap[t.variant];

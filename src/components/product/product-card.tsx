@@ -31,7 +31,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
+      transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.4) }}
     >
       <Link
         href={`/produk/${product.slug}`}
@@ -39,7 +39,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       >
         <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
           <Image
-            src={product.images[0]}
+            src={product.images[0] ?? "/placeholder.png"}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 50vw, 25vw"

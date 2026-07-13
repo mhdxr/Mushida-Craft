@@ -24,6 +24,7 @@ Web katalog bouquet bunga premium dengan halaman publik (beranda, katalog, detai
 | Database | Supabase (PostgreSQL + RLS) |
 | Animasi | framer-motion |
 | Error tracking | @sentry/nextjs |
+| Analytics | posthog-js |
 | Font | Inter (sans) + Playfair Display (serif) via `next/font` |
 
 ## 📁 Struktur Project
@@ -55,6 +56,7 @@ src/
 │   ├── robots.ts                    # robots.txt
 │   └── sitemap.ts                   # sitemap.xml dinamis
 ├── components/
+│   ├── analytics/                   # posthog provider
 │   ├── ui/                          # shadcn/ui primitives
 │   ├── layout/                      # navbar, footer
 │   ├── home/                        # hero, kategori, featured, testimoni
@@ -115,6 +117,10 @@ NEXT_PUBLIC_SENTRY_DSN=
 SENTRY_AUTH_TOKEN=
 SENTRY_ORG=
 SENTRY_PROJECT=
+
+# ── PostHog (analytics — opsional, kosongkan untuk menonaktifkan) ──
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 ```
 
 ### Menjalankan
@@ -236,6 +242,28 @@ Integrasi Sentry aktif bila `NEXT_PUBLIC_SENTRY_DSN` terisi. Jika kosong, SDK no
    ```
 3. Deploy — error mulai ter-track otomatis.
 
+## 📈 PostHog (Analytics)
+
+Integrasi PostHog aktif bila `NEXT_PUBLIC_POSTHOG_KEY` terisi. Jika kosong, SDK no-op — aman untuk dev/CI.
+
+**Cakupan:**
+- **Pageviews** — otomatis track setiap route change
+- **Auto-capture** — clicks, input changes, form submissions
+- **Session replay** — recording screen untuk analisis UX
+
+**File konfigurasi:**
+- `src/components/analytics/posthog-provider.tsx` — init SDK + pageview tracking
+- `src/app/api/posthog/ingest/route.ts` — proxy route (mengatasi ad-blocker)
+
+**Mengaktifkan:**
+1. Buat project di [posthog.com](https://posthog.com)
+2. Isi `.env.local`:
+   ```env
+   NEXT_PUBLIC_POSTHOG_KEY=phc_xxxxxxxxxxxxx
+   NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com   # atau https://eu.i.posthog.com
+   ```
+3. Deploy — analytics mulai ter-track otomatis.
+
 ## 📝 Scripts
 
 | Script | Deskripsi |
@@ -290,6 +318,8 @@ Project ini siap deploy ke Vercel. Vercel auto-detect Next.js, jadi tidak perlu 
    | `SENTRY_AUTH_TOKEN` | All | Opsional (untuk source maps) |
    | `SENTRY_ORG` | All | Opsional |
    | `SENTRY_PROJECT` | All | Opsional |
+   | `NEXT_PUBLIC_POSTHOG_KEY` | All | Opsional |
+   | `NEXT_PUBLIC_POSTHOG_HOST` | All | Opsional (default: `https://us.i.posthog.com`) |
 
    > **Catatan:** `SUPABASE_DB_URL` tidak perlu di-set di Vercel — hanya dipakai lokal oleh `npm run db:setup`.
 
