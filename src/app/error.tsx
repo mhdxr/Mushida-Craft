@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -12,8 +14,8 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    // Laporkan error ke Sentry untuk tracking.
+    Sentry.captureException(error);
   }, [error]);
 
   return (
@@ -31,7 +33,7 @@ export default function GlobalError({
       <div className="mt-6 flex gap-3">
         <Button onClick={reset}>Coba lagi</Button>
         <Button asChild variant="outline">
-          <a href="/">Ke Beranda</a>
+          <Link href="/">Ke Beranda</Link>
         </Button>
       </div>
     </div>

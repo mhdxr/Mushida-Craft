@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { setAdminSessionCookie } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -34,6 +35,9 @@ export async function POST(req: Request) {
         { status: 401 },
       );
     }
+
+    // Set HTTP-only cookie sesi admin (bukan localStorage lagi).
+    await setAdminSessionCookie(email);
 
     return NextResponse.json({ ok: true, email });
   } catch {

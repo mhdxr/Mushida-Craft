@@ -19,7 +19,7 @@ export const customOrderSchema = z.object({
 export type CustomOrderSchema = z.infer<typeof customOrderSchema>;
 
 export const loginSchema = z.object({
-  email: z.string().email("Format email tidak valid"),
+  email: z.email("Format email tidak valid"),
   password: z.string().min(6, "Password minimal 6 karakter"),
 });
 
@@ -32,7 +32,10 @@ export const productSchema = z.object({
     .min(10, "Deskripsi minimal 10 karakter")
     .max(800, "Deskripsi maksimal 800 karakter"),
   price: z
-    .number({ invalid_type_error: "Harga harus berupa angka" })
+    .number({
+      error: (issue) =>
+        issue.input === undefined ? "Harga wajib diisi" : "Harga harus berupa angka",
+    })
     .min(1000, "Harga minimal Rp1.000"),
   category: z.enum([
     "hand-bouquet",

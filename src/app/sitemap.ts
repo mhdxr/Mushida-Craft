@@ -1,11 +1,12 @@
 import type { MetadataRoute } from "next";
-import { products } from "@/data/products";
+import { fetchProductsServer } from "@/lib/product-api";
+import { products as seedProducts } from "@/data/products";
 import { categories } from "@/data/categories";
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL || "https://Mushida.vercel.app";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -13,6 +14,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${siteUrl}/katalog`, lastModified: now, priority: 0.9 },
     { url: `${siteUrl}/custom-order`, lastModified: now, priority: 0.8 },
   ];
+
+  // Coba ambil dari Supabase; fallback ke seed statis jika belum dikonfigurasi.
+  let products = seedProducts;
+  try {
+    const supabaseProducts = await fetchProductsServer();
+    if (supabaseProducts.length > 0) {
+      products = supabaseProducts;
+    }
+  } catch {
+    // Supabase belum dikonfigurasi — pakai seed statis.
+  }
 
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${siteUrl}/produk/${p.slug}`,

@@ -3,10 +3,18 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductGrid } from "@/components/product/product-grid";
 import { SectionHeading } from "@/components/common/section-heading";
+import { fetchFeaturedProductsServer } from "@/lib/product-api";
 import { getFeaturedProducts } from "@/data/products";
 
-export function FeaturedProducts() {
-  const products = getFeaturedProducts(4);
+export async function FeaturedProducts() {
+  // Coba ambil dari Supabase; fallback ke seed statis jika Supabase
+  // belum dikonfigurasi atau terjadi error.
+  let products = [];
+  try {
+    products = await fetchFeaturedProductsServer(4);
+  } catch {
+    products = getFeaturedProducts(4);
+  }
 
   return (
     <section className="container py-16 md:py-24">
@@ -18,7 +26,12 @@ export function FeaturedProducts() {
           align="left"
           className="md:max-w-xl"
         />
-        <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex">
+        <Button
+          asChild
+          variant="ghost"
+          size="sm"
+          className="hidden md:inline-flex"
+        >
           <Link href="/katalog">
             Lihat semua
             <ArrowRight className="h-4 w-4" />

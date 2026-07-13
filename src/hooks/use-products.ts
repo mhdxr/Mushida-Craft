@@ -1,18 +1,34 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { localProductRepository } from "@/lib/product-store";
 import type { Product } from "@/types";
 
+/**
+ * Hook untuk mengelola data produk via API routes (Supabase backend).
+ *
+ * Reads:  GET  /api/admin/products          (public, anon key)
+ * Create: POST /api/admin/products          (admin only, service role)
+ * Update: PATCH /api/admin/products/[id]    (admin only)
+ * Delete: DELETE /api/admin/products/[id]   (admin only)
+ * Reset:  POST /api/admin/products { action: "reset" }  (admin only)
+ */
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
-    const list = await localProductRepository.list();
-    setProducts(list);
-    setIsLoading(false);
+    try {
+      const res = await fetch("/api/admin/products", { cache: "no-store" });
+      const json = await res.json();
+      if (json.ok) {
+        setProducts(json.products as Product[]);
+      }
+    } catch {
+      // Error sudah ditangani oleh error boundary; biarkan list kosong.
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -21,30 +37,62 @@ export function useProducts() {
 
   const create = useCallback(
     async (input: Omit<Product, "id" | "createdAt">) => {
-      await localProductRepository.create(input);
+      const res = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        throw new Error(json.message || "Gagal membuat produk.");
+      }
       await refresh();
+      return json.product as Product;
     },
     [refresh],
   );
 
   const update = useCallback(
     async (id: string, input: Partial<Product>) => {
-      await localProductRepository.update(id, input);
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        throw new Error(json.message || "Gagal memperbarui produk.");
+      }
       await refresh();
+      return json.product as Product;
     },
     [refresh],
   );
 
   const remove = useCallback(
     async (id: string) => {
-      await localProductRepository.remove(id);
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        throw new Error(json.message || "Gagal menghapus produk.");
+      }
       await refresh();
     },
     [refresh],
   );
 
   const reset = useCallback(async () => {
-    await localProductRepository.reset();
+    const res = await fetch("/api/admin/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reset" }),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.ok) {
+      throw new Error(json.message || "Gagal reset data.");
+    }
     await refresh();
   }, [refresh]);
 

@@ -1,0 +1,16 @@
+# File yang tidak perlu di-deploy ke Vercel.
+
+# Supabase migration SQL (dijalankan lokal via npm run db:setup)
+supabase/
+
+# Script setup & tools (hanya untuk lokal/CI)
+scripts/
+
+# Environment example
+.env.example
+
+# Dokumentasi (tidak perlu di runtime)
+LICENSE
+
+# CI / config
+.eslintrc.json

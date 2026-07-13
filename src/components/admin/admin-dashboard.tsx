@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { ProductForm } from "@/components/admin/product-form";
 import { ProductTable } from "@/components/admin/product-table";
 import { useProducts } from "@/hooks/use-products";
-import { clearAdminSession, getAdminSession } from "@/lib/auth";
 import { toast } from "@/hooks/use-toast";
 import type { Product } from "@/types";
 
@@ -20,13 +19,16 @@ export function AdminDashboard() {
   const [adminEmail, setAdminEmail] = useState<string>("");
 
   useEffect(() => {
-    const session = getAdminSession();
-    if (!session) {
-      router.replace("/admin/login");
-      return;
-    }
-    setAdminEmail(session.email);
-    setAuthChecked(true);
+    (async () => {
+      const res = await fetch("/api/admin/session", { cache: "no-store" });
+      if (!res.ok) {
+        router.replace("/admin/login");
+        return;
+      }
+      const json = await res.json();
+      setAdminEmail(json.email ?? "");
+      setAuthChecked(true);
+    })();
   }, [router]);
 
   if (!authChecked) {
@@ -37,8 +39,8 @@ export function AdminDashboard() {
     );
   }
 
-  const handleLogout = () => {
-    clearAdminSession();
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
     router.push("/admin/login");
   };
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Flower2, Instagram, MessageCircle, Mail } from "lucide-react";
+import { Flower2, Camera, MessageCircle, Mail } from "lucide-react";
 
 export function Footer() {
   return (
@@ -91,7 +91,7 @@ export function Footer() {
                 <span>WhatsApp 0812-3456-7890</span>
               </li>
               <li className="flex items-center gap-2">
-                <Instagram className="h-4 w-4 text-primary" />
+                <Camera className="h-4 w-4 text-primary" />
                 <span>@Mushida.id</span>
               </li>
               <li className="flex items-center gap-2">

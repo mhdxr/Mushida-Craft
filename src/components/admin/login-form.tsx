@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginSchema, type LoginSchema } from "@/lib/validations";
-import { setAdminSession } from "@/lib/auth";
 
 export function LoginForm() {
   const router = useRouter();
@@ -37,7 +36,7 @@ export function LoginForm() {
         setError(json.message || "Login gagal.");
         return;
       }
-      setAdminSession(json.email);
+      // Cookie sesi admin sudah di-set oleh API route (HTTP-only).
       router.push("/admin/dashboard");
     } catch {
       setError("Terjadi kesalahan. Coba lagi.");

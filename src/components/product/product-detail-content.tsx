@@ -9,47 +9,70 @@ import { ProductGallery } from "@/components/product/product-gallery";
 import { OrderButton } from "@/components/product/order-button";
 import { ProductGrid } from "@/components/product/product-grid";
 import { SectionHeading } from "@/components/common/section-heading";
-import {
-  localProductRepository,
-  findRelatedProducts,
-} from "@/lib/product-store";
-import { getProductBySlug } from "@/data/products";
 import { categoryMap } from "@/data/categories";
 import { formatCurrency } from "@/lib/utils";
+import { findRelatedProducts } from "@/lib/product-store";
 import type { Product } from "@/types";
 
 interface ProductDetailContentProps {
   slug: string;
+  /** Produk seed (dari static data) jika ada — dipakai sebagai fallback SSR. */
+  initialProduct?: Product | null;
 }
 
-export function ProductDetailContent({ slug }: ProductDetailContentProps) {
-  const [product, setProduct] = useState<Product | null>(null);
+export function ProductDetailContent({
+  slug,
+  initialProduct,
+}: ProductDetailContentProps) {
+  const [product, setProduct] = useState<Product | null>(initialProduct ?? null);
   const [related, setRelated] = useState<Product[]>([]);
   const [status, setStatus] = useState<"loading" | "found" | "not-found">(
-    "loading",
+    initialProduct ? "found" : "loading",
   );
 
   useEffect(() => {
+    if (initialProduct) {
+      setProduct(initialProduct);
+      setStatus("found");
+    }
     let active = true;
     (async () => {
-      // Coba repository (localStorage) dulu, fallback ke seed statis.
-      let found = await localProductRepository.getBySlug(slug);
-      if (!found) {
-        found = getProductBySlug(slug);
+      try {
+        // Selalu fetch fresh dari API (Supabase) untuk dapat data terbaru.
+        const res = await fetch(`/api/admin/products?slug=${encodeURIComponent(slug)}`, {
+          cache: "no-store",
+        });
+        const json = await res.json();
+        if (!active) return;
+        if (!res.ok || !json.ok || !json.product) {
+          if (!initialProduct) setStatus("not-found");
+          return;
+        }
+        setProduct(json.product as Product);
+        setStatus("found");
+      } catch {
+        if (!initialProduct) setStatus("not-found");
       }
-      if (!active) return;
-      if (!found) {
-        setStatus("not-found");
-        return;
-      }
-      setProduct(found);
-      const all = await localProductRepository.list();
-      setRelated(findRelatedProducts(found, all, 4));
-      setStatus("found");
     })();
+
+    // Fetch related products
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/products", { cache: "no-store" });
+        const json = await res.json();
+        if (!active || !json.ok) return;
+        const all = json.products as Product[];
+        const base = product ?? initialProduct;
+        if (base) setRelated(findRelatedProducts(base, all, 4));
+      } catch {
+        // ignore
+      }
+    })();
+
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   if (status === "loading") {
