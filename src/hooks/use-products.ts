@@ -11,6 +11,7 @@ import type { Product } from "@/types";
  * Update: PATCH /api/admin/products/[id]    (admin only)
  * Delete: DELETE /api/admin/products/[id]   (admin only)
  * Reset:  POST /api/admin/products { action: "reset" }  (admin only)
+ * Upload: POST /api/admin/upload            (admin only, service role)
  */
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -96,5 +97,39 @@ export function useProducts() {
     await refresh();
   }, [refresh]);
 
-  return { products, isLoading, refresh, create, update, remove, reset };
+  const uploadImages = useCallback(async (files: File[]): Promise<string[]> => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+
+    const res = await fetch("/api/admin/upload", {
+      method: "POST",
+      body: formData,
+    });
+    const json = (await res.json().catch(() => null)) as {
+      ok?: boolean;
+      message?: string;
+      urls?: unknown;
+    } | null;
+    if (!res.ok || !json?.ok) {
+      throw new Error(json?.message || "Gagal mengunggah gambar.");
+    }
+    if (
+      !Array.isArray(json.urls) ||
+      !json.urls.every((url): url is string => typeof url === "string")
+    ) {
+      throw new Error("Respons upload gambar tidak valid.");
+    }
+    return json.urls;
+  }, []);
+
+  return {
+    products,
+    isLoading,
+    refresh,
+    create,
+    update,
+    remove,
+    reset,
+    uploadImages,
+  };
 }

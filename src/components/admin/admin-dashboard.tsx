@@ -12,7 +12,15 @@ import type { Product } from "@/types";
 
 export function AdminDashboard() {
   const router = useRouter();
-  const { products, isLoading, create, update, remove, reset } = useProducts();
+  const {
+    products,
+    isLoading,
+    create,
+    update,
+    remove,
+    reset,
+    uploadImages,
+  } = useProducts();
   const [authChecked, setAuthChecked] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -135,8 +143,10 @@ export function AdminDashboard() {
             {editing ? "Edit produk" : "Tambah produk baru"}
           </h2>
           <ProductForm
+            key={editing?.id ?? "new-product"}
             initial={editing ?? undefined}
             onSubmit={editing ? handleUpdate : handleCreate}
+            uploadImages={uploadImages}
             onCancel={() => {
               setShowForm(false);
               setEditing(null);

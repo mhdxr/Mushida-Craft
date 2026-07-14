@@ -8,7 +8,7 @@ Web katalog bouquet bunga premium dengan halaman publik (beranda, katalog, detai
 - **Katalog** (`/katalog`) — filter berdasarkan kategori, rentang harga, dan pencarian teks. Data dibaca dari Supabase via API route.
 - **Detail produk** (`/produk/[slug]`) — galeri gambar, info produk, order via WhatsApp, produk terkait. Produk default di-prerender (SSG) untuk SEO; produk admin di-render on-demand dari Supabase.
 - **Custom order** (`/custom-order`) — form request bouquet custom, validation dengan Zod, pesan dibuat otomatis dan dikirim ke WhatsApp.
-- **Admin dashboard** (`/admin/dashboard`) — CRUD produk (tambah, edit, hapus, reset ke seed) ke Supabase, autentikasi via env credentials + HTTP-only cookie session.
+- **Admin dashboard** (`/admin/dashboard`) — CRUD produk dan pengelolaan multi-gambar dari device/URL ke Supabase, autentikasi via env credentials + HTTP-only cookie session.
 - **SEO** — `robots.ts`, `sitemap.xml` dinamis (dari Supabase + fallback seed), JSON-LD (`Store` & `Product`), metadata + OpenGraph per halaman.
 - **Error tracking** — integrasi Sentry (server + client + upload source maps), no-op jika DSN kosong.
 
@@ -165,14 +165,14 @@ Cara paling cepat — pakai script built-in:
    npm run db:setup
    ```
 
-Script ini membaca file `supabase/migrations/0001_products.sql` dan menjalankannya ke database Supabase. Idempotent — aman dijalankan berulang. Akan membuat tabel `products`, mengaktifkan RLS (public SELECT, hanya service role yang bisa INSERT/UPDATE/DELETE), dan mengisi 12 produk seed.
+Script ini membaca seluruh file `.sql` di `supabase/migrations/` sesuai urutan nama dan menjalankannya ke database Supabase. Pada database existing, bootstrap `0001_products.sql` dilewati jika tabel produk sudah ada agar data admin tidak di-reset. Migration membuat tabel `products`, RLS produk, serta bucket publik `product-images` dengan batas file dan policy Storage.
 
 <details>
 <summary>Alternatif: jalankan SQL manual</summary>
 
 1. Buka **Supabase Dashboard > SQL Editor**
-2. Copy-paste isi file [`supabase/migrations/0001_products.sql`](supabase/migrations/0001_products.sql)
-3. Klik **Run**
+2. Untuk database baru, jalankan sesuai urutan nama: [`0001_products.sql`](supabase/migrations/0001_products.sql), lalu [`0002_product_images_storage.sql`](supabase/migrations/0002_product_images_storage.sql). Untuk database existing yang sudah memiliki produk, jalankan hanya `0002_product_images_storage.sql`.
+3. Klik **Run** untuk setiap file
 </details>
 
 ### 3. Dapatkan API keys
@@ -186,12 +186,23 @@ Buka **Project Settings > API** dan ambil:
 
 Isi `.env.local` dengan ketiga nilai di atas (lihat `.env.example`).
 
+### Storage gambar produk
+
+Migration `0002_product_images_storage.sql` membuat bucket publik `product-images`. Gambar dapat dibaca publik agar katalog dan `next/image` dapat menampilkannya, sedangkan upload/update/delete objek hanya dilakukan API server dengan service role.
+
+- Format upload: JPEG, PNG, WebP, atau AVIF.
+- Ukuran maksimal: 5 MB per file.
+- Maksimal 10 gambar per produk/upload.
+- `NEXT_PUBLIC_SUPABASE_URL` harus tersedia saat build agar hostname Storage masuk ke allowlist `next/image`.
+
 ### Arsitektur akses data
 
 | Operasi | Client | Key | RLS |
 |---------|--------|-----|-----|
 | Public read (katalog, detail, homepage, sitemap) | Browser/server | anon | SELECT only |
 | Admin write (create/update/delete) | API route (server) | service_role | Bypass RLS |
+| Public read gambar produk | Browser/`next/image` | Public URL | Public bucket |
+| Admin upload gambar produk | API route (server) | service_role | Bypass RLS |
 
 ### API Routes
 
@@ -202,6 +213,7 @@ Isi `.env.local` dengan ketiga nilai di atas (lihat `.env.example`).
 | `/api/admin/products` | POST | Admin | Buat produk baru / reset seed |
 | `/api/admin/products/[id]` | PATCH | Admin | Update produk |
 | `/api/admin/products/[id]` | DELETE | Admin | Hapus produk |
+| `/api/admin/upload` | POST | Admin | Upload multi-gambar ke Supabase Storage |
 | `/api/admin/login` | POST | Public | Login admin (set cookie) |
 | `/api/admin/logout` | POST | Admin | Logout (hapus cookie) |
 | `/api/admin/session` | GET | Public | Cek status sesi admin |
@@ -213,7 +225,7 @@ Isi `.env.local` dengan ketiga nilai di atas (lihat `.env.example`).
 1. Set `ADMIN_EMAIL`, `ADMIN_PASSWORD`, dan `SESSION_SECRET` di `.env.local`.
 2. Buka `/admin` → otomatis redirect ke `/admin/login`.
 3. Login dengan kredensial di env → API route set HTTP-only cookie sesi.
-4. Di dashboard, kamu bisa: tambah produk, edit, hapus, atau reset data ke seed.
+4. Di dashboard, kamu bisa: tambah produk, upload atau tempel beberapa URL gambar, mengatur urutan/gambar utama, edit, hapus, atau reset data ke seed.
 
 > **Arsitektur:** Login admin memakai env credentials (bukan Supabase Auth). Sesi disimpan di HTTP-only cookie yang ditandatangani HMAC-SHA256 (dibaca server untuk verifikasi API routes). Data produk disimpan di Supabase — admin writes lewat API route dengan service role key, public reads lewat anon key (RLS enforced).
 

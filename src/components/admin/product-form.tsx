@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Save, X } from "lucide-react";
+import { ProductImageManager } from "@/components/admin/product-image-manager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,9 +32,17 @@ interface ProductFormProps {
   initial?: Product;
   onSubmit: (data: Omit<Product, "id" | "createdAt"> | Partial<Product>) => Promise<void>;
   onCancel: () => void;
+  uploadImages: (files: File[]) => Promise<string[]>;
 }
 
-export function ProductForm({ initial, onSubmit, onCancel }: ProductFormProps) {
+export function ProductForm({
+  initial,
+  onSubmit,
+  onCancel,
+  uploadImages,
+}: ProductFormProps) {
+  const [images, setImages] = useState<string[]>(initial?.images ?? []);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
   const {
     register,
     handleSubmit,
@@ -55,28 +64,33 @@ export function ProductForm({ initial, onSubmit, onCancel }: ProductFormProps) {
   });
 
   useEffect(() => {
-    if (initial) {
-      reset({
-        name: initial.name,
-        description: initial.description,
-        price: initial.price,
-        category: initial.category,
-        images: initial.images.join("\n"),
-        badge: (initial.badge ?? "") as ProductFormSchema["badge"],
-        isAvailable: initial.isAvailable,
-      });
-    }
+    const nextImages = initial?.images ?? [];
+    setImages(nextImages);
+    reset({
+      name: initial?.name ?? "",
+      description: initial?.description ?? "",
+      price: initial?.price ?? 0,
+      category: initial?.category ?? "hand-bouquet",
+      images: nextImages.join("\n"),
+      badge: (initial?.badge ?? "") as ProductFormSchema["badge"],
+      isAvailable: initial?.isAvailable ?? true,
+    });
   }, [initial, reset]);
 
   const category = watch("category");
   const badge = watch("badge");
   const isAvailable = watch("isAvailable");
 
+  const handleImagesChange = (nextImages: string[]) => {
+    setImages(nextImages);
+    setValue("images", nextImages.join("\n"), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
   const handle = handleSubmit(async (data) => {
-    const images = data.images
-      .split("\n")
-      .map((u) => u.trim())
-      .filter(Boolean);
+    if (isUploadingImages) return;
     const payload = {
       name: data.name,
       description: data.description,
@@ -180,17 +194,16 @@ export function ProductForm({ initial, onSubmit, onCancel }: ProductFormProps) {
           </div>
         </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="images">URL gambar (satu per baris)</Label>
-          <Textarea
-            id="images"
-            rows={3}
-            placeholder="https://...&#10;https://..."
-            {...register("images")}
+        <div className="md:col-span-2">
+          <input type="hidden" {...register("images")} />
+          <ProductImageManager
+            images={images}
+            onChange={handleImagesChange}
+            onUpload={uploadImages}
+            onUploadingChange={setIsUploadingImages}
+            disabled={isSubmitting}
+            error={errors.images?.message}
           />
-          {errors.images && (
-            <p className="text-xs text-destructive">{errors.images.message}</p>
-          )}
         </div>
 
         <div className="space-y-2 md:col-span-2">
@@ -205,11 +218,16 @@ export function ProductForm({ initial, onSubmit, onCancel }: ProductFormProps) {
       </div>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isUploadingImages}
+          onClick={onCancel}
+        >
           <X className="h-4 w-4" />
           Batal
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || isUploadingImages}>
           <Save className="h-4 w-4" />
           {initial ? "Update produk" : "Simpan produk"}
         </Button>

@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  MAX_PRODUCT_IMAGES,
+  PRODUCT_IMAGES_BUCKET,
+} from "@/lib/product-images";
 
 export const customOrderSchema = z.object({
   name: z
@@ -49,23 +53,48 @@ const productBaseSchema = z.object({
 });
 
 const productBadgeSchema = z.enum(["best-seller", "new", "sold-out"]);
-const ALLOWED_PRODUCT_IMAGE_HOSTS = [
+const supabaseStorageUrl = (() => {
+  try {
+    const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || "");
+    return url.protocol === "https:" ? url : null;
+  } catch {
+    return null;
+  }
+})();
+const supabaseStorageHost = supabaseStorageUrl?.hostname ?? null;
+
+export const ALLOWED_PRODUCT_IMAGE_HOSTS = [
   "images.unsplash.com",
   "plus.unsplash.com",
-] as const;
+  ...(supabaseStorageHost ? [supabaseStorageHost] : []),
+];
 const PRODUCT_IMAGE_HOST_MESSAGE =
-  "URL gambar harus menggunakan HTTPS dari images.unsplash.com atau plus.unsplash.com";
+  `URL gambar harus menggunakan HTTPS dari ${ALLOWED_PRODUCT_IMAGE_HOSTS.join(", ")}` +
+  (supabaseStorageHost
+    ? `; URL Supabase harus berasal dari bucket ${PRODUCT_IMAGES_BUCKET}`
+    : "");
 
-const productImageSchema = z
+export const productImageSchema = z
   .string()
   .trim()
   .url("URL gambar tidak valid")
   .refine((value) => {
     try {
       const url = new URL(value);
+      if (
+        url.protocol !== "https:" ||
+        !ALLOWED_PRODUCT_IMAGE_HOSTS.some((host) => host === url.hostname)
+      ) {
+        return false;
+      }
+
       return (
-        url.protocol === "https:" &&
-        ALLOWED_PRODUCT_IMAGE_HOSTS.some((host) => host === url.hostname)
+        url.hostname !== supabaseStorageHost ||
+        (url.port === supabaseStorageUrl?.port &&
+          url.search === "" &&
+          url.pathname.startsWith(
+            `/storage/v1/object/public/${PRODUCT_IMAGES_BUCKET}/`,
+          ))
       );
     } catch {
       return false;
@@ -86,6 +115,13 @@ const productImagesFormSchema = z.string().superRefine((value, context) => {
     return;
   }
 
+  if (images.length > MAX_PRODUCT_IMAGES) {
+    context.addIssue({
+      code: "custom",
+      message: `Maksimal ${MAX_PRODUCT_IMAGES} gambar per produk`,
+    });
+  }
+
   images.forEach((image, index) => {
     const result = productImageSchema.safeParse(image);
     if (!result.success) {
@@ -99,7 +135,10 @@ const productImagesFormSchema = z.string().superRefine((value, context) => {
 
 export const productSchema = productBaseSchema.extend({
   slug: z.string().min(1, "Slug produk wajib diisi").max(100),
-  images: z.array(productImageSchema).min(1, "Masukkan minimal 1 URL gambar"),
+  images: z
+    .array(productImageSchema)
+    .min(1, "Masukkan minimal 1 URL gambar")
+    .max(MAX_PRODUCT_IMAGES, `Maksimal ${MAX_PRODUCT_IMAGES} gambar per produk`),
   badge: productBadgeSchema.optional(),
 });
 

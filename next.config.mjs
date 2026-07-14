@@ -1,5 +1,24 @@
 import { withSentryConfig } from "@sentry/nextjs";
 
+const PRODUCT_IMAGES_BUCKET = "product-images";
+
+const supabaseImagePattern = (() => {
+  try {
+    const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || "");
+    if (url.protocol !== "https:") return null;
+
+    return {
+      protocol: "https",
+      hostname: url.hostname,
+      port: url.port,
+      pathname: `/storage/v1/object/public/${PRODUCT_IMAGES_BUCKET}/**`,
+      search: "",
+    };
+  } catch {
+    return null;
+  }
+})();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -12,6 +31,7 @@ const nextConfig = {
         protocol: "https",
         hostname: "plus.unsplash.com",
       },
+      ...(supabaseImagePattern ? [supabaseImagePattern] : []),
     ],
   },
 };

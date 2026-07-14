@@ -6,13 +6,13 @@
  *      (Supabase Dashboard > Project Settings > Database > Connection string > URI)
  *   2. Jalankan: npm run db:setup
  *
- * Script ini idempotent — aman dijalankan berulang. SQL migration menggunakan
- * "if not exists" dan hanya insert seed jika tabel kosong.
+ * Script menjalankan seluruh file .sql di supabase/migrations sesuai urutan
+ * nama. Setiap file migration harus aman dijalankan berulang.
  *
  * Catatan: Connection string dari Supabase biasanya format:
  *   postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
  */
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
@@ -32,12 +32,7 @@ const DB_URL =
   process.env.DATABASE_URL ||
   process.env.POSTGRES_URL;
 
-const MIGRATION_FILE = resolve(
-  projectRoot,
-  "supabase",
-  "migrations",
-  "0001_products.sql",
-);
+const MIGRATIONS_DIR = resolve(projectRoot, "supabase", "migrations");
 
 async function main() {
   // ── Validasi ─────────────────────────────────────────────────────────────
@@ -54,13 +49,18 @@ async function main() {
     process.exit(1);
   }
 
-  if (!existsSync(MIGRATION_FILE)) {
-    console.error(`\n❌ File migration tidak ditemukan: ${MIGRATION_FILE}`);
+  if (!existsSync(MIGRATIONS_DIR)) {
+    console.error(`\n❌ Folder migration tidak ditemukan: ${MIGRATIONS_DIR}`);
     process.exit(1);
   }
 
-  console.log("📄 Membaca migration file...");
-  const sql = readFileSync(MIGRATION_FILE, "utf-8");
+  const migrationFiles = readdirSync(MIGRATIONS_DIR)
+    .filter((file) => file.endsWith(".sql"))
+    .sort();
+  if (migrationFiles.length === 0) {
+    console.error(`\n❌ Tidak ada file migration di: ${MIGRATIONS_DIR}`);
+    process.exit(1);
+  }
 
   // ── Koneksi & eksekusi ───────────────────────────────────────────────────
   console.log("🔌 Menghubungkan ke database...");
@@ -76,8 +76,21 @@ async function main() {
     await client.connect();
     console.log("✅ Terhubung ke database.");
 
-    console.log("⚙️  Menjalankan migration...");
-    await client.query(sql);
+    const productsTable = await client.query(
+      "SELECT to_regclass('public.products') as table_name",
+    );
+    const productsAlreadyExist = Boolean(productsTable.rows[0]?.table_name);
+
+    for (const migrationFile of migrationFiles) {
+      if (migrationFile === "0001_products.sql" && productsAlreadyExist) {
+        console.log("⏭️  Melewati 0001_products.sql (tabel products sudah ada).");
+        continue;
+      }
+
+      console.log(`⚙️  Menjalankan ${migrationFile}...`);
+      const sql = readFileSync(resolve(MIGRATIONS_DIR, migrationFile), "utf-8");
+      await client.query(sql);
+    }
 
     // Verifikasi hasil
     const result = await client.query(
