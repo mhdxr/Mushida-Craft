@@ -49,19 +49,64 @@ const productBaseSchema = z.object({
 });
 
 const productBadgeSchema = z.enum(["best-seller", "new", "sold-out"]);
+const ALLOWED_PRODUCT_IMAGE_HOSTS = [
+  "images.unsplash.com",
+  "plus.unsplash.com",
+] as const;
+const PRODUCT_IMAGE_HOST_MESSAGE =
+  "URL gambar harus menggunakan HTTPS dari images.unsplash.com atau plus.unsplash.com";
+
+const productImageSchema = z
+  .string()
+  .trim()
+  .url("URL gambar tidak valid")
+  .refine((value) => {
+    try {
+      const url = new URL(value);
+      return (
+        url.protocol === "https:" &&
+        ALLOWED_PRODUCT_IMAGE_HOSTS.some((host) => host === url.hostname)
+      );
+    } catch {
+      return false;
+    }
+  }, PRODUCT_IMAGE_HOST_MESSAGE);
+
+const productImagesFormSchema = z.string().superRefine((value, context) => {
+  const images = value
+    .split("\n")
+    .map((url) => url.trim())
+    .filter(Boolean);
+
+  if (images.length === 0) {
+    context.addIssue({
+      code: "custom",
+      message: "Masukkan minimal 1 URL gambar",
+    });
+    return;
+  }
+
+  images.forEach((image, index) => {
+    const result = productImageSchema.safeParse(image);
+    if (!result.success) {
+      context.addIssue({
+        code: "custom",
+        message: `Baris ${index + 1}: ${result.error.issues[0].message}`,
+      });
+    }
+  });
+});
 
 export const productSchema = productBaseSchema.extend({
   slug: z.string().min(1, "Slug produk wajib diisi").max(100),
-  images: z
-    .array(z.string().min(5, "URL gambar tidak valid"))
-    .min(1, "Masukkan minimal 1 URL gambar"),
+  images: z.array(productImageSchema).min(1, "Masukkan minimal 1 URL gambar"),
   badge: productBadgeSchema.optional(),
 });
 
 export type ProductSchema = z.infer<typeof productSchema>;
 
 export const productFormSchema = productBaseSchema.extend({
-  images: z.string().min(5, "Masukkan minimal 1 URL gambar"),
+  images: productImagesFormSchema,
   badge: z.enum(["best-seller", "new", "sold-out", ""]).optional(),
 });
 
