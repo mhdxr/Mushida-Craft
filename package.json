@@ -38,7 +38,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^26.1.1",
+    "@types/node": "^24.13.3",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
@@ -47,7 +47,7 @@
     "postcss": "^8.5.18",
     "tailwindcss": "^4.3.2",
     "ts-api-utils": "^2.5.0",
-    "typescript": "^6.0.3",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.63.0"
   }
 }

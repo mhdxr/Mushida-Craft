@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { updateProduct, deleteProduct } from "@/lib/product-api";
-import type { Product } from "@/types";
+import { productSchema } from "@/lib/validations";
+
+const productPatchSchema = productSchema
+  .partial()
+  .refine((input) => Object.keys(input).length > 0);
 
 /**
  * GET /api/admin/products/[id] — ambil satu produk by id (public).
@@ -24,8 +28,25 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const input = (await req.json()) as Partial<Product>;
-    const product = await updateProduct(id, input);
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        { ok: false, message: "Data produk tidak valid." },
+        { status: 400 },
+      );
+    }
+
+    const result = productPatchSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { ok: false, message: "Data produk tidak valid." },
+        { status: 400 },
+      );
+    }
+
+    const product = await updateProduct(id, result.data);
 
     if (!product) {
       return NextResponse.json(
@@ -36,9 +57,11 @@ export async function PATCH(
 
     return NextResponse.json({ ok: true, product });
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Gagal memperbarui produk.";
-    return NextResponse.json({ ok: false, message }, { status: 500 });
+    console.error("Gagal memperbarui produk:", err);
+    return NextResponse.json(
+      { ok: false, message: "Terjadi kesalahan pada server." },
+      { status: 500 },
+    );
   }
 }
 
@@ -61,8 +84,10 @@ export async function DELETE(
     await deleteProduct(id);
     return NextResponse.json({ ok: true, message: "Produk dihapus." });
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Gagal menghapus produk.";
-    return NextResponse.json({ ok: false, message }, { status: 500 });
+    console.error("Gagal menghapus produk:", err);
+    return NextResponse.json(
+      { ok: false, message: "Terjadi kesalahan pada server." },
+      { status: 500 },
+    );
   }
 }

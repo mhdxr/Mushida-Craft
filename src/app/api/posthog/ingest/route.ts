@@ -10,14 +10,19 @@ import { NextResponse } from "next/server";
  */
 const POSTHOG_HOST =
   process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
+const INGEST_PREFIX = "/api/posthog/ingest";
 
 async function proxyRequest(req: Request, path: string) {
   const url = `${POSTHOG_HOST}${path}`;
   const body = await req.text();
 
-  const headers = new Headers(req.headers);
-  headers.delete("host");
-  headers.set("content-type", "application/json");
+  const headers = new Headers();
+  headers.set(
+    "content-type",
+    req.headers.get("content-type") || "application/json",
+  );
+  const userAgent = req.headers.get("user-agent");
+  if (userAgent) headers.set("user-agent", userAgent);
 
   const res = await fetch(url, {
     method: req.method,
@@ -38,8 +43,12 @@ async function proxyRequest(req: Request, path: string) {
 export async function POST(req: Request) {
   try {
     return await proxyRequest(req, "/batch/");
-  } catch {
-    return NextResponse.json({ ok: false }, { status: 500 });
+  } catch (err) {
+    console.error("Gagal meneruskan event PostHog:", err);
+    return NextResponse.json(
+      { ok: false, message: "Terjadi kesalahan pada server." },
+      { status: 500 },
+    );
   }
 }
 
@@ -48,9 +57,18 @@ export async function GET(req: Request) {
   try {
     const { pathname } = new URL(req.url);
     // pathname = /api/posthog/ingest/... → strip prefix
-    const path = pathname.replace("/api/posthog/ingest", "");
+    const path = pathname.startsWith(INGEST_PREFIX)
+      ? pathname.slice(INGEST_PREFIX.length)
+      : "";
+    if (!path.startsWith("/") || path.startsWith("//")) {
+      return NextResponse.json({ ok: false }, { status: 400 });
+    }
     return await proxyRequest(req, path);
-  } catch {
-    return NextResponse.json({ ok: false }, { status: 500 });
+  } catch (err) {
+    console.error("Gagal meneruskan request PostHog:", err);
+    return NextResponse.json(
+      { ok: false, message: "Terjadi kesalahan pada server." },
+      { status: 500 },
+    );
   }
 }

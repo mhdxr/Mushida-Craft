@@ -16,7 +16,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { categories } from "@/data/categories";
-import { productSchema, type ProductSchema } from "@/lib/validations";
+import {
+  productFormSchema,
+  type ProductFormSchema,
+} from "@/lib/validations";
 import { slugify } from "@/lib/utils";
 import type { Product, ProductBadge, ProductCategory } from "@/types";
 
@@ -38,15 +41,15 @@ export function ProductForm({ initial, onSubmit, onCancel }: ProductFormProps) {
     watch,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<ProductSchema>({
-    resolver: zodResolver(productSchema),
+  } = useForm<ProductFormSchema>({
+    resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: initial?.name ?? "",
       description: initial?.description ?? "",
       price: initial?.price ?? 0,
       category: initial?.category ?? "hand-bouquet",
       images: initial?.images.join("\n") ?? "",
-      badge: (initial?.badge ?? "") as ProductSchema["badge"],
+      badge: (initial?.badge ?? "") as ProductFormSchema["badge"],
       isAvailable: initial?.isAvailable ?? true,
     },
   });
@@ -59,7 +62,7 @@ export function ProductForm({ initial, onSubmit, onCancel }: ProductFormProps) {
         price: initial.price,
         category: initial.category,
         images: initial.images.join("\n"),
-        badge: (initial.badge ?? "") as ProductSchema["badge"],
+        badge: (initial.badge ?? "") as ProductFormSchema["badge"],
         isAvailable: initial.isAvailable,
       });
     }

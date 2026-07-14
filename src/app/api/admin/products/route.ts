@@ -7,6 +7,7 @@ import {
   resetProducts,
 } from "@/lib/product-api";
 import { products as seedProducts } from "@/data/products";
+import { productSchema } from "@/lib/validations";
 import type { Product } from "@/types";
 
 /**
@@ -33,9 +34,11 @@ export async function GET(req: Request) {
     const products = await fetchProducts();
     return NextResponse.json({ ok: true, products });
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Gagal mengambil data produk.";
-    return NextResponse.json({ ok: false, message }, { status: 500 });
+    console.error("Gagal mengambil data produk:", err);
+    return NextResponse.json(
+      { ok: false, message: "Terjadi kesalahan pada server." },
+      { status: 500 },
+    );
   }
 }
 
@@ -55,34 +58,42 @@ export async function POST(req: Request) {
       );
     }
 
-    const body = (await req.json()) as Record<string, unknown>;
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        { ok: false, message: "Data produk tidak valid." },
+        { status: 400 },
+      );
+    }
 
     // Reset ke seed
-    if (body.action === "reset") {
+    if (
+      typeof body === "object" &&
+      body !== null &&
+      (body as { action?: unknown }).action === "reset"
+    ) {
       await resetProducts(seedProducts as Product[]);
       return NextResponse.json({ ok: true, message: "Data direset ke seed." });
     }
 
     // Create produk baru
-    const input = body as Omit<Product, "id" | "createdAt">;
-    if (
-      !input.name ||
-      !input.description ||
-      typeof input.price !== "number" ||
-      !input.category ||
-      !Array.isArray(input.images)
-    ) {
+    const result = productSchema.safeParse(body);
+    if (!result.success) {
       return NextResponse.json(
-        { ok: false, message: "Data produk tidak lengkap." },
+        { ok: false, message: "Data produk tidak valid." },
         { status: 400 },
       );
     }
 
-    const product = await createProduct(input);
+    const product = await createProduct(result.data);
     return NextResponse.json({ ok: true, product }, { status: 201 });
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Gagal membuat produk.";
-    return NextResponse.json({ ok: false, message }, { status: 500 });
+    console.error("Gagal membuat produk:", err);
+    return NextResponse.json(
+      { ok: false, message: "Terjadi kesalahan pada server." },
+      { status: 500 },
+    );
   }
 }

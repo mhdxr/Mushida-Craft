@@ -1,6 +1,6 @@
 # Mushida-Craft
 
-Web katalog bouquet bunga premium dengan halaman publik (beranda, katalog, detail produk, custom order) dan admin dashboard untuk mengelola produk. Order dilakukan via WhatsApp. Dibangun dengan Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui, dan Supabase sebagai backend database.
+Web katalog bouquet bunga premium dengan halaman publik (beranda, katalog, detail produk, custom order) dan admin dashboard untuk mengelola produk. Order dilakukan via WhatsApp. Dibangun dengan Next.js 16 (App Router), TypeScript, Tailwind CSS, shadcn/ui, dan Supabase sebagai backend database.
 
 ## ✨ Fitur
 
@@ -16,9 +16,9 @@ Web katalog bouquet bunga premium dengan halaman publik (beranda, katalog, detai
 
 | Layer | Teknologi |
 |------|----------|
-| Framework | Next.js 14.2 (App Router) |
-| Bahasa | TypeScript 5.6 |
-| Styling | Tailwind CSS 3.4 + CSS variables |
+| Framework | Next.js 16.2 (App Router) + React 19.2 |
+| Bahasa | TypeScript 5.9 |
+| Styling | Tailwind CSS 4.3 + CSS variables |
 | UI components | shadcn/ui, Radix UI, lucide-react |
 | Form & validation | react-hook-form + Zod |
 | Database | Supabase (PostgreSQL + RLS) |
@@ -75,7 +75,7 @@ src/
 
 ### Prasyarat
 
-- Node.js 18.17+ (disarankan 20+)
+- Node.js 20.9+ (disarankan Node.js 24 LTS)
 - npm
 
 ### Instalasi
@@ -103,6 +103,7 @@ NEXT_PUBLIC_WHATSAPP_NUMBER=6281234567890
 # Kredensial admin dashboard
 ADMIN_EMAIL=admin@Mushida.id
 ADMIN_PASSWORD=changeme123
+SESSION_SECRET=ganti-dengan-secret-acak-yang-kuat
 
 # URL produksi situs (untuk SEO & metadata)
 NEXT_PUBLIC_SITE_URL=https://Mushida.vercel.app
@@ -209,12 +210,14 @@ Isi `.env.local` dengan ketiga nilai di atas (lihat `.env.example`).
 
 ## 🔐 Admin Dashboard
 
-1. Set `ADMIN_EMAIL` & `ADMIN_PASSWORD` di `.env.local`.
+1. Set `ADMIN_EMAIL`, `ADMIN_PASSWORD`, dan `SESSION_SECRET` di `.env.local`.
 2. Buka `/admin` → otomatis redirect ke `/admin/login`.
 3. Login dengan kredensial di env → API route set HTTP-only cookie sesi.
 4. Di dashboard, kamu bisa: tambah produk, edit, hapus, atau reset data ke seed.
 
-> **Arsitektur:** Login admin memakai env credentials (bukan Supabase Auth). Sesi disimpan di HTTP-only cookie (dibaca server untuk verifikasi API routes). Data produk disimpan di Supabase — admin writes lewat API route dengan service role key, public reads lewat anon key (RLS enforced).
+> **Arsitektur:** Login admin memakai env credentials (bukan Supabase Auth). Sesi disimpan di HTTP-only cookie yang ditandatangani HMAC-SHA256 (dibaca server untuk verifikasi API routes). Data produk disimpan di Supabase — admin writes lewat API route dengan service role key, public reads lewat anon key (RLS enforced).
+
+> **Catatan Next.js 16:** `cookies()` adalah API async, sehingga seluruh akses cookie server harus memakai `await cookies()`.
 
 ## 📊 Sentry (Error Tracking)
 
@@ -308,8 +311,9 @@ Project ini siap deploy ke Vercel. Vercel auto-detect Next.js, jadi tidak perlu 
    | Variable | Scope | Wajib? |
    |----------|-------|--------|
    | `NEXT_PUBLIC_WHATSAPP_NUMBER` | All | ✅ |
-   | `ADMIN_EMAIL` | All | ✅ |
-   | `ADMIN_PASSWORD` | All | ✅ |
+    | `ADMIN_EMAIL` | All | ✅ |
+    | `ADMIN_PASSWORD` | All | ✅ |
+    | `SESSION_SECRET` | All | ✅ (sensitive — server only) |
    | `NEXT_PUBLIC_SITE_URL` | Production | ✅ (set ke URL Vercel Anda) |
    | `NEXT_PUBLIC_SUPABASE_URL` | All | ✅ |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | All | ✅ |

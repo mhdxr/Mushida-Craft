@@ -25,7 +25,7 @@ export const loginSchema = z.object({
 
 export type LoginSchema = z.infer<typeof loginSchema>;
 
-export const productSchema = z.object({
+const productBaseSchema = z.object({
   name: z.string().min(2, "Nama produk minimal 2 karakter").max(80),
   description: z
     .string()
@@ -45,9 +45,24 @@ export const productSchema = z.object({
     "money-bouquet",
     "dried-flower",
   ]),
-  images: z.string().min(5, "Masukkan minimal 1 URL gambar"),
-  badge: z.enum(["best-seller", "new", "sold-out", ""]).optional(),
   isAvailable: z.boolean(),
 });
 
+const productBadgeSchema = z.enum(["best-seller", "new", "sold-out"]);
+
+export const productSchema = productBaseSchema.extend({
+  slug: z.string().min(1, "Slug produk wajib diisi").max(100),
+  images: z
+    .array(z.string().min(5, "URL gambar tidak valid"))
+    .min(1, "Masukkan minimal 1 URL gambar"),
+  badge: productBadgeSchema.optional(),
+});
+
 export type ProductSchema = z.infer<typeof productSchema>;
+
+export const productFormSchema = productBaseSchema.extend({
+  images: z.string().min(5, "Masukkan minimal 1 URL gambar"),
+  badge: z.enum(["best-seller", "new", "sold-out", ""]).optional(),
+});
+
+export type ProductFormSchema = z.infer<typeof productFormSchema>;

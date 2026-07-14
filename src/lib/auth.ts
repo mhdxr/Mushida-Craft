@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 /**
@@ -21,6 +22,17 @@ export interface AdminSession {
   loggedAt: number;
 }
 
+function createSessionToken(session: AdminSession): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) throw new Error("SESSION_SECRET belum diset.");
+
+  const payload = Buffer.from(JSON.stringify(session)).toString("base64url");
+  const signature = createHmac("sha256", secret)
+    .update(payload)
+    .digest("base64url");
+  return `${payload}.${signature}`;
+}
+
 // ---------------------------------------------------------------------------
 // Server-side (API routes, server components) — pakai next/headers cookies()
 // ---------------------------------------------------------------------------
@@ -30,8 +42,54 @@ export async function getAdminSessionFromCookie(): Promise<AdminSession | null> 
   const cookieStore = await cookies();
   const raw = cookieStore.get(SESSION_COOKIE)?.value;
   if (!raw) return null;
+
   try {
-    return JSON.parse(raw) as AdminSession;
+    const secret = process.env.SESSION_SECRET;
+    if (!secret) return null;
+
+    const parts = raw.split(".");
+    if (parts.length !== 2) return null;
+
+    const [payload, encodedSignature] = parts;
+    if (
+      !payload ||
+      !encodedSignature ||
+      !/^[A-Za-z0-9_-]+$/.test(payload) ||
+      !/^[A-Za-z0-9_-]+$/.test(encodedSignature)
+    ) {
+      return null;
+    }
+
+    const signature = Buffer.from(encodedSignature, "base64url");
+    const expectedSignature = createHmac("sha256", secret)
+      .update(payload)
+      .digest();
+    if (
+      signature.length !== expectedSignature.length ||
+      !timingSafeEqual(signature, expectedSignature)
+    ) {
+      return null;
+    }
+
+    const session = JSON.parse(
+      Buffer.from(payload, "base64url").toString("utf8"),
+    ) as unknown;
+    if (
+      typeof session !== "object" ||
+      session === null ||
+      typeof (session as AdminSession).email !== "string" ||
+      !(session as AdminSession).email ||
+      typeof (session as AdminSession).loggedAt !== "number" ||
+      !Number.isFinite((session as AdminSession).loggedAt)
+    ) {
+      return null;
+    }
+
+    const adminSession = session as AdminSession;
+    const ageSeconds = (Date.now() - adminSession.loggedAt) / 1000;
+    if (ageSeconds < 0 || ageSeconds > SESSION_MAX_AGE) return null;
+
+    return adminSession;
   } catch {
     return null;
   }
@@ -39,11 +97,7 @@ export async function getAdminSessionFromCookie(): Promise<AdminSession | null> 
 
 /** Cek apakah request saat ini berasal dari admin yang login. */
 export async function isAdminAuthenticated(): Promise<boolean> {
-  const session = await getAdminSessionFromCookie();
-  if (!session) return false;
-  // Cek kedaluwarsa
-  const ageSeconds = (Date.now() - session.loggedAt) / 1000;
-  return ageSeconds <= SESSION_MAX_AGE;
+  return (await getAdminSessionFromCookie()) !== null;
 }
 
 /** Set cookie sesi admin (dipanggil dari API route login). */
@@ -52,7 +106,7 @@ export async function setAdminSessionCookie(email: string) {
   const session: AdminSession = { email, loggedAt: Date.now() };
   cookieStore.set({
     name: SESSION_COOKIE,
-    value: JSON.stringify(session),
+    value: createSessionToken(session),
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

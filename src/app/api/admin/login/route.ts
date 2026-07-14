@@ -1,30 +1,35 @@
 import { NextResponse } from "next/server";
 import { setAdminSessionCookie } from "@/lib/auth";
+import { loginSchema } from "@/lib/validations";
 
 export async function POST(req: Request) {
+  let body: unknown;
   try {
-    const { email, password } = (await req.json()) as {
-      email?: string;
-      password?: string;
-    };
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { ok: false, message: "Data login tidak valid." },
+      { status: 400 },
+    );
+  }
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { ok: false, message: "Email dan password wajib diisi." },
-        { status: 400 },
-      );
-    }
+  const result = loginSchema.safeParse(body);
+  if (!result.success) {
+    return NextResponse.json(
+      { ok: false, message: "Data login tidak valid." },
+      { status: 400 },
+    );
+  }
 
+  try {
+    const { email, password } = result.data;
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPassword = process.env.ADMIN_PASSWORD;
 
     if (!adminEmail || !adminPassword) {
+      console.error("Kredensial admin belum dikonfigurasi.");
       return NextResponse.json(
-        {
-          ok: false,
-          message:
-            "Kredensial admin belum diset. Atur ADMIN_EMAIL dan ADMIN_PASSWORD pada .env.",
-        },
+        { ok: false, message: "Terjadi kesalahan pada server." },
         { status: 500 },
       );
     }
@@ -40,10 +45,11 @@ export async function POST(req: Request) {
     await setAdminSessionCookie(email);
 
     return NextResponse.json({ ok: true, email });
-  } catch {
+  } catch (err) {
+    console.error("Gagal memproses login admin:", err);
     return NextResponse.json(
-      { ok: false, message: "Permintaan tidak valid." },
-      { status: 400 },
+      { ok: false, message: "Terjadi kesalahan pada server." },
+      { status: 500 },
     );
   }
 }
