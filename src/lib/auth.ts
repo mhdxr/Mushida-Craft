@@ -1,5 +1,11 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import {
+  SESSION_COOKIE,
+  SESSION_MAX_AGE,
+  createSessionToken,
+  verifySessionToken,
+  type AdminSession,
+} from "@/lib/session-token";
 
 /**
  * Admin session management — cookie-based (HTTP-only).
@@ -11,27 +17,13 @@ import { cookies } from "next/headers";
  * Login admin tetap memakai env credentials (ADMIN_EMAIL / ADMIN_PASSWORD),
  * BUKAN Supabase Auth.
  *
+ * Logika token murni ada di session-token.ts (bisa dipakai middleware Edge).
+ *
  * Catatan Next 16: cookies() sekarang async — harus di-await.
  */
 
-const SESSION_COOKIE = "Mushida:admin-session";
-const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 hari (detik)
-
-export interface AdminSession {
-  email: string;
-  loggedAt: number;
-}
-
-function createSessionToken(session: AdminSession): string {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret) throw new Error("SESSION_SECRET belum diset.");
-
-  const payload = Buffer.from(JSON.stringify(session)).toString("base64url");
-  const signature = createHmac("sha256", secret)
-    .update(payload)
-    .digest("base64url");
-  return `${payload}.${signature}`;
-}
+export type { AdminSession };
+export { SESSION_COOKIE, SESSION_MAX_AGE };
 
 // ---------------------------------------------------------------------------
 // Server-side (API routes, server components) — pakai next/headers cookies()
@@ -43,56 +35,10 @@ export async function getAdminSessionFromCookie(): Promise<AdminSession | null> 
   const raw = cookieStore.get(SESSION_COOKIE)?.value;
   if (!raw) return null;
 
-  try {
-    const secret = process.env.SESSION_SECRET;
-    if (!secret) return null;
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) return null;
 
-    const parts = raw.split(".");
-    if (parts.length !== 2) return null;
-
-    const [payload, encodedSignature] = parts;
-    if (
-      !payload ||
-      !encodedSignature ||
-      !/^[A-Za-z0-9_-]+$/.test(payload) ||
-      !/^[A-Za-z0-9_-]+$/.test(encodedSignature)
-    ) {
-      return null;
-    }
-
-    const signature = Buffer.from(encodedSignature, "base64url");
-    const expectedSignature = createHmac("sha256", secret)
-      .update(payload)
-      .digest();
-    if (
-      signature.length !== expectedSignature.length ||
-      !timingSafeEqual(signature, expectedSignature)
-    ) {
-      return null;
-    }
-
-    const session = JSON.parse(
-      Buffer.from(payload, "base64url").toString("utf8"),
-    ) as unknown;
-    if (
-      typeof session !== "object" ||
-      session === null ||
-      typeof (session as AdminSession).email !== "string" ||
-      !(session as AdminSession).email ||
-      typeof (session as AdminSession).loggedAt !== "number" ||
-      !Number.isFinite((session as AdminSession).loggedAt)
-    ) {
-      return null;
-    }
-
-    const adminSession = session as AdminSession;
-    const ageSeconds = (Date.now() - adminSession.loggedAt) / 1000;
-    if (ageSeconds < 0 || ageSeconds > SESSION_MAX_AGE) return null;
-
-    return adminSession;
-  } catch {
-    return null;
-  }
+  return verifySessionToken(raw, secret, SESSION_MAX_AGE);
 }
 
 /** Cek apakah request saat ini berasal dari admin yang login. */
@@ -102,11 +48,14 @@ export async function isAdminAuthenticated(): Promise<boolean> {
 
 /** Set cookie sesi admin (dipanggil dari API route login). */
 export async function setAdminSessionCookie(email: string) {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) throw new Error("SESSION_SECRET belum diset.");
+
   const cookieStore = await cookies();
   const session: AdminSession = { email, loggedAt: Date.now() };
   cookieStore.set({
     name: SESSION_COOKIE,
-    value: createSessionToken(session),
+    value: await createSessionToken(session, secret),
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
