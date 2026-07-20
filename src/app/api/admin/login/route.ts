@@ -1,49 +1,15 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { setAdminSessionCookie } from "@/lib/auth";
+import {
+  clearLoginFailures,
+  isLoginRateLimited,
+  recordLoginFailure,
+} from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/validations";
-
-const MAX_FAILED_ATTEMPTS = 5;
-const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
-
-interface LoginAttempts {
-  count: number;
-  expiresAt: number;
-}
-
-// Map ini lokal per proses. Gunakan store eksternal seperti Upstash Redis
-// agar rate limit konsisten pada deployment multi-instance.
-const failedLoginAttempts = new Map<string, LoginAttempts>();
 
 function getClientIp(req: Request): string {
   return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-}
-
-function isRateLimited(ip: string): boolean {
-  const attempts = failedLoginAttempts.get(ip);
-  if (!attempts) return false;
-
-  if (attempts.expiresAt <= Date.now()) {
-    failedLoginAttempts.delete(ip);
-    return false;
-  }
-
-  return attempts.count >= MAX_FAILED_ATTEMPTS;
-}
-
-function recordFailedAttempt(ip: string) {
-  const now = Date.now();
-  const attempts = failedLoginAttempts.get(ip);
-
-  if (!attempts || attempts.expiresAt <= now) {
-    failedLoginAttempts.set(ip, {
-      count: 1,
-      expiresAt: now + RATE_LIMIT_WINDOW_MS,
-    });
-    return;
-  }
-
-  attempts.count += 1;
 }
 
 function safeEqual(value: string, expected: string): boolean {
@@ -54,7 +20,7 @@ function safeEqual(value: string, expected: string): boolean {
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
-  if (isRateLimited(ip)) {
+  if (await isLoginRateLimited(ip)) {
     return NextResponse.json(
       { ok: false, message: "Terlalu banyak percobaan. Coba lagi nanti." },
       { status: 429 },
@@ -65,7 +31,7 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    recordFailedAttempt(ip);
+    await recordLoginFailure(ip);
     return NextResponse.json(
       { ok: false, message: "Data login tidak valid." },
       { status: 400 },
@@ -74,7 +40,7 @@ export async function POST(req: Request) {
 
   const result = loginSchema.safeParse(body);
   if (!result.success) {
-    recordFailedAttempt(ip);
+    await recordLoginFailure(ip);
     return NextResponse.json(
       { ok: false, message: "Data login tidak valid." },
       { status: 400 },
@@ -97,7 +63,7 @@ export async function POST(req: Request) {
     const emailMatches = safeEqual(email, adminEmail);
     const passwordMatches = safeEqual(password, adminPassword);
     if (!emailMatches || !passwordMatches) {
-      recordFailedAttempt(ip);
+      await recordLoginFailure(ip);
       return NextResponse.json(
         { ok: false, message: "Email atau password salah." },
         { status: 401 },
@@ -106,7 +72,7 @@ export async function POST(req: Request) {
 
     // Set HTTP-only cookie sesi admin (bukan localStorage lagi).
     await setAdminSessionCookie(email);
-    failedLoginAttempts.delete(ip);
+    await clearLoginFailures(ip);
 
     return NextResponse.json({ ok: true, email });
   } catch (err) {
