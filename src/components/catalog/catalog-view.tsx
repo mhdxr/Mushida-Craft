@@ -9,9 +9,8 @@ import {
   type PriceRange,
 } from "@/components/catalog/catalog-filters";
 import { EmptyState } from "@/components/catalog/empty-state";
-import { useProducts } from "@/hooks/use-products";
 import { categoryMap } from "@/data/categories";
-import type { ProductCategory } from "@/types";
+import type { Product, ProductCategory } from "@/types";
 
 const priceRanges: Record<PriceRange, [number, number]> = {
   all: [0, Number.POSITIVE_INFINITY],
@@ -52,7 +51,12 @@ function buildActiveFilterSummary(filters: CatalogFiltersValue): string[] {
   return parts;
 }
 
-export function CatalogView() {
+interface CatalogViewProps {
+  /** Produk di-fetch di server agar halaman tidak stuck "Memuat..." tanpa JS. */
+  initialProducts: Product[];
+}
+
+export function CatalogView({ initialProducts }: CatalogViewProps) {
   const searchParams = useSearchParams();
   const initialCategory =
     (searchParams.get("category") as ProductCategory | null) ?? null;
@@ -67,7 +71,8 @@ export function CatalogView() {
     price: "all",
   });
 
-  const { products, isLoading } = useProducts();
+  // Data sudah dari server — tidak ada client fetch yang bisa hang.
+  const products = initialProducts;
 
   useEffect(() => {
     const cat = searchParams.get("category") as ProductCategory | null;
@@ -119,7 +124,6 @@ export function CatalogView() {
         </p>
       </div>
 
-      {/* Filter non-sticky: chip + search, ikut scroll (tenang & premium). */}
       <div
         ref={filtersRef}
         className="mb-6 scroll-mt-24 rounded-2xl border border-border/40 bg-gradient-to-b from-white to-cream-50/80 p-4 shadow-sm md:p-5"
@@ -131,7 +135,6 @@ export function CatalogView() {
         />
       </div>
 
-      {/* Ringkasan filter aktif + pintasan kembali ke filter. */}
       {isFiltered && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
           <p>
@@ -153,23 +156,7 @@ export function CatalogView() {
         </div>
       )}
 
-      {isLoading ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div
-              key={i}
-              className="overflow-hidden rounded-2xl border border-border/60 bg-white shadow-sm"
-            >
-              <div className="aspect-[4/5] animate-pulse bg-secondary" />
-              <div className="space-y-2 p-4">
-                <div className="h-2.5 w-16 animate-pulse rounded bg-secondary" />
-                <div className="h-4 w-3/4 animate-pulse rounded bg-secondary" />
-                <div className="h-4 w-1/3 animate-pulse rounded bg-secondary" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
+      {filtered.length === 0 ? (
         <EmptyState
           onReset={() =>
             setFilters({ search: "", category: "all", price: "all" })

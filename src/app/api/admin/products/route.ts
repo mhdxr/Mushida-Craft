@@ -21,18 +21,40 @@ export async function GET(req: Request) {
     const slug = searchParams.get("slug");
 
     if (slug) {
-      const product = await fetchProductBySlug(slug);
-      if (!product) {
-        return NextResponse.json(
-          { ok: false, message: "Produk tidak ditemukan." },
-          { status: 404 },
-        );
+      try {
+        const product = await fetchProductBySlug(slug);
+        if (!product) {
+          // Fallback seed by slug agar detail publik tidak 500.
+          const seed = seedProducts.find((p) => p.slug === slug) ?? null;
+          if (!seed) {
+            return NextResponse.json(
+              { ok: false, message: "Produk tidak ditemukan." },
+              { status: 404 },
+            );
+          }
+          return NextResponse.json({ ok: true, product: seed });
+        }
+        return NextResponse.json({ ok: true, product });
+      } catch {
+        const seed = seedProducts.find((p) => p.slug === slug) ?? null;
+        if (!seed) {
+          return NextResponse.json(
+            { ok: false, message: "Produk tidak ditemukan." },
+            { status: 404 },
+          );
+        }
+        return NextResponse.json({ ok: true, product: seed });
       }
-      return NextResponse.json({ ok: true, product });
     }
 
-    const products = await fetchProducts();
-    return NextResponse.json({ ok: true, products });
+    try {
+      const products = await fetchProducts();
+      return NextResponse.json({ ok: true, products });
+    } catch (err) {
+      // Supabase down / misconfig → seed agar katalog admin & client tidak hang.
+      console.error("Gagal fetch Supabase, fallback seed:", err);
+      return NextResponse.json({ ok: true, products: seedProducts });
+    }
   } catch (err) {
     console.error("Gagal mengambil data produk:", err);
     return NextResponse.json(

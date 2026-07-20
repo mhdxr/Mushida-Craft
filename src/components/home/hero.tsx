@@ -1,29 +1,28 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getTimeGreeting } from "@/lib/greeting";
 
 export function Hero() {
-  const reduceMotion = useReducedMotion();
+  // Sapaan di-set setelah mount agar SSR & client markup identik
+  // (hindari hydration mismatch yang bisa mematikan event handler).
+  const [greeting, setGreeting] = useState("Halo");
+
+  useEffect(() => {
+    setGreeting(getTimeGreeting());
+  }, []);
 
   return (
     <section className="hero-gradient relative overflow-hidden">
       <div className="container relative grid items-center gap-12 py-16 md:grid-cols-2 md:py-24 lg:py-28">
-        <motion.div
-          // Jangan mulai dari opacity 0 — di mobile/slow JS konten bisa
-          // "stuck" invisible. Animasi hanya geser halus jika motion diizinkan.
-          initial={reduceMotion ? false : { opacity: 1, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="space-y-6"
-        >
+        <div className="space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/70 px-4 py-1.5 text-xs font-medium text-primary backdrop-blur-sm">
             <Sparkles className="h-3.5 w-3.5" />
-            {getTimeGreeting()} · Hand-tied bouquet artisan
+            {greeting} · Hand-tied bouquet artisan
           </div>
           <h1 className="font-serif text-4xl font-semibold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl">
             Setiap rangkaian{" "}
@@ -68,14 +67,9 @@ export function Hero() {
               <p>Same-day delivery</p>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 1, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.55, delay: 0.05 }}
-          className="relative"
-        >
+        <div className="relative">
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-primary/20">
             <Image
               src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=1200&q=80"
@@ -94,7 +88,7 @@ export function Hero() {
               Free greeting card 💌
             </p>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

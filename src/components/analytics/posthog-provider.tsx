@@ -31,27 +31,28 @@ function PostHogPageViewTracker() {
 }
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
-  // Init PostHog sekali saat mount.
+  // Init PostHog sekali saat mount — jangan biarkan error analytics
+  // merusak interaktivitas situs (menu, navigasi, form).
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-    if (!key) return; // no-op jika key kosong
+    if (!key) return;
 
-    posthog.init(key, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
-      autocapture: true,
-      capture_pageview: false, // kita track manual di PostHogPageViewTracker
-      disable_session_recording: false,
-      // Mask input & teks pada session replay agar PII (nama, nomor WhatsApp
-      // di form custom order) tidak ikut terekam.
-      session_recording: {
-        maskAllInputs: true,
-        maskTextSelector: "*",
-      },
-      persistence: "localStorage+cookie",
-      loaded: (ph) => {
-        if (process.env.NODE_ENV === "development") ph.debug();
-      },
-    });
+    try {
+      posthog.init(key, {
+        api_host:
+          process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
+        autocapture: true,
+        capture_pageview: false,
+        // Session recording sering membebani HP low-end; nonaktifkan default.
+        disable_session_recording: true,
+        persistence: "localStorage+cookie",
+        loaded: (ph) => {
+          if (process.env.NODE_ENV === "development") ph.debug();
+        },
+      });
+    } catch {
+      // Abaikan kegagalan init analytics.
+    }
   }, []);
 
   return (

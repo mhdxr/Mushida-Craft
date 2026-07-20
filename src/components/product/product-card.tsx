@@ -1,8 +1,5 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { categoryMap } from "@/data/categories";
 import { formatCurrency } from "@/lib/utils";
@@ -22,59 +19,50 @@ interface ProductCardProps {
   index?: number;
 }
 
-export function ProductCard({ product, index = 0 }: ProductCardProps) {
+/** Kartu produk tanpa animasi client — gambar & link selalu aktif. */
+export function ProductCard({ product }: ProductCardProps) {
   const cat = categoryMap[product.category];
   const isSoldOut = product.badge === "sold-out" || !product.isAvailable;
-  const reduceMotion = useReducedMotion();
 
   return (
-    <motion.div
-      // Jangan hide card dengan opacity 0 — gambar produk harus langsung
-      // terlihat meski animasi/JS lambat.
-      initial={reduceMotion ? false : { opacity: 1, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.3) }}
+    <Link
+      href={`/produk/${product.slug}`}
+      className="group block overflow-hidden rounded-2xl border border-border/60 bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10"
     >
-      <Link
-        href={`/produk/${product.slug}`}
-        className="group block overflow-hidden rounded-2xl border border-border/60 bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10"
-      >
-        <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
-          <Image
-            src={product.images[0] ?? "/placeholder.png"}
-            alt={product.name}
-            fill
-            sizes="(max-width: 768px) 50vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-          {product.badge && (
-            <div className="absolute left-3 top-3">
-              <Badge variant={badgeMap[product.badge].variant}>
-                {badgeMap[product.badge].label}
-              </Badge>
-            </div>
-          )}
-          {isSoldOut && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-              <span className="rounded-full bg-white/90 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-foreground">
-                Sold Out
-              </span>
-            </div>
-          )}
-        </div>
-        <div className="space-y-2 p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-primary">
-            {cat?.name}
-          </p>
-          <h3 className="font-serif text-lg font-semibold leading-tight tracking-tight">
-            {product.name}
-          </h3>
-          <p className="text-sm font-semibold text-foreground">
-            {formatCurrency(product.price)}
-          </p>
-        </div>
-      </Link>
-    </motion.div>
+      <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
+        <Image
+          src={product.images[0] ?? "/placeholder.png"}
+          alt={product.name}
+          fill
+          sizes="(max-width: 768px) 50vw, 25vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        {product.badge && (
+          <div className="absolute left-3 top-3">
+            <Badge variant={badgeMap[product.badge].variant}>
+              {badgeMap[product.badge].label}
+            </Badge>
+          </div>
+        )}
+        {isSoldOut && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <span className="rounded-full bg-white/90 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-foreground">
+              Sold Out
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="space-y-2 p-4">
+        <p className="text-xs font-medium uppercase tracking-wider text-primary">
+          {cat?.name}
+        </p>
+        <h3 className="font-serif text-lg font-semibold leading-tight tracking-tight">
+          {product.name}
+        </h3>
+        <p className="text-sm font-semibold text-foreground">
+          {formatCurrency(product.price)}
+        </p>
+      </div>
+    </Link>
   );
 }

@@ -1,5 +1,4 @@
 import type { CustomOrderForm, Product } from "@/types";
-import { getTimeGreeting } from "@/lib/greeting";
 import { formatCurrency } from "@/lib/utils";
 
 const DEFAULT_NUMBER = "6281234567890";
@@ -18,9 +17,13 @@ export function buildWhatsAppUrl(message: string): string {
   return `https://wa.me/${number}?text=${encoded}`;
 }
 
-/** Pembuka pesan WhatsApp dengan sapaan sesuai jam WIB. */
+/**
+ * Pembuka pesan WhatsApp.
+ * Sapaan waktu TIDAK dihitung di sini (hindari mismatch SSR/client
+ * & dependency greeting di path kritis layout/footer).
+ */
 function buildGreetingOpener(): string {
-  return `${getTimeGreeting()}, Mushida! 🌸`;
+  return "Halo, Mushida! 🌸";
 }
 
 /** Pesan inquiry umum (FAB, footer). */

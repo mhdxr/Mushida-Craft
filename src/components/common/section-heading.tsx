@@ -1,6 +1,3 @@
-"use client";
-
-import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface SectionHeadingProps {
@@ -11,6 +8,7 @@ interface SectionHeadingProps {
   className?: string;
 }
 
+/** Heading section statis (tanpa Framer) agar selalu terlihat & ringan. */
 export function SectionHeading({
   eyebrow,
   title,
@@ -18,15 +16,8 @@ export function SectionHeading({
   align = "center",
   className,
 }: SectionHeadingProps) {
-  const reduceMotion = useReducedMotion();
-
   return (
-    <motion.div
-      // Konten tetap visible tanpa JS/hydration — jangan start opacity 0.
-      initial={reduceMotion ? false : { opacity: 1, y: 12 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.4 }}
+    <div
       className={cn(
         "max-w-2xl space-y-3",
         align === "center" ? "mx-auto text-center" : "text-left",
@@ -44,6 +35,6 @@ export function SectionHeading({
       {description && (
         <p className="text-base text-muted-foreground">{description}</p>
       )}
-    </motion.div>
+    </div>
   );
 }
