@@ -1,7 +1,10 @@
 import Link from "next/link";
 import {
-  GraduationCap,
+  Cookie,
   DollarSign,
+  Flower2,
+  GraduationCap,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import { SectionHeading } from "@/components/common/section-heading";
@@ -9,8 +12,11 @@ import { categories } from "@/data/categories";
 import type { ProductCategory } from "@/types";
 
 const categoryIcons: Record<ProductCategory, LucideIcon> = {
-  graduation: GraduationCap,
+  "snack-bouquet": Cookie,
   "money-bouquet": DollarSign,
+  "artificial-bouquet": Flower2,
+  graduation: GraduationCap,
+  "satin-flower": Sparkles,
 };
 
 export function CategorySection() {
@@ -19,17 +25,17 @@ export function CategorySection() {
       <div className="container">
         <SectionHeading
           eyebrow="Kategori"
-          title="Temukan bouquet sesuai momen"
-          description="Spesialisasi kami: bouquet wisuda dan money bouquet custom."
+          title="Temukan buket sesuai momen"
+          description="Spesialisasi kami: buket snack, money, artifisial, graduation, dan bunga satin."
         />
-        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 md:mx-auto md:max-w-2xl md:gap-6">
+        <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-5">
           {categories.map((cat) => {
             const Icon = categoryIcons[cat.id];
             return (
               <Link
                 key={cat.id}
                 href={`/katalog?category=${cat.id}`}
-                className="group flex h-full flex-col items-center gap-3 rounded-2xl border border-border/60 bg-white p-8 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
+                className="group flex h-full flex-col items-center gap-3 rounded-2xl border border-border/60 bg-white p-6 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
               >
                 <span className="flex h-14 w-14 items-center justify-center rounded-full bg-blush-50 text-primary transition-colors group-hover:bg-primary/10">
                   <Icon className="h-7 w-7" />

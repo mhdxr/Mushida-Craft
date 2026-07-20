@@ -23,8 +23,11 @@ import { buildCustomOrderMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
 import { toast } from "@/hooks/use-toast";
 
 const bouquetTypes = [
-  "Graduation Bouquet",
-  "Money Bouquet",
+  "Buket Snack",
+  "Buket Money",
+  "Artifisial Buket",
+  "Graduation Buket",
+  "Bunga Satin",
   "Custom / Lainnya",
 ];
 

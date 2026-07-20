@@ -9,7 +9,7 @@ import {
   type PriceRange,
 } from "@/components/catalog/catalog-filters";
 import { EmptyState } from "@/components/catalog/empty-state";
-import { categoryMap } from "@/data/categories";
+import { categoryIds, categoryMap } from "@/data/categories";
 import type { Product, ProductCategory } from "@/types";
 
 const priceRanges: Record<PriceRange, [number, number]> = {
@@ -28,10 +28,7 @@ const priceLabels: Record<PriceRange, string> = {
   "above-700": "≥ Rp700rb",
 };
 
-const allowedCategories: ProductCategory[] = [
-  "graduation",
-  "money-bouquet",
-];
+const allowedCategories: ProductCategory[] = categoryIds;
 
 function buildActiveFilterSummary(filters: CatalogFiltersValue): string[] {
   const parts: string[] = [];

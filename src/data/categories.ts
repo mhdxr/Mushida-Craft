@@ -1,22 +1,39 @@
 import type { CategoryInfo, ProductCategory } from "@/types";
 
 /**
- * Kategori yang diproduksi Mushida Craft.
- * Hanya Graduation & Money Bouquet (hand-bouquet / wedding /
- * anniversary / dried-flower sudah dihapus).
+ * Kategori produksi Mushida Craft:
+ * Buket Snack, Buket Money, Artifisial Buket, Graduation Buket, Bunga Satin.
  */
 export const categories: CategoryInfo[] = [
   {
-    id: "graduation",
-    name: "Graduation",
-    description: "Rangkaian bunga untuk merayakan kelulusan.",
-    icon: "🎓",
+    id: "snack-bouquet",
+    name: "Buket Snack",
+    description: "Buket camilan kreatif untuk hadiah seru dan berkesan.",
+    icon: "🍫",
   },
   {
     id: "money-bouquet",
-    name: "Money Bouquet",
-    description: "Bouquet uang unik sebagai hadiah berkesan.",
+    name: "Buket Money",
+    description: "Bouquet uang unik, bisa custom nominal sesuai budget.",
     icon: "💸",
+  },
+  {
+    id: "artificial-bouquet",
+    name: "Artifisial Buket",
+    description: "Bunga artifisial premium yang awet dan tetap cantik.",
+    icon: "🌺",
+  },
+  {
+    id: "graduation",
+    name: "Graduation Buket",
+    description: "Rangkaian spesial untuk merayakan momen wisuda.",
+    icon: "🎓",
+  },
+  {
+    id: "satin-flower",
+    name: "Bunga Satin",
+    description: "Bunga satin handmade elegan, tahan lama & mewah.",
+    icon: "🎀",
   },
 ];
 
@@ -32,3 +49,6 @@ export const categoryMap: Record<ProductCategory, CategoryInfo> =
     },
     {} as Record<ProductCategory, CategoryInfo>,
   );
+
+/** Daftar id kategori (untuk filter / allowlist). */
+export const categoryIds: ProductCategory[] = categories.map((c) => c.id);

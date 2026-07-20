@@ -1,4 +1,9 @@
-export type ProductCategory = "graduation" | "money-bouquet";
+export type ProductCategory =
+  | "snack-bouquet"
+  | "money-bouquet"
+  | "artificial-bouquet"
+  | "graduation"
+  | "satin-flower";
 
 export type ProductBadge = "best-seller" | "new" | "sold-out";
 

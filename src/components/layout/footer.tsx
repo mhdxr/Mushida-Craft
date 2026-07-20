@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Camera, MessageCircle, Mail } from "lucide-react";
 import { BrandLogo } from "@/components/common/brand-logo";
+import { categories } from "@/data/categories";
 import {
   buildDefaultInquiryMessage,
   buildWhatsAppUrl,
@@ -16,8 +17,8 @@ export function Footer() {
           <div className="space-y-4">
             <BrandLogo size="md" />
             <p className="text-sm text-muted-foreground">
-              Hand-tied bouquet artisan untuk setiap momen berharga.
-              Premium, elegan, dengan sentuhan personal.
+              Buket snack, money, artifisial, graduation, dan bunga satin —
+              premium, elegan, dengan sentuhan personal.
             </p>
           </div>
 
@@ -50,22 +51,16 @@ export function Footer() {
           <div>
             <h4 className="mb-4 font-serif text-base font-semibold">Kategori</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <Link
-                  href="/katalog?category=graduation"
-                  className="hover:text-foreground"
-                >
-                  Graduation
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/katalog?category=money-bouquet"
-                  className="hover:text-foreground"
-                >
-                  Money Bouquet
-                </Link>
-              </li>
+              {categories.map((cat) => (
+                <li key={cat.id}>
+                  <Link
+                    href={`/katalog?category=${cat.id}`}
+                    className="hover:text-foreground"
+                  >
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -108,7 +103,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border/60 pt-6 text-xs text-muted-foreground md:flex-row">
-          <p>© {new Date().getFullYear()} Mushida. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Mushida Craft. All rights reserved.</p>
           <p>Made with 🌸 in Indonesia.</p>
         </div>
       </div>

@@ -15,7 +15,7 @@ export const testimonials: Testimonial[] = [
     name: "Raka Mahendra",
     role: "Customer",
     message:
-      "Pesan graduation bouquet untuk adik — packaging-nya rapi, bunga segar, dan sampai tepat waktu di hari wisuda.",
+      "Pesan graduation buket untuk adik — packaging-nya rapi dan sampai tepat waktu di hari wisuda. Recommended!",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
     rating: 5,
   },
@@ -24,16 +24,16 @@ export const testimonials: Testimonial[] = [
     name: "Anindya Putri",
     role: "Customer",
     message:
-      "Money bouquet mini untuk kado ulang tahun teman super cantik. Bisa custom nominal sesuai budget, recommended!",
+      "Buket snack choco delight untuk ulang tahun teman super cantik. Isinya lengkap, bisa request camilan favorit.",
     avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
     rating: 5,
   },
   {
     id: "t4",
     name: "Bagus Pratama",
-    role: "Orang tua",
+    role: "Customer",
     message:
-      "Graduation Elegant White untuk wisuda anak — elegan di foto, admin bantu susun kartu ucapan. Worth it.",
+      "Bunga satin peony-nya elegan banget, sudah berbulan-bulan masih bagus di meja. Worth it sebagai hadiah long lasting.",
     avatar: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=80",
     rating: 4,
   },

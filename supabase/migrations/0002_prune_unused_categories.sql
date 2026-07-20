@@ -1,15 +1,16 @@
 -- ===========================================================================
--- Prune kategori yang tidak diproduksi dari tabel products yang sudah ada.
--- Aman dijalankan di production tanpa drop table (tidak menghapus produk
--- graduation / money-bouquet yang dibuat admin).
+-- Prune kategori lama yang tidak diproduksi dari tabel products existing.
+-- Aman dijalankan di production tanpa drop table.
 --
--- Jalankan di Supabase SQL Editor jika DB sudah di-seed dengan skema lama.
+-- Kategori yang DIPERTAHANKAN:
+--   snack-bouquet, money-bouquet, artificial-bouquet, graduation, satin-flower
 -- ===========================================================================
 
 delete from public.products
-where category in (
-  'hand-bouquet',
-  'wedding',
-  'anniversary',
-  'dried-flower'
+where category not in (
+  'snack-bouquet',
+  'money-bouquet',
+  'artificial-bouquet',
+  'graduation',
+  'satin-flower'
 );
