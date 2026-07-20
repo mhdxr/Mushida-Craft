@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ProductDetailContent } from "@/components/product/product-detail-content";
-import { fetchProductBySlugServer } from "@/lib/product-api";
+import { fetchProductBySlug } from "@/lib/product-api";
 import { getProductBySlug, products as seedProducts } from "@/data/products";
 import { categoryMap } from "@/data/categories";
 
@@ -31,7 +31,7 @@ export async function generateMetadata({
   // Jika tidak ada di seed, coba Supabase (produk admin).
   if (!seedProduct) {
     try {
-      const supaProduct = await fetchProductBySlugServer(slug);
+      const supaProduct = await fetchProductBySlug(slug);
       if (supaProduct) {
         return {
           title: supaProduct.name,
@@ -108,7 +108,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   // Coba fetch dari Supabase untuk metadata JSON-LD.
   let adminProduct = null;
   try {
-    adminProduct = await fetchProductBySlugServer(slug);
+    adminProduct = await fetchProductBySlug(slug);
   } catch {
     // Supabase belum dikonfigurasi — serahkan ke client component.
   }

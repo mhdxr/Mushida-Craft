@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { fetchProductsServer } from "@/lib/product-api";
+import { fetchProducts } from "@/lib/product-api";
 import { products as seedProducts } from "@/data/products";
 import { categories } from "@/data/categories";
 
@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Coba ambil dari Supabase; fallback ke seed statis jika belum dikonfigurasi.
   let products = seedProducts;
   try {
-    const supabaseProducts = await fetchProductsServer();
+    const supabaseProducts = await fetchProducts();
     if (supabaseProducts.length > 0) {
       products = supabaseProducts;
     }

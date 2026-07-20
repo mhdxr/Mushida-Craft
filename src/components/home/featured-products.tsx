@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductGrid } from "@/components/product/product-grid";
 import { SectionHeading } from "@/components/common/section-heading";
-import { fetchFeaturedProductsServer } from "@/lib/product-api";
+import { fetchFeaturedProducts } from "@/lib/product-api";
 import { getFeaturedProducts } from "@/data/products";
 
 export async function FeaturedProducts() {
@@ -11,7 +11,7 @@ export async function FeaturedProducts() {
   // belum dikonfigurasi atau terjadi error.
   let products = [];
   try {
-    products = await fetchFeaturedProductsServer(4);
+    products = await fetchFeaturedProducts(4);
   } catch {
     products = getFeaturedProducts(4);
   }
