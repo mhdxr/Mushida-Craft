@@ -7,6 +7,13 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getTimeGreeting } from "@/lib/greeting";
 
+// Teks promo bisa dioverride via env tanpa mengubah kode
+// (NEXT_PUBLIC_* di-inline saat build — ganti env + redeploy, tanpa edit file).
+const PROMO_LABEL =
+  process.env.NEXT_PUBLIC_HERO_PROMO_LABEL || "Promo bulan ini";
+const PROMO_TEXT =
+  process.env.NEXT_PUBLIC_HERO_PROMO_TEXT || "Free greeting card 💌";
+
 export function Hero() {
   // Sapaan di-set setelah mount agar SSR & client markup identik
   // (hindari hydration mismatch yang bisa mematikan event handler).
@@ -82,10 +89,10 @@ export function Hero() {
           </div>
           <div className="absolute -bottom-6 -left-4 hidden rounded-2xl border border-border/60 bg-white/95 p-4 shadow-lg backdrop-blur-sm sm:block">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">
-              Promo bulan ini
+              {PROMO_LABEL}
             </p>
             <p className="font-serif text-xl font-semibold">
-              Free greeting card 💌
+              {PROMO_TEXT}
             </p>
           </div>
         </div>
