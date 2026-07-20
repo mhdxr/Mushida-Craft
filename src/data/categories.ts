@@ -1,31 +1,31 @@
 import type { CategoryInfo, ProductCategory } from "@/types";
 
 /**
- * Kategori produksi Mushida Craft:
- * Buket Snack, Buket Money, Artifisial Buket, Graduation Buket, Bunga Satin.
+ * Kategori produksi Mushida Craft (ID slug + nama tampilan tanpa "Buket"):
+ * snack-bouquet, money-bouquet, artificial-bouquet, graduation-bouquet, satin-flower
  */
 export const categories: CategoryInfo[] = [
   {
     id: "snack-bouquet",
-    name: "Buket Snack",
-    description: "Buket camilan kreatif untuk hadiah seru dan berkesan.",
+    name: "Snack",
+    description: "Rangkaian camilan kreatif untuk hadiah seru dan berkesan.",
     icon: "🍫",
   },
   {
     id: "money-bouquet",
-    name: "Buket Money",
-    description: "Bouquet uang unik, bisa custom nominal sesuai budget.",
+    name: "Money",
+    description: "Rangkaian uang unik, bisa custom nominal sesuai budget.",
     icon: "💸",
   },
   {
     id: "artificial-bouquet",
-    name: "Artifisial Buket",
+    name: "Artifisial",
     description: "Bunga artifisial premium yang awet dan tetap cantik.",
     icon: "🌺",
   },
   {
-    id: "graduation",
-    name: "Graduation Buket",
+    id: "graduation-bouquet",
+    name: "Graduation",
     description: "Rangkaian spesial untuk merayakan momen wisuda.",
     icon: "🎓",
   },

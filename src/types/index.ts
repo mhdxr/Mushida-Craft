@@ -2,7 +2,7 @@ export type ProductCategory =
   | "snack-bouquet"
   | "money-bouquet"
   | "artificial-bouquet"
-  | "graduation"
+  | "graduation-bouquet"
   | "satin-flower";
 
 export type ProductBadge = "best-seller" | "new" | "sold-out";

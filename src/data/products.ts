@@ -60,7 +60,7 @@ export const products: Product[] = [
     description:
       "Bouquet wisuda ceria dengan aksen sunflower dan boneka mini graduation. Hadiah penuh semangat untuk merayakan kelulusan.",
     price: 235000,
-    category: "graduation",
+    category: "graduation-bouquet",
     images: [
       "https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=900&q=80",
       "https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=900&q=80",
@@ -137,7 +137,7 @@ export const products: Product[] = [
     description:
       "Bouquet wisuda nuansa pastel pink dan cream dengan boneka mini graduation. Tersedia ukuran medium dan jumbo.",
     price: 285000,
-    category: "graduation",
+    category: "graduation-bouquet",
     images: [
       "https://images.unsplash.com/photo-1530092285049-1c42085fd395?w=900&q=80",
       "https://images.unsplash.com/photo-1508610048659-a06b669e3321?w=900&q=80",

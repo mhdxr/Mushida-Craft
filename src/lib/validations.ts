@@ -45,7 +45,7 @@ const productBaseSchema = z.object({
     "snack-bouquet",
     "money-bouquet",
     "artificial-bouquet",
-    "graduation",
+    "graduation-bouquet",
     "satin-flower",
   ]),
   isAvailable: z.boolean(),

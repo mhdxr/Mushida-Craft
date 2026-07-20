@@ -15,7 +15,7 @@ const categoryIcons: Record<ProductCategory, LucideIcon> = {
   "snack-bouquet": Cookie,
   "money-bouquet": DollarSign,
   "artificial-bouquet": Flower2,
-  graduation: GraduationCap,
+  "graduation-bouquet": GraduationCap,
   "satin-flower": Sparkles,
 };
 
@@ -25,8 +25,8 @@ export function CategorySection() {
       <div className="container">
         <SectionHeading
           eyebrow="Kategori"
-          title="Temukan buket sesuai momen"
-          description="Spesialisasi kami: buket snack, money, artifisial, graduation, dan bunga satin."
+          title="Temukan rangkaian sesuai momen"
+          description="Spesialisasi kami: Snack, Money, Artifisial, Graduation, dan Bunga Satin."
         />
         <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-5">
           {categories.map((cat) => {
