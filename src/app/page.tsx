@@ -5,6 +5,9 @@ import { FeaturedProducts } from "@/components/home/featured-products";
 import { TestimonialsSection } from "@/components/home/testimonials-section";
 import { HowToOrder } from "@/components/home/how-to-order";
 
+/** ISR 5 menit — homepage tidak memicu loading overlay dinamis terus-menerus. */
+export const revalidate = 300;
+
 function FeaturedProductsFallback() {
   return (
     <section className="container py-16 md:py-24" aria-busy="true">
@@ -33,8 +36,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      {/* Suspense: hero tetap tampil dulu, produk unggulan stream belakangan
-          agar fetch Supabase lambat tidak bikin halaman kosong. */}
+      {/* Suspense: hero tetap tampil dulu; produk unggulan stream belakangan. */}
       <Suspense fallback={<FeaturedProductsFallback />}>
         <FeaturedProducts />
       </Suspense>

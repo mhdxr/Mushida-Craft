@@ -97,10 +97,19 @@ export async function recordLoginFailure(ip: string): Promise<void> {
   attempts.count += 1;
 }
 
-/** Reset counter gagal saat login sukses. */
+/**
+ * Reset counter gagal saat login sukses — HANYA untuk IP ini.
+ *
+ * Upstash Ratelimit@2.x: resetUsedTokens(identifier) menghapus token
+ * terpakai untuk identifier tersebut (bukan global). Prefix "login:fail"
+ * + identifier IP = counter per-IP terisolasi.
+ *
+ * @see node_modules/@upstash/ratelimit resetUsedTokens(identifier: string)
+ */
 export async function clearLoginFailures(ip: string): Promise<void> {
   const limiter = getRedisRatelimit();
   if (limiter) {
+    // Per-identifier reset (IP yang sukses login saja).
     await limiter.resetUsedTokens(ip);
     return;
   }

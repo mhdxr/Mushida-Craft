@@ -1,4 +1,4 @@
-import type { CategoryInfo } from "@/types";
+import type { CategoryInfo, ProductCategory } from "@/types";
 
 export const categories: CategoryInfo[] = [
   {
@@ -39,10 +39,15 @@ export const categories: CategoryInfo[] = [
   },
 ];
 
-export const categoryMap: Record<string, CategoryInfo> = categories.reduce(
-  (acc, c) => {
-    acc[c.id] = c;
-    return acc;
-  },
-  {} as Record<string, CategoryInfo>,
-);
+/**
+ * Lookup kategori by id (semua ProductCategory terjamin ada).
+ * Dipakai catalog filter summary, product card, admin table.
+ */
+export const categoryMap: Record<ProductCategory, CategoryInfo> =
+  categories.reduce(
+    (acc, c) => {
+      acc[c.id] = c;
+      return acc;
+    },
+    {} as Record<ProductCategory, CategoryInfo>,
+  );

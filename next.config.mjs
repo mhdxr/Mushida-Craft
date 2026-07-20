@@ -19,6 +19,14 @@ const supabaseImagePattern = (() => {
   }
 })();
 
+// Host PostHog untuk reverse-proxy /ingest (same-origin → lolos CSP + ad-block).
+// Override via env jika region EU: NEXT_PUBLIC_POSTHOG_INGEST_HOST / ASSETS_HOST.
+const POSTHOG_INGEST_HOST =
+  process.env.NEXT_PUBLIC_POSTHOG_INGEST_HOST || "https://us.i.posthog.com";
+const POSTHOG_ASSETS_HOST =
+  process.env.NEXT_PUBLIC_POSTHOG_ASSETS_HOST ||
+  "https://us-assets.i.posthog.com";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -33,6 +41,23 @@ const nextConfig = {
       },
       ...(supabaseImagePattern ? [supabaseImagePattern] : []),
     ],
+  },
+  /**
+   * Reverse-proxy PostHog (pendekatan A).
+   * Browser hanya memanggil /ingest/* (same-origin) → CSP script-src 'self' cukup.
+   * @see https://posthog.com/docs/advanced/proxy/nextjs
+   */
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: `${POSTHOG_ASSETS_HOST}/static/:path*`,
+      },
+      {
+        source: "/ingest/:path*",
+        destination: `${POSTHOG_INGEST_HOST}/:path*`,
+      },
+    ];
   },
 };
 
