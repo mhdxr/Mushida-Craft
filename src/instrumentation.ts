@@ -8,6 +8,12 @@
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
+    // Guard kredensial admin di production (password lemah/default/kosong).
+    const { assertProductionAdminCredentials } = await import(
+      "@/lib/admin-credentials"
+    );
+    assertProductionAdminCredentials();
+
     await import("../sentry.server.config");
   }
 

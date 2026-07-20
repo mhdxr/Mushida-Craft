@@ -24,7 +24,7 @@ export type CustomOrderSchema = z.infer<typeof customOrderSchema>;
 
 export const loginSchema = z.object({
   email: z.email("Format email tidak valid"),
-  password: z.string().min(6, "Password minimal 6 karakter"),
+  password: z.string().min(12, "Password minimal 12 karakter"),
 });
 
 export type LoginSchema = z.infer<typeof loginSchema>;
