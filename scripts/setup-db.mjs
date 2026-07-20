@@ -66,9 +66,11 @@ async function main() {
   console.log("🔌 Menghubungkan ke database...");
   const client = new Client({
     connectionString: DB_URL,
-    // Supabase pooler butuh sslmode=require
+    // Supabase pooler pakai sertifikat dari CA publik yang valid, jadi
+    // verifikasi TLS diaktifkan (cegah MITM). Set DB_SSL_INSECURE=1 hanya
+    // jika benar-benar perlu (mis. cert self-signed di lingkungan lokal).
     ssl: DB_URL.includes("supabase.com")
-      ? { rejectUnauthorized: false }
+      ? { rejectUnauthorized: process.env.DB_SSL_INSECURE !== "1" }
       : undefined,
   });
 

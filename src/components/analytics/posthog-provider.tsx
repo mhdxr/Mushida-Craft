@@ -41,6 +41,12 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       autocapture: true,
       capture_pageview: false, // kita track manual di PostHogPageViewTracker
       disable_session_recording: false,
+      // Mask input & teks pada session replay agar PII (nama, nomor WhatsApp
+      // di form custom order) tidak ikut terekam.
+      session_recording: {
+        maskAllInputs: true,
+        maskTextSelector: "*",
+      },
       persistence: "localStorage+cookie",
       loaded: (ph) => {
         if (process.env.NODE_ENV === "development") ph.debug();

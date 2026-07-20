@@ -4,7 +4,11 @@ import { formatCurrency } from "@/lib/utils";
 const DEFAULT_NUMBER = "6281234567890";
 
 export function getWhatsAppNumber(): string {
-  return process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || DEFAULT_NUMBER;
+  // wa.me hanya menerima digit (format internasional tanpa "+").
+  // Sanitasi env agar spasi/"+"/karakter asing tidak merusak link.
+  const raw = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || DEFAULT_NUMBER;
+  const digits = raw.replace(/\D/g, "");
+  return digits || DEFAULT_NUMBER;
 }
 
 export function buildWhatsAppUrl(message: string): string {

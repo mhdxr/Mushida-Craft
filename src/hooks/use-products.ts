@@ -22,7 +22,7 @@ export function useProducts() {
     try {
       const res = await fetch("/api/admin/products", { cache: "no-store" });
       const json = await res.json();
-      if (json.ok) {
+      if (json.ok && Array.isArray(json.products)) {
         setProducts(json.products as Product[]);
       }
     } catch {

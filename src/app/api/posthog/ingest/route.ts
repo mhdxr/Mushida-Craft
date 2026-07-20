@@ -12,6 +12,24 @@ const POSTHOG_HOST =
   process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
 const INGEST_PREFIX = "/api/posthog/ingest";
 
+/**
+ * Allowlist path PostHog yang boleh di-proxy. Tanpa ini route berfungsi
+ * sebagai open proxy (SSRF / penyalahgunaan kuota). Hanya endpoint ingest
+ * & feature-flag/asset resmi PostHog yang diizinkan.
+ */
+const ALLOWED_GET_PREFIXES = [
+  "/decide/",
+  "/flags/",
+  "/array/",
+  "/static/",
+  "/e/",
+  "/s/",
+];
+
+function isAllowedGetPath(path: string): boolean {
+  return ALLOWED_GET_PREFIXES.some((prefix) => path.startsWith(prefix));
+}
+
 async function proxyRequest(req: Request, path: string) {
   const url = `${POSTHOG_HOST}${path}`;
   const body = await req.text();
@@ -62,6 +80,9 @@ export async function GET(req: Request) {
       : "";
     if (!path.startsWith("/") || path.startsWith("//")) {
       return NextResponse.json({ ok: false }, { status: 400 });
+    }
+    if (!isAllowedGetPath(path)) {
+      return NextResponse.json({ ok: false }, { status: 403 });
     }
     return await proxyRequest(req, path);
   } catch (err) {

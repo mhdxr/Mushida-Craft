@@ -13,9 +13,9 @@ import * as Sentry from "@sentry/nextjs";
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // Sesuaikan sample rate sesuai traffic.
-  // Set 1.0 di dev, 0.x di production untuk menghemat quota.
-  tracesSampleRate: 1.0,
+  // Sesuaikan sample rate sesuai traffic:
+  // 1.0 di dev (semua trace), 0.1 di production untuk menghemat quota.
+  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 
   // Hilangkan data request body default (bisa mengandung input form/password).
   // Sentry sudah mask header sensitif secara default.

@@ -28,14 +28,20 @@ export function AdminDashboard() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch("/api/admin/session", { cache: "no-store" });
-      if (!res.ok) {
+      try {
+        const res = await fetch("/api/admin/session", { cache: "no-store" });
+        if (!res.ok) {
+          router.replace("/admin/login");
+          return;
+        }
+        const json = await res.json();
+        setAdminEmail(json.email ?? "");
+        setAuthChecked(true);
+      } catch {
+        // Gagal cek sesi (mis. jaringan) → arahkan ke login daripada
+        // stuck di layar "Memuat dashboard..." selamanya.
         router.replace("/admin/login");
-        return;
       }
-      const json = await res.json();
-      setAdminEmail(json.email ?? "");
-      setAuthChecked(true);
     })();
   }, [router]);
 
