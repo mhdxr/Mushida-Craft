@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { getBrowserSupabaseClient, getServerSupabaseClient } from "@/lib/supabase";
 import { rowToProduct } from "@/lib/product-store";
 import { slugify } from "@/lib/utils";
@@ -6,7 +7,8 @@ import type { Product } from "@/types";
 const TABLE = "products";
 
 // ---------------------------------------------------------------------------
-// Public reads (anon key, browser atau server — RLS SELECT only)
+// Public reads (anon key — RLS SELECT only)
+// Aman dipanggil dari browser, Server Components, maupun API routes.
 // ---------------------------------------------------------------------------
 
 /** Ambil semua produk (urut created_at desc). */
@@ -58,48 +60,6 @@ export async function fetchAllSlugs(): Promise<string[]> {
 }
 
 // ---------------------------------------------------------------------------
-// Server-side reads (anon key juga bisa; ini untuk Server Components yang
-// tidak punya akses window). Pakai browser client factory tapi aman di server
-// karena createClient() tidak butuh window.
-// ---------------------------------------------------------------------------
-
-export async function fetchProductsServer(): Promise<Product[]> {
-  const client = getBrowserSupabaseClient();
-  const { data, error } = await client
-    .from(TABLE)
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return (data ?? []).map(rowToProduct);
-}
-
-export async function fetchProductBySlugServer(slug: string): Promise<Product | null> {
-  const client = getBrowserSupabaseClient();
-  const { data, error } = await client
-    .from(TABLE)
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
-
-  if (error) throw error;
-  return data ? rowToProduct(data) : null;
-}
-
-export async function fetchFeaturedProductsServer(limit = 4): Promise<Product[]> {
-  const client = getBrowserSupabaseClient();
-  const { data, error } = await client
-    .from(TABLE)
-    .select("*")
-    .eq("badge", "best-seller")
-    .order("created_at", { ascending: false })
-    .limit(limit);
-
-  if (error) throw error;
-  return (data ?? []).map(rowToProduct);
-}
-
-// ---------------------------------------------------------------------------
 // Admin writes (service role key — SERVER ONLY, bypass RLS)
 // ---------------------------------------------------------------------------
 
@@ -107,7 +67,9 @@ export async function createProduct(
   input: Omit<Product, "id" | "createdAt">,
 ): Promise<Product> {
   const client = getServerSupabaseClient();
-  const id = `p${Date.now()}`;
+  // UUID unik (bukan timestamp) agar create bersamaan tidak bentrok.
+  // Seed lama (p01..p12) tetap tidak diubah.
+  const id = randomUUID();
 
   const { data, error } = await client
     .from(TABLE)
