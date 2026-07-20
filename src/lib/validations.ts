@@ -151,3 +151,26 @@ export const productFormSchema = productBaseSchema.extend({
 });
 
 export type ProductFormSchema = z.infer<typeof productFormSchema>;
+
+export const testimonialSchema = z.object({
+  name: z
+    .string()
+    .min(2, "Nama minimal 2 karakter")
+    .max(60, "Nama maksimal 60 karakter"),
+  role: z
+    .string()
+    .max(40, "Peran maksimal 40 karakter")
+    .optional()
+    .or(z.literal("")),
+  message: z
+    .string()
+    .min(10, "Testimoni minimal 10 karakter")
+    .max(300, "Testimoni maksimal 300 karakter"),
+  rating: z
+    .number({ error: "Pilih rating bintang" })
+    .int()
+    .min(1, "Rating minimal 1 bintang")
+    .max(5, "Rating maksimal 5 bintang"),
+});
+
+export type TestimonialSchema = z.infer<typeof testimonialSchema>;

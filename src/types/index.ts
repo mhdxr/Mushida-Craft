@@ -27,13 +27,18 @@ export interface CategoryInfo {
   icon: string;
 }
 
+export type TestimonialStatus = "pending" | "approved";
+
 export interface Testimonial {
   id: string;
   name: string;
-  role: string;
+  role?: string;
   message: string;
-  avatar: string;
+  /** Optional — customer-submitted testimonials use initials when missing. */
+  avatar?: string;
   rating: number;
+  status?: TestimonialStatus;
+  createdAt?: string;
 }
 
 export interface CustomOrderForm {

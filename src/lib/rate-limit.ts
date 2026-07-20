@@ -116,3 +116,75 @@ export async function clearLoginFailures(ip: string): Promise<void> {
 
   failedLoginAttempts.delete(ip);
 }
+
+// ---------------------------------------------------------------------------
+// Testimonial submit rate limit — 3 submit / jam / IP
+// ---------------------------------------------------------------------------
+
+export const TESTIMONIAL_MAX_PER_HOUR = 3;
+export const TESTIMONIAL_WINDOW_MS = 60 * 60 * 1000;
+
+interface TestimonialAttempts {
+  count: number;
+  expiresAt: number;
+}
+
+const testimonialAttempts = new Map<string, TestimonialAttempts>();
+let testimonialRedisRatelimit: Ratelimit | null = null;
+let warnedAboutTestimonialFallback = false;
+
+function getTestimonialRedisRatelimit(): Ratelimit | null {
+  if (!hasUpstashEnv()) return null;
+  if (testimonialRedisRatelimit) return testimonialRedisRatelimit;
+
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  });
+
+  testimonialRedisRatelimit = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(TESTIMONIAL_MAX_PER_HOUR, "1 h"),
+    prefix: "testimonial:submit",
+    analytics: false,
+  });
+  return testimonialRedisRatelimit;
+}
+
+function warnTestimonialFallbackOnce() {
+  if (warnedAboutTestimonialFallback) return;
+  warnedAboutTestimonialFallback = true;
+  console.warn(
+    "[rate-limit] Upstash belum diset — rate limit testimoni memakai Map in-memory.",
+  );
+}
+
+/**
+ * Catat satu submit testimoni. Mengembalikan true jika masih diizinkan,
+ * false jika IP sudah melebihi ambang (3 / jam).
+ */
+export async function consumeTestimonialSubmit(
+  ip: string,
+): Promise<{ allowed: boolean }> {
+  const limiter = getTestimonialRedisRatelimit();
+  if (limiter) {
+    const result = await limiter.limit(ip);
+    return { allowed: result.success };
+  }
+
+  warnTestimonialFallbackOnce();
+  const now = Date.now();
+  const attempts = testimonialAttempts.get(ip);
+  if (!attempts || attempts.expiresAt <= now) {
+    testimonialAttempts.set(ip, {
+      count: 1,
+      expiresAt: now + TESTIMONIAL_WINDOW_MS,
+    });
+    return { allowed: true };
+  }
+  if (attempts.count >= TESTIMONIAL_MAX_PER_HOUR) {
+    return { allowed: false };
+  }
+  attempts.count += 1;
+  return { allowed: true };
+}

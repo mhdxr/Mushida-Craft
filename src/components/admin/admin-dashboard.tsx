@@ -6,6 +6,7 @@ import { LogOut, Plus, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductForm } from "@/components/admin/product-form";
 import { ProductTable } from "@/components/admin/product-table";
+import { TestimonialModeration } from "@/components/admin/testimonial-moderation";
 import { useProducts } from "@/hooks/use-products";
 import { toast } from "@/hooks/use-toast";
 import { getTimeGreetingWithName } from "@/lib/greeting";
@@ -175,6 +176,8 @@ export function AdminDashboard() {
           onDelete={handleDelete}
         />
       )}
+
+      <TestimonialModeration />
     </div>
   );
 }
