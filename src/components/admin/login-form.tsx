@@ -65,7 +65,7 @@ export function LoginForm() {
         <Input
           id="email"
           type="email"
-          placeholder="admin@mushidacraft.com"
+          placeholder="mushidacraft@gmail.com"
           {...register("email")}
         />
         {errors.email && (

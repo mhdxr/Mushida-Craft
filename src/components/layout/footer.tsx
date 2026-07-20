@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Camera, MessageCircle } from "lucide-react";
+import { Camera, MessageCircle, Mail } from "lucide-react";
 import { BrandLogo } from "@/components/common/brand-logo";
 import { categories } from "@/data/categories";
 import {
@@ -89,6 +89,15 @@ export function Footer() {
                   className="transition-colors hover:text-foreground"
                 >
                   @mushida_craft
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-primary" />
+                <a
+                  href="mailto:mushidacraft@gmail.com"
+                  className="transition-colors hover:text-foreground"
+                >
+                  mushidacraft@gmail.com
                 </a>
               </li>
             </ul>

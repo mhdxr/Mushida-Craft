@@ -101,7 +101,7 @@ Edit `.env.local`:
 NEXT_PUBLIC_WHATSAPP_NUMBER=6285713254800
 
 # Kredensial admin dashboard
-ADMIN_EMAIL=admin@mushidacraft.com
+ADMIN_EMAIL=mushidacraft@gmail.com
 ADMIN_PASSWORD=changeme123
 SESSION_SECRET=ganti-dengan-secret-acak-yang-kuat
 
