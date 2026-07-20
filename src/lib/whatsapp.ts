@@ -3,42 +3,62 @@ import { formatCurrency } from "@/lib/utils";
 
 const DEFAULT_NUMBER = "6281234567890";
 
+/**
+ * Normalisasi ke digit internasional untuk wa.me (tanpa "+").
+ * - 08xxxxxxxxxx → 628xxxxxxxxxx (lokal ID)
+ * - 8xxxxxxxxxx → 628xxxxxxxxxx
+ * - 62… / lain → digit apa adanya
+ */
+function normalizeWhatsAppDigits(raw: string): string {
+  let digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+
+  // Lokal Indonesia: 08… atau 8… → 628…
+  if (digits.startsWith("0") && digits.length >= 10) {
+    digits = `62${digits.slice(1)}`;
+  } else if (
+    digits.startsWith("8") &&
+    !digits.startsWith("62") &&
+    digits.length >= 9 &&
+    digits.length <= 13
+  ) {
+    digits = `62${digits}`;
+  }
+
+  return digits;
+}
+
 export function getWhatsAppNumber(): string {
   // wa.me hanya menerima digit (format internasional tanpa "+").
-  // Sanitasi env agar spasi/"+"/karakter asing tidak merusak link.
+  // Sanitasi env agar spasi/"+"/karakter asing / format lokal 08… tidak merusak link.
   const raw = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || DEFAULT_NUMBER;
-  const digits = raw.replace(/\D/g, "");
+  const digits = normalizeWhatsAppDigits(raw);
   return digits || DEFAULT_NUMBER;
 }
 
 /**
  * Format nomor WA untuk tampilan UI (bukan link).
  * 6285xxxxxxxx → 085x-xxxx-xxxx (lokal ID)
- * 62xxxxxxxxxx → 0xxx-xxxx-xxxx
- * Lainnya → +digits digroup 3-4
  */
 export function formatWhatsAppDisplay(digits?: string): string {
-  const n = (digits ?? getWhatsAppNumber()).replace(/\D/g, "");
-  if (!n) return "WhatsApp";
+  const international = normalizeWhatsAppDigits(
+    digits ?? getWhatsAppNumber(),
+  );
+  if (!international) return "WhatsApp";
 
-  // Indonesia: 62… → 0…
-  if (n.startsWith("62") && n.length >= 10) {
-    const local = `0${n.slice(2)}`;
-    // 08xx-xxxx-xxxx / 08xx-xxx-xxxx
-    if (local.length === 12) {
-      return `${local.slice(0, 4)}-${local.slice(4, 8)}-${local.slice(8)}`;
-    }
-    if (local.length === 13) {
-      return `${local.slice(0, 4)}-${local.slice(4, 8)}-${local.slice(8)}`;
-    }
+  // Indonesia: 62… → 0… untuk label
+  if (international.startsWith("62") && international.length >= 10) {
+    const local = `0${international.slice(2)}`;
     if (local.length === 11) {
       return `${local.slice(0, 4)}-${local.slice(4, 7)}-${local.slice(7)}`;
     }
-    // fallback group 4
+    if (local.length === 12 || local.length === 13) {
+      return `${local.slice(0, 4)}-${local.slice(4, 8)}-${local.slice(8)}`;
+    }
     return local.replace(/(\d{4})(?=\d)/g, "$1-").replace(/-$/, "");
   }
 
-  return `+${n}`;
+  return `+${international}`;
 }
 
 export function buildWhatsAppUrl(message: string): string {
