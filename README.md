@@ -106,7 +106,7 @@ ADMIN_PASSWORD=changeme123
 SESSION_SECRET=ganti-dengan-secret-acak-yang-kuat
 
 # URL produksi situs (untuk SEO & metadata)
-NEXT_PUBLIC_SITE_URL=https://Mushida.vercel.app
+NEXT_PUBLIC_SITE_URL=https://mushida-craft.vercel.app
 
 # ── Supabase (backend database produk) ──
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co

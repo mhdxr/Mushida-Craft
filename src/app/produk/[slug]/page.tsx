@@ -72,7 +72,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     const isAvailable =
       seedProduct.isAvailable && seedProduct.badge !== "sold-out";
     const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL || "https://Mushida.vercel.app";
+      process.env.NEXT_PUBLIC_SITE_URL || "https://mushida-craft.vercel.app";
     const productJsonLd = {
       "@context": "https://schema.org",
       "@type": "Product",
@@ -81,7 +81,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       image: seedProduct.images,
       sku: seedProduct.id,
       category: cat?.name,
-      brand: { "@type": "Brand", name: "Mushida" },
+      brand: { "@type": "Brand", name: "Mushida Craft" },
       offers: {
         "@type": "Offer",
         url: `${siteUrl}/produk/${seedProduct.slug}`,

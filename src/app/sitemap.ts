@@ -4,7 +4,7 @@ import { products as seedProducts } from "@/data/products";
 import { categories } from "@/data/categories";
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://Mushida.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://mushida-craft.vercel.app";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();

@@ -5,10 +5,12 @@ import { categories } from "@/data/categories";
 import {
   buildDefaultInquiryMessage,
   buildWhatsAppUrl,
+  formatWhatsAppDisplay,
 } from "@/lib/whatsapp";
 
 export function Footer() {
   const whatsappUrl = buildWhatsAppUrl(buildDefaultInquiryMessage());
+  const whatsappLabel = formatWhatsAppDisplay();
 
   return (
     <footer className="border-t border-border/60 bg-cream-50">
@@ -75,7 +77,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-foreground"
                 >
-                  WhatsApp 0812-3456-7890
+                  WhatsApp {whatsappLabel}
                 </a>
               </li>
               <li className="flex items-center gap-2">

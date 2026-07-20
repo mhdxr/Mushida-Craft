@@ -11,6 +11,36 @@ export function getWhatsAppNumber(): string {
   return digits || DEFAULT_NUMBER;
 }
 
+/**
+ * Format nomor WA untuk tampilan UI (bukan link).
+ * 6285xxxxxxxx → 085x-xxxx-xxxx (lokal ID)
+ * 62xxxxxxxxxx → 0xxx-xxxx-xxxx
+ * Lainnya → +digits digroup 3-4
+ */
+export function formatWhatsAppDisplay(digits?: string): string {
+  const n = (digits ?? getWhatsAppNumber()).replace(/\D/g, "");
+  if (!n) return "WhatsApp";
+
+  // Indonesia: 62… → 0…
+  if (n.startsWith("62") && n.length >= 10) {
+    const local = `0${n.slice(2)}`;
+    // 08xx-xxxx-xxxx / 08xx-xxx-xxxx
+    if (local.length === 12) {
+      return `${local.slice(0, 4)}-${local.slice(4, 8)}-${local.slice(8)}`;
+    }
+    if (local.length === 13) {
+      return `${local.slice(0, 4)}-${local.slice(4, 8)}-${local.slice(8)}`;
+    }
+    if (local.length === 11) {
+      return `${local.slice(0, 4)}-${local.slice(4, 7)}-${local.slice(7)}`;
+    }
+    // fallback group 4
+    return local.replace(/(\d{4})(?=\d)/g, "$1-").replace(/-$/, "");
+  }
+
+  return `+${n}`;
+}
+
 export function buildWhatsAppUrl(message: string): string {
   const number = getWhatsAppNumber();
   const encoded = encodeURIComponent(message);
@@ -23,12 +53,12 @@ export function buildWhatsAppUrl(message: string): string {
  * & dependency greeting di path kritis layout/footer).
  */
 function buildGreetingOpener(): string {
-  return "Halo, Mushida! 🌸";
+  return "Halo, Mushida Craft! 🌸";
 }
 
 /** Pesan inquiry umum (FAB, footer). */
 export function buildDefaultInquiryMessage(): string {
-  return `${buildGreetingOpener()} Saya ingin tanya-tanya tentang bouquet bunga.`;
+  return `${buildGreetingOpener()} Saya ingin tanya-tanya tentang rangkaian bouquet.`;
 }
 
 export function buildProductOrderMessage(product: Product): string {

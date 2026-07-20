@@ -55,7 +55,7 @@ export function LoginForm() {
         <div>
           <h1 className="font-serif text-xl font-semibold">Admin Login</h1>
           <p className="text-xs text-muted-foreground">
-            Masuk untuk mengelola produk Mushida.
+            Masuk untuk mengelola produk Mushida Craft.
           </p>
         </div>
       </div>

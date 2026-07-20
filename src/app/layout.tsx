@@ -20,13 +20,13 @@ const playfair = Playfair_Display({
 });
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://Mushida.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://mushida-craft.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Mushida — Hand-tied Bouquet Artisan",
-    template: "%s | Mushida",
+    default: "Mushida Craft — Hand-tied Bouquet Artisan",
+    template: "%s | Mushida Craft",
   },
   description:
     "Katalog Snack, Money, Artifisial, Graduation, dan Satin. Custom order mudah via WhatsApp — Mushida Craft.",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     "bunga satin",
     "Mushida Craft",
   ],
-  authors: [{ name: "Mushida" }],
+  authors: [{ name: "Mushida Craft" }],
   openGraph: {
     type: "website",
     locale: "id_ID",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     siteName: "Mushida Craft",
     title: "Mushida Craft — Hand-tied Bouquet Artisan",
     description:
-      "Katalog bouquet bunga premium untuk setiap momen spesialmu.",
+      "Katalog bouquet premium untuk setiap momen spesialmu.",
     // Share card: JPG 1200×630 (bukan wordmark PNG persegi).
     images: [
       {
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Mushida Craft — Hand-tied Bouquet Artisan",
     description:
-      "Katalog bouquet bunga premium untuk setiap momen spesialmu.",
+      "Katalog bouquet premium untuk setiap momen spesialmu.",
     images: ["/og-image.jpg"],
   },
   robots: { index: true, follow: true },

@@ -8,7 +8,7 @@ import type { Product } from "@/types";
 export const metadata: Metadata = {
   title: "Katalog Bouquet",
   description:
-    "Jelajahi koleksi bouquet bunga Mushida. Filter berdasarkan kategori, harga, dan temukan rangkaian sempurna untuk momen spesialmu.",
+    "Jelajahi koleksi bouquet Mushida Craft. Filter berdasarkan kategori, harga, dan temukan rangkaian sempurna untuk momen spesialmu.",
 };
 
 export const dynamic = "force-dynamic";
