@@ -36,10 +36,10 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-white/80 backdrop-blur-md">
-      <div className="container flex h-16 items-center justify-between">
-        <BrandLogo height={32} priority />
+      <div className="container flex h-16 items-center justify-between gap-4">
+        <BrandLogo size="sm" priority />
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden min-w-0 items-center gap-6 lg:gap-8 md:flex">
           {navLinks.map((link) => {
             const active =
               pathname === link.href ||

@@ -14,7 +14,7 @@ export function Footer() {
       <div className="container py-12">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="space-y-4">
-            <BrandLogo height={36} />
+            <BrandLogo size="md" />
             <p className="text-sm text-muted-foreground">
               Hand-tied bouquet artisan untuk setiap momen berharga.
               Premium, elegan, dengan sentuhan personal.

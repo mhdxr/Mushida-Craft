@@ -3,36 +3,55 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface BrandLogoProps {
-  /** Tinggi logo dalam pixel (default 36). */
-  height?: number;
+  /**
+   * Variasi ukuran tampilan.
+   * - sm: navbar (tinggi ~28–32px)
+   * - md: footer (tinggi ~32–36px)
+   */
+  size?: "sm" | "md";
   className?: string;
   /** Jika true, logo dibungkus Link ke beranda. */
   asLink?: boolean;
   priority?: boolean;
 }
 
+// Dimensi intrinsik public/images/logo-wordmark.png
+const LOGO_WIDTH = 640;
+const LOGO_HEIGHT = 158;
+
 /**
- * Logo wordmark Mushida_Craft (daisy di huruf i).
- * Dipakai di navbar & footer.
+ * Logo wordmark Mushida_Craft dari public/images/.
+ *
+ * - logo-wordmark.png → gelap (untuk UI light: navbar/footer)
+ * - logo-wordmark-light.png → terang (untuk dark bg)
+ * - mushida-craft-logo.png → file sumber PNG asli
+ *
+ * Constraint CSS mencegah wordmark meledak di layout.
  */
 export function BrandLogo({
-  height = 36,
+  size = "sm",
   className,
   asLink = true,
   priority = false,
 }: BrandLogoProps) {
-  // Aspect ratio wordmark setelah trim ≈ 1178×261 ≈ 4.51:1
-  const width = Math.round(height * 4.51);
+  const sizeClass =
+    size === "md"
+      ? "h-8 w-auto max-w-[10.5rem] sm:h-9 sm:max-w-[12rem]"
+      : "h-7 w-auto max-w-[9rem] sm:h-8 sm:max-w-[10.5rem]";
 
   const image = (
     <Image
-      src="/logo.png"
+      src="/images/logo-wordmark.png"
       alt="Mushida Craft"
-      width={width}
-      height={height}
+      width={LOGO_WIDTH}
+      height={LOGO_HEIGHT}
       priority={priority}
-      className={cn("h-auto w-auto object-contain", className)}
-      style={{ height, width: "auto" }}
+      sizes="(max-width: 640px) 144px, 168px"
+      className={cn(
+        "block object-contain object-left",
+        sizeClass,
+        className,
+      )}
     />
   );
 
@@ -41,7 +60,7 @@ export function BrandLogo({
   return (
     <Link
       href="/"
-      className="inline-flex items-center"
+      className="inline-flex shrink-0 items-center"
       aria-label="Mushida Craft — Beranda"
     >
       {image}
