@@ -3,6 +3,7 @@ import type { CategoryInfo, ProductCategory } from "@/types";
 /**
  * Kategori produksi Mushida Craft (ID slug + nama tampilan tanpa "Buket"):
  * snack-bouquet, money-bouquet, artificial-bouquet, graduation-bouquet, satin-flower
+ * Label UI (Pilihan A): Snack, Money, Artifisial, Graduation, Satin
  */
 export const categories: CategoryInfo[] = [
   {
@@ -31,7 +32,7 @@ export const categories: CategoryInfo[] = [
   },
   {
     id: "satin-flower",
-    name: "Bunga Satin",
+    name: "Satin",
     description: "Bunga satin handmade elegan, tahan lama & mewah.",
     icon: "🎀",
   },

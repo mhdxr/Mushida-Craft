@@ -27,7 +27,7 @@ const bouquetTypes = [
   "Money",
   "Artifisial",
   "Graduation",
-  "Bunga Satin",
+  "Satin",
   "Custom / Lainnya",
 ];
 

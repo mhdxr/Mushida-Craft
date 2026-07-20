@@ -30,7 +30,7 @@ export function Hero() {
             momen tak terlupakan.
           </h1>
           <p className="max-w-lg text-base text-muted-foreground md:text-lg">
-            Snack, Money, Artifisial, Graduation, dan Bunga Satin —
+            Snack, Money, Artifisial, Graduation, dan Satin —
             Mushida Craft menghadirkan rangkaian premium dengan sentuhan
             personal untuk momen spesial Anda.
           </p>

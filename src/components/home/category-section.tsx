@@ -26,7 +26,7 @@ export function CategorySection() {
         <SectionHeading
           eyebrow="Kategori"
           title="Temukan rangkaian sesuai momen"
-          description="Spesialisasi kami: Snack, Money, Artifisial, Graduation, dan Bunga Satin."
+          description="Spesialisasi kami: Snack, Money, Artifisial, Graduation, dan Satin."
         />
         <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-5">
           {categories.map((cat) => {

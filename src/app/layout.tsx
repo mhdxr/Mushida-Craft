@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     template: "%s | Mushida",
   },
   description:
-    "Katalog Snack, Money, Artifisial, Graduation, dan Bunga Satin. Custom order mudah via WhatsApp — Mushida Craft.",
+    "Katalog Snack, Money, Artifisial, Graduation, dan Satin. Custom order mudah via WhatsApp — Mushida Craft.",
   keywords: [
     "snack bouquet",
     "money bouquet",
@@ -87,7 +87,7 @@ const jsonLd = {
   "@type": "Store",
   name: "Mushida Craft",
   description:
-    "Toko Snack, Money, Artifisial, Graduation, dan Bunga Satin — order via WhatsApp dan custom request.",
+    "Toko Snack, Money, Artifisial, Graduation, dan Satin — order via WhatsApp dan custom request.",
   url: siteUrl,
   image: `${siteUrl}/og-image.jpg`,
   logo: `${siteUrl}/images/logo-wordmark.png`,

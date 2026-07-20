@@ -17,7 +17,7 @@ export function Footer() {
           <div className="space-y-4">
             <BrandLogo size="md" />
             <p className="text-sm text-muted-foreground">
-              Snack, Money, Artifisial, Graduation, dan Bunga Satin —
+              Snack, Money, Artifisial, Graduation, dan Satin —
               premium, elegan, dengan sentuhan personal.
             </p>
           </div>
