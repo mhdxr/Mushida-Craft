@@ -45,31 +45,30 @@ export function Navbar() {
     };
   }, [open]);
 
+  const isActive = (href: string) =>
+    pathname === href ||
+    (href !== "/" && !href.startsWith("/#") && pathname.startsWith(href));
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-white/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between gap-4">
         <BrandLogo size="sm" priority />
 
         <nav className="hidden min-w-0 items-center gap-6 lg:gap-8 md:flex">
-          {navLinks.map((link) => {
-            const active =
-              pathname === link.href ||
-              (link.href !== "/" &&
-                !link.href.startsWith("/#") &&
-                pathname.startsWith(link.href));
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
-                  active && "text-foreground",
-                )}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-foreground",
+                isActive(link.href)
+                  ? "text-foreground"
+                  : "text-muted-foreground",
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
         <div className="hidden md:flex">
@@ -78,43 +77,98 @@ export function Navbar() {
           </Button>
         </div>
 
+        {/* Hit target ≥ 44×44; ikon Menu/X cross-fade + rotate. */}
         <button
           type="button"
           aria-label={open ? "Tutup menu" : "Buka menu"}
           aria-expanded={open}
           aria-controls={menuId}
-          className="relative z-50 inline-flex h-11 w-11 items-center justify-center rounded-full border border-border/60 bg-white text-foreground shadow-sm md:hidden"
+          className="relative z-50 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border/60 bg-white text-foreground shadow-sm transition-transform active:scale-95 md:hidden"
           onClick={() => setOpen((v) => !v)}
         >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          <Menu
+            aria-hidden
+            className={cn(
+              "absolute h-5 w-5 transition-all duration-300 ease-out motion-reduce:transition-none",
+              open
+                ? "rotate-90 scale-75 opacity-0"
+                : "rotate-0 scale-100 opacity-100",
+            )}
+          />
+          <X
+            aria-hidden
+            className={cn(
+              "absolute h-5 w-5 transition-all duration-300 ease-out motion-reduce:transition-none",
+              open
+                ? "rotate-0 scale-100 opacity-100"
+                : "-rotate-90 scale-75 opacity-0",
+            )}
+          />
         </button>
       </div>
 
-      {/* Panel mobile: fixed full-width agar selalu di atas konten. */}
+      {/* Backdrop: selalu ter-mount, fade + blur; klik menutup menu. */}
+      <div
+        aria-hidden
+        onClick={() => setOpen(false)}
+        className={cn(
+          "fixed inset-0 top-16 z-40 bg-foreground/20 backdrop-blur-sm transition-opacity duration-300 ease-out md:hidden motion-reduce:transition-none",
+          open ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+      />
+
+      {/* Panel: selalu ter-mount — fade + slide-down + scale (bukan unmount). */}
       <div
         id={menuId}
-        hidden={!open}
         className={cn(
-          "border-t border-border/60 bg-white md:hidden",
-          open ? "block" : "hidden",
+          "absolute inset-x-0 top-16 z-40 origin-top border-b border-border/60 bg-white shadow-lg transition-all duration-300 ease-out md:hidden motion-reduce:transition-none motion-reduce:duration-0",
+          open
+            ? "translate-y-0 scale-100 opacity-100"
+            : "pointer-events-none -translate-y-3 scale-[0.98] opacity-0",
         )}
       >
         <div className="container flex flex-col gap-1 py-4">
-          {navLinks.map((link) => (
+          {navLinks.map((link, i) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="rounded-lg px-3 py-3 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground"
+              style={{
+                transitionDelay: open ? `${80 + i * 45}ms` : "0ms",
+              }}
+              className={cn(
+                "rounded-lg px-3 py-3 text-sm font-medium transition-all duration-300 ease-out motion-reduce:transition-none motion-reduce:delay-0",
+                open
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-1 opacity-0",
+                isActive(link.href)
+                  ? "bg-secondary text-foreground"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+              )}
             >
               {link.label}
             </Link>
           ))}
-          <Button asChild size="sm" className="mt-2">
-            <Link href="/katalog" onClick={() => setOpen(false)}>
-              Belanja Sekarang
-            </Link>
-          </Button>
+
+          <div
+            style={{
+              transitionDelay: open
+                ? `${80 + navLinks.length * 45}ms`
+                : "0ms",
+            }}
+            className={cn(
+              "mt-2 transition-all duration-300 ease-out motion-reduce:transition-none motion-reduce:delay-0",
+              open
+                ? "translate-y-0 opacity-100"
+                : "translate-y-1 opacity-0",
+            )}
+          >
+            <Button asChild size="sm" className="w-full">
+              <Link href="/katalog" onClick={() => setOpen(false)}>
+                Belanja Sekarang
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 
