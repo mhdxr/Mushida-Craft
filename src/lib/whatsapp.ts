@@ -1,7 +1,8 @@
 import type { CustomOrderForm, Product } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 
-const DEFAULT_NUMBER = "6281234567890";
+// Nomor bisnis Mushida Craft — fallback bila env tidak di-set.
+const DEFAULT_NUMBER = "6285713254800";
 
 /**
  * Normalisasi ke digit internasional untuk wa.me (tanpa "+").

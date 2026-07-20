@@ -98,10 +98,10 @@ Edit `.env.local`:
 
 ```env
 # Nomor WhatsApp tujuan order (format internasional tanpa "+", contoh: 6281234567890)
-NEXT_PUBLIC_WHATSAPP_NUMBER=6281234567890
+NEXT_PUBLIC_WHATSAPP_NUMBER=6285713254800
 
 # Kredensial admin dashboard
-ADMIN_EMAIL=admin@Mushida.id
+ADMIN_EMAIL=admin@mushidacraft.com
 ADMIN_PASSWORD=changeme123
 SESSION_SECRET=ganti-dengan-secret-acak-yang-kuat
 
