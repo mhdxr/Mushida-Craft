@@ -1,4 +1,5 @@
 import type { CustomOrderForm, Product } from "@/types";
+import { getTimeGreeting } from "@/lib/greeting";
 import { formatCurrency } from "@/lib/utils";
 
 const DEFAULT_NUMBER = "6281234567890";
@@ -17,9 +18,19 @@ export function buildWhatsAppUrl(message: string): string {
   return `https://wa.me/${number}?text=${encoded}`;
 }
 
+/** Pembuka pesan WhatsApp dengan sapaan sesuai jam WIB. */
+function buildGreetingOpener(): string {
+  return `${getTimeGreeting()}, Mushida! 🌸`;
+}
+
+/** Pesan inquiry umum (FAB, footer). */
+export function buildDefaultInquiryMessage(): string {
+  return `${buildGreetingOpener()} Saya ingin tanya-tanya tentang bouquet bunga.`;
+}
+
 export function buildProductOrderMessage(product: Product): string {
   return [
-    "Halo Mushida! 🌸",
+    buildGreetingOpener(),
     "",
     "Saya tertarik dengan produk berikut:",
     `• Nama: ${product.name}`,
@@ -32,7 +43,7 @@ export function buildProductOrderMessage(product: Product): string {
 
 export function buildCustomOrderMessage(form: CustomOrderForm): string {
   return [
-    "Halo Mushida! 🌸",
+    buildGreetingOpener(),
     "Saya ingin request *Custom Bouquet* dengan detail berikut:",
     "",
     `• Nama: ${form.name}`,

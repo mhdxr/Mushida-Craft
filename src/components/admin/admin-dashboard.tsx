@@ -8,6 +8,7 @@ import { ProductForm } from "@/components/admin/product-form";
 import { ProductTable } from "@/components/admin/product-table";
 import { useProducts } from "@/hooks/use-products";
 import { toast } from "@/hooks/use-toast";
+import { getTimeGreetingWithName } from "@/lib/greeting";
 import type { Product } from "@/types";
 
 export function AdminDashboard() {
@@ -117,8 +118,7 @@ export function AdminDashboard() {
             Kelola Produk
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Login sebagai{" "}
-            <strong className="text-foreground">{adminEmail}</strong>
+            {getTimeGreetingWithName(adminEmail || undefined)}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { Flower2, Camera, MessageCircle, Mail } from "lucide-react";
-import { buildWhatsAppUrl } from "@/lib/whatsapp";
-
-const contactMessage = "Halo Mushida! 🌸 Saya ingin tanya-tanya tentang bouquet bunga.";
+import {
+  buildDefaultInquiryMessage,
+  buildWhatsAppUrl,
+} from "@/lib/whatsapp";
 
 export function Footer() {
-  const whatsappUrl = buildWhatsAppUrl(contactMessage);
+  const whatsappUrl = buildWhatsAppUrl(buildDefaultInquiryMessage());
 
   return (
     <footer className="border-t border-border/60 bg-cream-50">

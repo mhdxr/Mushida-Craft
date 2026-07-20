@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getTimeGreeting } from "@/lib/greeting";
 
 export function Hero() {
   return (
@@ -18,7 +19,7 @@ export function Hero() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/70 px-4 py-1.5 text-xs font-medium text-primary backdrop-blur-sm">
             <Sparkles className="h-3.5 w-3.5" />
-            Hand-tied bouquet artisan
+            {getTimeGreeting()} · Hand-tied bouquet artisan
           </div>
           <h1 className="font-serif text-4xl font-semibold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl">
             Setiap rangkaian{" "}

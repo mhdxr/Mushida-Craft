@@ -2,13 +2,13 @@
 
 import { motion } from "framer-motion";
 import { MessageCircle } from "lucide-react";
-import { buildWhatsAppUrl } from "@/lib/whatsapp";
-
-const defaultMessage =
-  "Halo Mushida! 🌸 Saya ingin tanya-tanya tentang bouquet bunga.";
+import {
+  buildDefaultInquiryMessage,
+  buildWhatsAppUrl,
+} from "@/lib/whatsapp";
 
 export function WhatsAppFab() {
-  const url = buildWhatsAppUrl(defaultMessage);
+  const url = buildWhatsAppUrl(buildDefaultInquiryMessage());
 
   return (
     <motion.a
