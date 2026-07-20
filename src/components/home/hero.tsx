@@ -72,8 +72,8 @@ export function Hero() {
         <div className="relative">
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-primary/20">
             <Image
-              src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=1200&q=80"
-              alt="Hand bouquet elegan"
+              src="https://ozsrkctqxlevsetqivwl.supabase.co/storage/v1/object/public/product-images/4f9a86b0-6e0e-4d34-9c84-2fc59bb26768.jpg"
+              alt="Hand bouquet Lily"
               fill
               priority
               sizes="(max-width: 768px) 100vw, 50vw"
