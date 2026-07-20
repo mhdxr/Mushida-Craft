@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { MessageCircle, Search, ShoppingBag, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/common/section-heading";
@@ -30,6 +30,8 @@ const steps = [
 ];
 
 export function HowToOrder() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <section id="cara-order" className="section-soft py-16 md:py-24">
       <div className="container">
@@ -42,10 +44,10 @@ export function HowToOrder() {
           {steps.map((s, idx) => (
             <motion.div
               key={s.title}
-              initial={{ opacity: 0, y: 16 }}
+              initial={reduceMotion ? false : { opacity: 1, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.4, delay: idx * 0.08 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.35, delay: idx * 0.06 }}
               className="relative rounded-2xl border border-border/60 bg-white p-6 shadow-sm"
             >
               <span className="absolute -top-3 left-6 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">

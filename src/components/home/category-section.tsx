@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   Flower2,
   Heart,
@@ -26,6 +26,8 @@ const categoryIcons: Record<ProductCategory, LucideIcon> = {
 };
 
 export function CategorySection() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <section className="section-soft py-16 md:py-24">
       <div className="container">
@@ -40,17 +42,24 @@ export function CategorySection() {
             return (
               <motion.div
                 key={cat.id}
-                initial={{ opacity: 0, y: 16 }}
+                initial={reduceMotion ? false : { opacity: 1, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.4, delay: Math.min(idx * 0.05, 0.3) }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{
+                  duration: 0.35,
+                  delay: Math.min(idx * 0.04, 0.24),
+                }}
               >
                 <Link
                   href={`/katalog?category=${cat.id}`}
                   className="group flex h-full flex-col items-center gap-3 rounded-2xl border border-border/60 bg-white p-6 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
                 >
                   <span className="flex h-14 w-14 items-center justify-center rounded-full bg-blush-50 text-primary transition-colors group-hover:bg-primary/10">
-                    {Icon ? <Icon className="h-7 w-7" /> : <Flower2 className="h-7 w-7" />}
+                    {Icon ? (
+                      <Icon className="h-7 w-7" />
+                    ) : (
+                      <Flower2 className="h-7 w-7" />
+                    )}
                   </span>
                   <h3 className="font-serif text-base font-semibold tracking-tight">
                     {cat.name}

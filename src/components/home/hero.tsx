@@ -2,19 +2,23 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getTimeGreeting } from "@/lib/greeting";
 
 export function Hero() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <section className="hero-gradient relative overflow-hidden">
       <div className="container relative grid items-center gap-12 py-16 md:grid-cols-2 md:py-24 lg:py-28">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          // Jangan mulai dari opacity 0 — di mobile/slow JS konten bisa
+          // "stuck" invisible. Animasi hanya geser halus jika motion diizinkan.
+          initial={reduceMotion ? false : { opacity: 1, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
           className="space-y-6"
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/70 px-4 py-1.5 text-xs font-medium text-primary backdrop-blur-sm">
@@ -67,9 +71,9 @@ export function Hero() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={reduceMotion ? false : { opacity: 1, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
+          transition={{ duration: 0.55, delay: 0.05 }}
           className="relative"
         >
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-primary/20">
@@ -82,19 +86,14 @@ export function Hero() {
               className="object-cover"
             />
           </div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className="absolute -bottom-6 -left-4 hidden rounded-2xl border border-border/60 bg-white/95 p-4 shadow-lg backdrop-blur-sm sm:block"
-          >
+          <div className="absolute -bottom-6 -left-4 hidden rounded-2xl border border-border/60 bg-white/95 p-4 shadow-lg backdrop-blur-sm sm:block">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">
               Promo bulan ini
             </p>
             <p className="font-serif text-xl font-semibold">
               Free greeting card 💌
             </p>
-          </motion.div>
+          </div>
         </motion.div>
       </div>
     </section>

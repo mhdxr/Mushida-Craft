@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface SectionHeadingProps {
@@ -18,12 +18,15 @@ export function SectionHeading({
   align = "center",
   className,
 }: SectionHeadingProps) {
+  const reduceMotion = useReducedMotion();
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      // Konten tetap visible tanpa JS/hydration — jangan start opacity 0.
+      initial={reduceMotion ? false : { opacity: 1, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.4 }}
       className={cn(
         "max-w-2xl space-y-3",
         align === "center" ? "mx-auto text-center" : "text-left",

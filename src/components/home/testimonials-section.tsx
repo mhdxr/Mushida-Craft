@@ -1,12 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Star } from "lucide-react";
 import { SectionHeading } from "@/components/common/section-heading";
 import { testimonials } from "@/data/testimonials";
 
 export function TestimonialsSection() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <section id="testimoni" className="container py-16 md:py-24">
       <SectionHeading
@@ -18,10 +20,10 @@ export function TestimonialsSection() {
         {testimonials.map((t, idx) => (
           <motion.div
             key={t.id}
-            initial={{ opacity: 0, y: 16 }}
+            initial={reduceMotion ? false : { opacity: 1, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.4, delay: idx * 0.08 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.35, delay: idx * 0.06 }}
             className="rounded-2xl border border-border/60 bg-white p-6 shadow-sm"
           >
             <div

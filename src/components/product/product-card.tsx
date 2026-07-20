@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { categoryMap } from "@/data/categories";
 import { formatCurrency } from "@/lib/utils";
@@ -25,13 +25,16 @@ interface ProductCardProps {
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const cat = categoryMap[product.category];
   const isSoldOut = product.badge === "sold-out" || !product.isAvailable;
+  const reduceMotion = useReducedMotion();
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      // Jangan hide card dengan opacity 0 — gambar produk harus langsung
+      // terlihat meski animasi/JS lambat.
+      initial={reduceMotion ? false : { opacity: 1, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.4) }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.3) }}
     >
       <Link
         href={`/produk/${product.slug}`}
