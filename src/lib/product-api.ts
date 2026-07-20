@@ -36,18 +36,42 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
   return data ? rowToProduct(data) : null;
 }
 
-/** Ambil produk best-seller (untuk homepage featured). */
+/** Ambil produk best-seller (untuk homepage featured).
+ *  Jika best-seller kurang dari limit, sisa slot diisi produk terbaru
+ *  agar grid unggulan selalu penuh. */
 export async function fetchFeaturedProducts(limit = 4): Promise<Product[]> {
   const client = getBrowserSupabaseClient();
   const { data, error } = await client
     .from(TABLE)
     .select("*")
     .eq("badge", "best-seller")
+    .eq("is_available", true)
     .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error) throw error;
-  return (data ?? []).map(rowToProduct);
+  const featured = (data ?? []).map(rowToProduct);
+  if (featured.length >= limit) return featured;
+
+  const excludeIds = featured.map((p) => p.id);
+  let fillQuery = client
+    .from(TABLE)
+    .select("*")
+    .eq("is_available", true)
+    .order("created_at", { ascending: false })
+    .limit(limit - featured.length);
+  if (excludeIds.length > 0) {
+    fillQuery = fillQuery.not(
+      "id",
+      "in",
+      `(${excludeIds.map((id) => `"${id}"`).join(",")})`,
+    );
+  }
+  const { data: fillData, error: fillError } = await fillQuery;
+
+  // Jika query pengisi gagal, tetap tampilkan best-seller yang ada.
+  if (fillError) return featured;
+  return [...featured, ...(fillData ?? []).map(rowToProduct)];
 }
 
 /** Ambil semua slug produk (untuk generateStaticParams). */
