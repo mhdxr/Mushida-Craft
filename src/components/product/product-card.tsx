@@ -19,19 +19,10 @@ interface ProductCardProps {
   index?: number;
 }
 
-const PLACEHOLDER = "/placeholder.jpg";
-
-function productImageSrc(images: string[] | undefined): string {
-  const first = images?.find((src) => typeof src === "string" && src.trim());
-  return first?.trim() || PLACEHOLDER;
-}
-
 /** Kartu produk tanpa animasi client — gambar & link selalu aktif. */
 export function ProductCard({ product }: ProductCardProps) {
   const cat = categoryMap[product.category];
   const isSoldOut = product.badge === "sold-out" || !product.isAvailable;
-  const badge = product.badge ? badgeMap[product.badge] : undefined;
-  const imageSrc = productImageSrc(product.images);
 
   return (
     <Link
@@ -40,15 +31,17 @@ export function ProductCard({ product }: ProductCardProps) {
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
         <Image
-          src={imageSrc}
+          src={product.images[0] ?? "/placeholder.png"}
           alt={product.name}
           fill
           sizes="(max-width: 768px) 50vw, 25vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        {badge && (
+        {product.badge && (
           <div className="absolute left-3 top-3">
-            <Badge variant={badge.variant}>{badge.label}</Badge>
+            <Badge variant={badgeMap[product.badge].variant}>
+              {badgeMap[product.badge].label}
+            </Badge>
           </div>
         )}
         {isSoldOut && (

@@ -9,7 +9,8 @@ import { fetchProducts } from "@/lib/product-api";
 import { formatCurrency } from "@/lib/utils";
 import type { Product } from "@/types";
 
-const FALLBACK_IMAGE = "/placeholder.jpg";
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=1200&q=80";
 
 function promoEyebrow(product: Product): string {
   if (product.badge === "new") return "Baru di katalog";
@@ -26,9 +27,7 @@ export async function Hero() {
     console.error("Hero: gagal load promo dari Supabase", err);
   }
 
-  const imageSrc =
-    promo?.images?.find((src) => typeof src === "string" && src.trim())?.trim() ||
-    FALLBACK_IMAGE;
+  const imageSrc = promo?.images?.[0] || FALLBACK_IMAGE;
   const imageAlt = promo
     ? `${promo.name} — Mushida Craft`
     : "Rangkaian premium Mushida Craft";

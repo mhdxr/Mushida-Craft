@@ -2,35 +2,21 @@ import { withSentryConfig } from "@sentry/nextjs";
 
 const PRODUCT_IMAGES_BUCKET = "product-images";
 
-/**
- * Allowlist gambar produk Supabase Storage.
- * Selalu izinkan *.supabase.co agar deploy tidak gagal/error image
- * meski NEXT_PUBLIC_SUPABASE_URL kosong/salah format saat build.
- * Tetap tambahkan hostname project spesifik jika env valid.
- */
-const supabaseImagePatterns = (() => {
-  const patterns = [
-    {
-      protocol: "https",
-      hostname: "*.supabase.co",
-      pathname: `/storage/v1/object/public/${PRODUCT_IMAGES_BUCKET}/**`,
-    },
-  ];
-
+const supabaseImagePattern = (() => {
   try {
     const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || "");
-    if (url.protocol === "https:" && url.hostname.endsWith("supabase.co")) {
-      patterns.push({
-        protocol: "https",
-        hostname: url.hostname,
-        pathname: `/storage/v1/object/public/${PRODUCT_IMAGES_BUCKET}/**`,
-      });
-    }
-  } catch {
-    // env bukan URL valid — wildcard di atas sudah cukup.
-  }
+    if (url.protocol !== "https:") return null;
 
-  return patterns;
+    return {
+      protocol: "https",
+      hostname: url.hostname,
+      port: url.port,
+      pathname: `/storage/v1/object/public/${PRODUCT_IMAGES_BUCKET}/**`,
+      search: "",
+    };
+  } catch {
+    return null;
+  }
 })();
 
 // Host PostHog untuk reverse-proxy /ingest (same-origin → lolos CSP + ad-block).
@@ -53,7 +39,7 @@ const nextConfig = {
         protocol: "https",
         hostname: "plus.unsplash.com",
       },
-      ...supabaseImagePatterns,
+      ...(supabaseImagePattern ? [supabaseImagePattern] : []),
     ],
   },
   /**

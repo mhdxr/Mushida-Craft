@@ -11,10 +11,7 @@ interface ProductGalleryProps {
 
 export function ProductGallery({ images, alt }: ProductGalleryProps) {
   const [active, setActive] = useState(0);
-  const list =
-    images?.filter((src) => typeof src === "string" && src.trim()).length > 0
-      ? images.filter((src) => typeof src === "string" && src.trim())
-      : ["/placeholder.jpg"];
+  const list = images.length > 0 ? images : ["/placeholder.png"];
 
   return (
     <div className="space-y-3">
