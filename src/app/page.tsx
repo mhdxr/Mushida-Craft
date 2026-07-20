@@ -5,8 +5,11 @@ import { FeaturedProducts } from "@/components/home/featured-products";
 import { TestimonialsSection } from "@/components/home/testimonials-section";
 import { HowToOrder } from "@/components/home/how-to-order";
 
-/** ISR 5 menit — homepage tidak memicu loading overlay dinamis terus-menerus. */
-export const revalidate = 300;
+/**
+ * Dynamic: produk unggulan harus mengikuti database (admin CRUD),
+ * bukan cache seed/ISR lama.
+ */
+export const dynamic = "force-dynamic";
 
 function FeaturedProductsFallback() {
   return (

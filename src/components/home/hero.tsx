@@ -1,38 +1,54 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getTimeGreeting } from "@/lib/greeting";
+import { HeroGreeting } from "@/components/home/hero-greeting";
+import { categoryMap } from "@/data/categories";
+import { selectPromoProduct } from "@/data/products";
+import { fetchProducts } from "@/lib/product-api";
+import { formatCurrency } from "@/lib/utils";
+import type { Product } from "@/types";
 
-export function Hero() {
-  // Sapaan di-set setelah mount agar SSR & client markup identik
-  // (hindari hydration mismatch yang bisa mematikan event handler).
-  const [greeting, setGreeting] = useState("Halo");
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=1200&q=80";
 
-  useEffect(() => {
-    setGreeting(getTimeGreeting());
-  }, []);
+function promoEyebrow(product: Product): string {
+  if (product.badge === "new") return "Baru di katalog";
+  if (product.badge === "best-seller") return "Best seller";
+  return "Unggulan bulan ini";
+}
+
+export async function Hero() {
+  let promo: Product | null = null;
+  try {
+    const all = await fetchProducts();
+    promo = selectPromoProduct(all);
+  } catch (err) {
+    console.error("Hero: gagal load promo dari Supabase", err);
+  }
+
+  const imageSrc = promo?.images?.[0] || FALLBACK_IMAGE;
+  const imageAlt = promo
+    ? `${promo.name} — Mushida Craft`
+    : "Rangkaian premium Mushida Craft";
+  const categoryName = promo
+    ? categoryMap[promo.category]?.name ?? promo.category
+    : null;
 
   return (
     <section className="hero-gradient relative overflow-hidden">
       <div className="container relative grid items-center gap-12 py-16 md:grid-cols-2 md:py-24 lg:py-28">
         <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/70 px-4 py-1.5 text-xs font-medium text-primary backdrop-blur-sm">
-            <Sparkles className="h-3.5 w-3.5" />
-            {greeting} · Hand-tied bouquet artisan
-          </div>
+          <HeroGreeting />
           <h1 className="font-serif text-4xl font-semibold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl">
             Setiap rangkaian{" "}
-            <span className="italic text-primary">bercerita</span>, untuk
-            momen tak terlupakan.
+            <span className="italic text-primary">bercerita</span>, untuk momen
+            tak terlupakan.
           </h1>
           <p className="max-w-lg text-base text-muted-foreground md:text-lg">
-            Snack, Money, Artifisial, Graduation, dan Satin —
-            Mushida Craft menghadirkan rangkaian premium dengan sentuhan
-            personal untuk momen spesial Anda.
+            Snack, Money, Artifisial, Graduation, dan Satin — Mushida Craft
+            menghadirkan rangkaian premium dengan sentuhan personal untuk momen
+            spesial Anda.
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Button asChild size="lg">
@@ -42,7 +58,7 @@ export function Hero() {
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href="/custom-order">Custom Bouquet</Link>
+              <Link href="/custom-order">Custom Order</Link>
             </Button>
           </div>
           <div className="flex items-center gap-6 pt-4 text-sm text-muted-foreground">
@@ -72,22 +88,45 @@ export function Hero() {
         <div className="relative">
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-primary/20">
             <Image
-              src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=1200&q=80"
-              alt="Hand bouquet elegan"
+              src={imageSrc}
+              alt={imageAlt}
               fill
               priority
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </div>
-          <div className="absolute -bottom-6 -left-4 hidden rounded-2xl border border-border/60 bg-white/95 p-4 shadow-lg backdrop-blur-sm sm:block">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">
-              Promo bulan ini
-            </p>
-            <p className="font-serif text-xl font-semibold">
-              Free greeting card 💌
-            </p>
-          </div>
+
+          {/* Kartu promo: produk nyata dari DB, bukan copy fiktif */}
+          {promo ? (
+            <Link
+              href={`/produk/${promo.slug}`}
+              className="absolute -bottom-6 -left-4 hidden max-w-[16rem] rounded-2xl border border-border/60 bg-white/95 p-4 shadow-lg backdrop-blur-sm transition-transform hover:-translate-y-0.5 hover:shadow-xl sm:block"
+            >
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                {promoEyebrow(promo)}
+                {categoryName ? ` · ${categoryName}` : ""}
+              </p>
+              <p className="mt-0.5 line-clamp-2 font-serif text-lg font-semibold leading-snug">
+                {promo.name}
+              </p>
+              <p className="mt-1 text-sm font-medium text-primary">
+                {formatCurrency(promo.price)}
+              </p>
+            </Link>
+          ) : (
+            <Link
+              href="/custom-order"
+              className="absolute -bottom-6 -left-4 hidden max-w-[16rem] rounded-2xl border border-border/60 bg-white/95 p-4 shadow-lg backdrop-blur-sm transition-transform hover:-translate-y-0.5 hover:shadow-xl sm:block"
+            >
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                Custom order
+              </p>
+              <p className="mt-0.5 font-serif text-lg font-semibold leading-snug">
+                Request rangkaian sesuai momenmu
+              </p>
+            </Link>
+          )}
         </div>
       </div>
     </section>
