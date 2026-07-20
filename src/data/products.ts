@@ -1,5 +1,4 @@
 import type { Product } from "@/types";
-import { categoryIds, categoryMap } from "@/data/categories";
 
 /**
  * Seed produk — 5 kategori produksi Mushida Craft.
@@ -175,77 +174,6 @@ export function getRelatedProducts(product: Product, limit = 4): Product[] {
     .slice(0, limit);
 }
 
-/**
- * Pilih unggulan dari list produk (biasanya hasil DB):
- * 1 item per kategori yang **benar-benar ada** di `source`.
- * Kategori tanpa produk di DB dilewati — tidak memaksa seed.
- * Prioritas di tiap kategori: best-seller → new → terbaru.
- */
-export function selectFeaturedFromCatalog(
-  source: Product[],
-  limit = 8,
-): Product[] {
-  const available = source.filter(
-    (p) => p.isAvailable && p.badge !== "sold-out",
-  );
-  if (available.length === 0) return [];
-
-  const picked: Product[] = [];
-  const used = new Set<string>();
-
-  // Urutan kategori resmi, tapi hanya yang punya stok di source (DB).
-  for (const cat of categoryIds) {
-    if (picked.length >= limit) break;
-    const inCat = available.filter((p) => p.category === cat);
-    if (inCat.length === 0) continue;
-
-    const best =
-      inCat.find((p) => p.badge === "best-seller") ??
-      inCat.find((p) => p.badge === "new") ??
-      [...inCat].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-
-    if (best && !used.has(best.id)) {
-      picked.push(best);
-      used.add(best.id);
-    }
-  }
-
-  return picked.slice(0, limit);
-}
-
-/** Label kategori dari produk terpilih (untuk copy UI dinamis). */
-export function featuredCategoryLabels(items: Product[]): string[] {
-  const names: string[] = [];
-  const seen = new Set<string>();
-  for (const p of items) {
-    const name = categoryMap[p.category]?.name;
-    if (name && !seen.has(name)) {
-      seen.add(name);
-      names.push(name);
-    }
-  }
-  return names;
-}
-
-/**
- * Produk untuk kartu promo di hero (mengikuti DB, bukan copy fiktif).
- * Prioritas: new → best-seller → terbaru available.
- */
-export function selectPromoProduct(source: Product[]): Product | null {
-  const available = source.filter(
-    (p) => p.isAvailable && p.badge !== "sold-out",
-  );
-  if (available.length === 0) return null;
-
-  return (
-    available.find((p) => p.badge === "new") ??
-    available.find((p) => p.badge === "best-seller") ??
-    [...available].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ??
-    null
-  );
-}
-
-/** Fallback seed lokal (hanya jika DB gagal / kosong). */
-export function getFeaturedProducts(limit = 8): Product[] {
-  return selectFeaturedFromCatalog(products, limit);
+export function getFeaturedProducts(limit = 4): Product[] {
+  return products.filter((p) => p.badge === "best-seller").slice(0, limit);
 }

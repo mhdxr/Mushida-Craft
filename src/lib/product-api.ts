@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { selectFeaturedFromCatalog } from "@/data/products";
 import { getBrowserSupabaseClient, getServerSupabaseClient } from "@/lib/supabase";
 import { rowToProduct } from "@/lib/product-store";
 import { slugify } from "@/lib/utils";
@@ -37,13 +36,18 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
   return data ? rowToProduct(data) : null;
 }
 
-/**
- * Produk unggulan homepage — mengikuti isi database:
- * ambil semua produk, pilih 1 per kategori yang ada di DB.
- */
-export async function fetchFeaturedProducts(limit = 8): Promise<Product[]> {
-  const all = await fetchProducts();
-  return selectFeaturedFromCatalog(all, limit);
+/** Ambil produk best-seller (untuk homepage featured). */
+export async function fetchFeaturedProducts(limit = 4): Promise<Product[]> {
+  const client = getBrowserSupabaseClient();
+  const { data, error } = await client
+    .from(TABLE)
+    .select("*")
+    .eq("badge", "best-seller")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return (data ?? []).map(rowToProduct);
 }
 
 /** Ambil semua slug produk (untuk generateStaticParams). */
