@@ -45,20 +45,35 @@ export const metadata: Metadata = {
     type: "website",
     locale: "id_ID",
     url: siteUrl,
-    siteName: "Mushida",
-    title: "Mushida — Hand-tied Bouquet Artisan",
+    siteName: "Mushida Craft",
+    title: "Mushida Craft — Hand-tied Bouquet Artisan",
     description:
       "Katalog bouquet bunga premium untuk setiap momen spesialmu.",
+    images: [
+      {
+        url: "/logo-512.png",
+        width: 512,
+        height: 512,
+        alt: "Mushida Craft",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mushida — Hand-tied Bouquet Artisan",
+    title: "Mushida Craft — Hand-tied Bouquet Artisan",
     description:
       "Katalog bouquet bunga premium untuk setiap momen spesialmu.",
+    images: ["/logo-512.png"],
   },
   robots: { index: true, follow: true },
   alternates: { canonical: "/" },
-  icons: { icon: "/favicon.ico" },
+  icons: {
+    icon: [
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo.png", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
 };
 
 export const viewport: Viewport = {
@@ -71,11 +86,12 @@ export const viewport: Viewport = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Store",
-  name: "Mushida",
+  name: "Mushida Craft",
   description:
     "Toko bouquet bunga premium dengan layanan order via WhatsApp dan custom request.",
   url: siteUrl,
-  image: `${siteUrl}/og-image.jpg`,
+  image: `${siteUrl}/logo-512.png`,
+  logo: `${siteUrl}/logo.png`,
   priceRange: "Rp200.000 - Rp2.000.000",
   currenciesAccepted: "IDR",
   paymentAccepted: "Cash, Bank Transfer, E-Wallet",

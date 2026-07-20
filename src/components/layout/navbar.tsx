@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Flower2, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { BrandLogo } from "@/components/common/brand-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -36,14 +37,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-white/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Flower2 className="h-5 w-5" />
-          </span>
-          <span className="font-serif text-xl font-semibold tracking-tight">
-            Mushida
-          </span>
-        </Link>
+        <BrandLogo height={32} priority />
 
         <nav className="hidden items-center gap-8 md:flex">
           {navLinks.map((link) => {

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Flower2, Camera, MessageCircle, Mail } from "lucide-react";
+import { Camera, MessageCircle, Mail } from "lucide-react";
+import { BrandLogo } from "@/components/common/brand-logo";
 import {
   buildDefaultInquiryMessage,
   buildWhatsAppUrl,
@@ -13,12 +14,7 @@ export function Footer() {
       <div className="container py-12">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Flower2 className="h-5 w-5" />
-              </span>
-              <span className="font-serif text-xl font-semibold">Mushida</span>
-            </Link>
+            <BrandLogo height={36} />
             <p className="text-sm text-muted-foreground">
               Hand-tied bouquet artisan untuk setiap momen berharga.
               Premium, elegan, dengan sentuhan personal.
