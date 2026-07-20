@@ -138,7 +138,9 @@ export const productSchema = productBaseSchema.extend({
     .array(productImageSchema)
     .min(1, "Masukkan minimal 1 URL gambar")
     .max(MAX_PRODUCT_IMAGES, `Maksimal ${MAX_PRODUCT_IMAGES} gambar per produk`),
-  badge: productBadgeSchema.optional(),
+  // null = hapus badge (undefined akan hilang saat JSON.stringify di client,
+  // sehingga PATCH tidak pernah menyentuh kolom badge).
+  badge: productBadgeSchema.nullable().optional(),
 });
 
 export type ProductSchema = z.infer<typeof productSchema>;

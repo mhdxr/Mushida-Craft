@@ -97,7 +97,9 @@ export function ProductForm({
       price: Number(data.price),
       category: data.category,
       images,
-      badge: !data.badge ? undefined : (data.badge as ProductBadge),
+      // null (bukan undefined) agar key tetap ikut JSON.stringify —
+      // PATCH harus mengirim badge eksplisit untuk menghapusnya di DB.
+      badge: !data.badge ? null : (data.badge as ProductBadge),
       isAvailable: data.isAvailable,
       slug: initial?.slug ?? slugify(data.name),
     };

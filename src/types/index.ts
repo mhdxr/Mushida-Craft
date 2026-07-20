@@ -15,7 +15,7 @@ export interface Product {
   price: number;
   category: ProductCategory;
   images: string[];
-  badge?: ProductBadge;
+  badge?: ProductBadge | null;
   isAvailable: boolean;
   createdAt: string;
 }
