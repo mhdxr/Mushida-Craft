@@ -41,14 +41,7 @@ const productBaseSchema = z.object({
         issue.input === undefined ? "Harga wajib diisi" : "Harga harus berupa angka",
     })
     .min(1000, "Harga minimal Rp1.000"),
-  category: z.enum([
-    "hand-bouquet",
-    "wedding",
-    "graduation",
-    "anniversary",
-    "money-bouquet",
-    "dried-flower",
-  ]),
+  category: z.enum(["graduation", "money-bouquet"]),
   isAvailable: z.boolean(),
 });
 

@@ -52,22 +52,6 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link
-                  href="/katalog?category=hand-bouquet"
-                  className="hover:text-foreground"
-                >
-                  Hand Bouquet
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/katalog?category=wedding"
-                  className="hover:text-foreground"
-                >
-                  Wedding
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/katalog?category=graduation"
                   className="hover:text-foreground"
                 >
@@ -76,10 +60,10 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/katalog?category=anniversary"
+                  href="/katalog?category=money-bouquet"
                   className="hover:text-foreground"
                 >
-                  Anniversary
+                  Money Bouquet
                 </Link>
               </li>
             </ul>

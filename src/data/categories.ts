@@ -1,18 +1,11 @@
 import type { CategoryInfo, ProductCategory } from "@/types";
 
+/**
+ * Kategori yang diproduksi Mushida Craft.
+ * Hanya Graduation & Money Bouquet (hand-bouquet / wedding /
+ * anniversary / dried-flower sudah dihapus).
+ */
 export const categories: CategoryInfo[] = [
-  {
-    id: "hand-bouquet",
-    name: "Hand Bouquet",
-    description: "Bouquet genggam elegan untuk berbagai momen spesial.",
-    icon: "🌷",
-  },
-  {
-    id: "wedding",
-    name: "Wedding",
-    description: "Bouquet pengantin yang romantis dan timeless.",
-    icon: "💍",
-  },
   {
     id: "graduation",
     name: "Graduation",
@@ -20,22 +13,10 @@ export const categories: CategoryInfo[] = [
     icon: "🎓",
   },
   {
-    id: "anniversary",
-    name: "Anniversary",
-    description: "Hadiah anniversary penuh kesan untuk pasangan.",
-    icon: "💕",
-  },
-  {
     id: "money-bouquet",
     name: "Money Bouquet",
     description: "Bouquet uang unik sebagai hadiah berkesan.",
     icon: "💸",
-  },
-  {
-    id: "dried-flower",
-    name: "Dried Flower",
-    description: "Bunga kering dengan estetika vintage tahan lama.",
-    icon: "🌾",
   },
 ];
 

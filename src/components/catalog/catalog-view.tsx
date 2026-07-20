@@ -29,12 +29,8 @@ const priceLabels: Record<PriceRange, string> = {
 };
 
 const allowedCategories: ProductCategory[] = [
-  "hand-bouquet",
-  "wedding",
   "graduation",
-  "anniversary",
   "money-bouquet",
-  "dried-flower",
 ];
 
 function buildActiveFilterSummary(filters: CatalogFiltersValue): string[] {

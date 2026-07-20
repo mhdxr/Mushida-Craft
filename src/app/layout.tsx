@@ -29,16 +29,15 @@ export const metadata: Metadata = {
     template: "%s | Mushida",
   },
   description:
-    "Katalog bouquet bunga premium untuk wedding, graduation, anniversary, dan momen spesial lainnya. Order mudah via WhatsApp.",
+    "Katalog bouquet wisuda dan money bouquet premium. Custom order mudah via WhatsApp — Mushida Craft.",
   keywords: [
     "bouquet bunga",
     "toko bunga online",
-    "hand bouquet",
-    "wedding bouquet",
     "graduation bouquet",
+    "bouquet wisuda",
     "money bouquet",
-    "dried flower",
-    "Mushida",
+    "bouquet uang",
+    "Mushida Craft",
   ],
   authors: [{ name: "Mushida" }],
   openGraph: {

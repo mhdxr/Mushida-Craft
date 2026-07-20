@@ -30,9 +30,9 @@ export function Hero() {
             momen tak terlupakan.
           </h1>
           <p className="max-w-lg text-base text-muted-foreground md:text-lg">
-            Dari hand-bouquet klasik hingga rangkaian wedding mewah —
-            Mushida menghadirkan bunga premium dengan sentuhan personal
-            untuk setiap kisah Anda.
+            Spesialis bouquet wisuda dan money bouquet custom —
+            Mushida menghadirkan rangkaian premium dengan sentuhan personal
+            untuk momen spesial Anda.
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Button asChild size="lg">

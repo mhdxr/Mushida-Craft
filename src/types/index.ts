@@ -1,10 +1,4 @@
-export type ProductCategory =
-  | "hand-bouquet"
-  | "wedding"
-  | "graduation"
-  | "anniversary"
-  | "money-bouquet"
-  | "dried-flower";
+export type ProductCategory = "graduation" | "money-bouquet";
 
 export type ProductBadge = "best-seller" | "new" | "sold-out";
 
