@@ -2,12 +2,17 @@
   "name": "web-katalog-bouquet",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
+    "verify": "npm run type-check && npm run lint",
     "db:setup": "node scripts/setup-db.mjs"
   },
   "dependencies": {

@@ -141,8 +141,14 @@ function MarqueeRow({
   const offsetRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   // Stabilkan dependency: id list, bukan referensi array baru tiap poll.
+  // Key stabil: hindari remount loop saat parent kirim array baru isi sama.
   const itemsKey = items.map((t) => t.id).join("|");
-  const loop = useMemo(() => [...items, ...items], [items, itemsKey]);
+  const loop = useMemo(
+    () => [...items, ...items],
+    // itemsKey merepresentasikan identitas isi; items ikut agar isi loop akurat.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional stable key
+    [itemsKey],
+  );
 
   useEffect(() => {
     const track = trackRef.current;
@@ -190,7 +196,9 @@ function MarqueeRow({
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
       ro?.disconnect();
     };
-  }, [itemsKey, direction, speed, pausedRef, items.length]);
+    // itemsKey cukup: daftar id sama = konten track sama.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional stable key
+  }, [itemsKey, direction, speed, pausedRef]);
 
   if (items.length === 0) return null;
 
@@ -220,7 +228,8 @@ export function TestimonialMarquee({ items }: { items: Testimonial[] }) {
 
   const rows = useMemo(
     () => splitIntoRows(items, ROW_COUNT),
-    [items, itemsKey],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional stable key
+    [itemsKey],
   );
 
   // Desktop hover pause only — hindari mouseenter sticky di touch.

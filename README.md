@@ -4,71 +4,54 @@ Web katalog bouquet bunga premium dengan halaman publik (beranda, katalog, detai
 
 ## ✨ Fitur
 
-- **Beranda** — hero, section kategori, produk unggulan (best-seller dari Supabase), testimoni, alur pemesanan.
-- **Katalog** (`/katalog`) — filter berdasarkan kategori, rentang harga, dan pencarian teks. Data dibaca dari Supabase via API route.
-- **Detail produk** (`/produk/[slug]`) — galeri gambar, info produk, order via WhatsApp, produk terkait. Produk default di-prerender (SSG) untuk SEO; produk admin di-render on-demand dari Supabase.
-- **Custom order** (`/custom-order`) — form request bouquet custom, validation dengan Zod, pesan dibuat otomatis dan dikirim ke WhatsApp.
-- **Admin dashboard** (`/admin/dashboard`) — CRUD produk dan pengelolaan multi-gambar dari device/URL ke Supabase, autentikasi via env credentials + HTTP-only cookie session.
-- **SEO** — `robots.ts`, `sitemap.xml` dinamis (dari Supabase + fallback seed), JSON-LD (`Store` & `Product`), metadata + OpenGraph per halaman.
-- **Error tracking** — integrasi Sentry (server + client + upload source maps), no-op jika DSN kosong.
+- **Beranda** — hero, trust strip, produk unggulan, kategori, testimoni (live dari DB + marquee), cara order, FAQ.
+- **Katalog** (`/katalog`) — filter kategori, harga, pencarian; data dari Supabase (fallback seed).
+- **Detail produk** (`/produk/[slug]`) — galeri, info pengiriman, order WhatsApp (sticky di mobile), produk terkait.
+- **Custom order** (`/custom-order`) — form Zod (jenis, momen, budget, area, tanggal), pesan WA otomatis.
+- **Admin ops console** (`/admin`) — shell terpisah (tanpa nav toko): ringkasan, produk (CRUD + toggle stok), moderasi testimoni.
+- **Testimoni** — submit publik (pending) → approve admin → tampil homepage (poll client + revalidate).
+- **SEO** — canonical per route, `robots.ts`, sitemap dinamis, JSON-LD LocalBusiness/Florist + Product + FAQPage.
+- **Observability** — Sentry + PostHog (no-op jika env kosong); funnel events (view_item, click_wa_*, submit_*).
 
 ## 🛠️ Tech Stack
 
 | Layer | Teknologi |
 |------|----------|
-| Framework | Next.js 16.2 (App Router) + React 19.2 |
+| Framework | Next.js 16 (App Router) + React 19 |
 | Bahasa | TypeScript 5.9 |
-| Styling | Tailwind CSS 4.3 + CSS variables |
-| UI components | shadcn/ui, Radix UI, lucide-react |
-| Form & validation | react-hook-form + Zod |
-| Database | Supabase (PostgreSQL + RLS) |
-| Animasi | framer-motion |
+| Runtime | Node.js ≥ 20.9 (lihat `engines` + `.nvmrc`) |
+| Styling | Tailwind CSS 4 + CSS variables |
+| UI | shadcn/ui, Radix UI, lucide-react |
+| Form | react-hook-form + Zod |
+| Database | Supabase (PostgreSQL + RLS + Storage) |
 | Error tracking | @sentry/nextjs |
 | Analytics | posthog-js |
-| Font | Inter (sans) + Playfair Display (serif) via `next/font` |
+| Font | Inter (sans / UI) + Cormorant Garamond (serif / heading) via `next/font` |
 
-## 📁 Struktur Project
+## 📁 Struktur Project (ringkas)
 
 ```
 src/
 ├── app/
-│   ├── (publik)
-│   │   ├── page.tsx                  # Beranda
-│   │   ├── katalog/page.tsx          # Katalog produk
-│   │   ├── produk/[slug]/page.tsx    # Detail produk (SSG + client)
-│   │   └── custom-order/page.tsx     # Form custom order
+│   ├── page.tsx, katalog/, produk/[slug]/, custom-order/
 │   ├── admin/
-│   │   ├── login/page.tsx
-│   │   ├── dashboard/page.tsx
-│   │   └── page.tsx                  # Redirect ke login/dashboard
-│   ├── api/admin/
-│   │   ├── login/route.ts            # API login (set HTTP-only cookie)
-│   │   ├── logout/route.ts           # API logout (hapus cookie)
-│   │   ├── session/route.ts          # Cek status sesi admin
-│   │   └── products/
-│   │       ├── route.ts              # GET list / POST create / POST reset
-│   │       └── [id]/route.ts         # PATCH update / DELETE remove
-│   ├── layout.tsx                   # Root layout (navbar, footer, FAB, toaster)
-│   ├── error.tsx                    # Error boundary (route)
-│   ├── global-error.tsx             # Error boundary (root layout) → Sentry
-│   ├── not-found.tsx                # 404
-│   ├── loading.tsx                  # Loading fallback
-│   ├── robots.ts                    # robots.txt
-│   └── sitemap.ts                   # sitemap.xml dinamis
+│   │   ├── layout.tsx              # Admin shell
+│   │   ├── login/, page.tsx        # Login + ringkasan
+│   │   ├── produk/, testimoni/     # CRUD + moderasi
+│   │   └── dashboard/              # Redirect → /admin
+│   ├── api/
+│   │   ├── testimonials/           # GET approved, POST submit
+│   │   └── admin/                  # auth, products, upload, testimonials
+│   ├── layout.tsx                  # Root + StoreChrome
+│   ├── robots.ts, sitemap.ts
+│   └── error.tsx, global-error.tsx, not-found.tsx
 ├── components/
-│   ├── analytics/                   # posthog provider
-│   ├── ui/                          # shadcn/ui primitives
-│   ├── layout/                      # navbar, footer
-│   ├── home/                        # hero, kategori, featured, testimoni
-│   ├── product/                     # card, grid, gallery, order button, detail
-│   ├── catalog/                     # filters, view, empty state
-│   ├── custom-order/                # custom order form
-│   ├── admin/                       # dashboard, login form, product form/table
-│   └── common/                      # section heading, toaster, whatsapp FAB
-├── data/                            # Seed data statis (products, categories, testimonials)
-├── lib/                             # utils, auth, supabase, product-store, product-api, validations, whatsapp
-├── hooks/                           # use-products, use-toast
-└── types/                           # Type definitions
+│   ├── admin/                      # shell, overview, products, testimonials
+│   ├── home/, product/, catalog/, layout/, common/, analytics/, ui/
+├── data/                           # seed products, categories, testimonials, faq
+├── lib/                            # supabase, product/testimonial api, auth, whatsapp, delivery, analytics
+└── hooks/                          # use-products, use-testimonials, use-toast
+supabase/migrations/                # 0001 products … 0004 testimonial avatars
 ```
 
 ## 🚀 Quick Start
@@ -134,11 +117,10 @@ npm run dev          # http://localhost:3000
 npm run build
 npm run start
 
-# Cek tipe
-npm run type-check
-
-# Lint
+# Verifikasi fondasi (wajib sebelum commit berarti)
+npm run type-check   # tsc --noEmit
 npm run lint
+npm run verify       # type-check + lint
 ```
 
 ## 🗄️ Supabase Setup (Backend Database)
@@ -165,13 +147,21 @@ Cara paling cepat — pakai script built-in:
    npm run db:setup
    ```
 
-Script ini membaca seluruh file `.sql` di `supabase/migrations/` sesuai urutan nama dan menjalankannya ke database Supabase. Pada database existing, bootstrap `0001_products.sql` dilewati jika tabel produk sudah ada agar data admin tidak di-reset. Migration membuat tabel `products`, RLS produk, serta bucket publik `product-images` dengan batas file dan policy Storage.
+Script ini membaca seluruh file `.sql` di `supabase/migrations/` sesuai urutan nama. Pada database existing, bootstrap `0001_products.sql` dilewati jika tabel `products` sudah ada. Migrasi lain tetap dijalankan:
+
+| File | Isi |
+|------|-----|
+| `0001_products.sql` | Tabel produk + RLS (skip jika sudah ada) |
+| `0002_product_images_storage.sql` | Bucket `product-images` + policy |
+| `0002_prune_unused_categories.sql` | Prune kategori lama |
+| `0003_testimonials.sql` | Tabel testimoni + RLS |
+| `0004_testimonial_avatars.sql` | Kolom `avatar` |
 
 <details>
 <summary>Alternatif: jalankan SQL manual</summary>
 
 1. Buka **Supabase Dashboard > SQL Editor**
-2. Untuk database baru, jalankan sesuai urutan nama: [`0001_products.sql`](supabase/migrations/0001_products.sql), lalu [`0002_product_images_storage.sql`](supabase/migrations/0002_product_images_storage.sql). Untuk database existing yang sudah memiliki produk, jalankan hanya `0002_product_images_storage.sql`.
+2. Jalankan file di `supabase/migrations/` sesuai urutan nama (skip `0001` jika tabel produk sudah ada di DB existing)
 3. Klik **Run** untuk setiap file
 </details>
 
@@ -208,15 +198,29 @@ Migration `0002_product_images_storage.sql` membuat bucket publik `product-image
 
 | Endpoint | Method | Akses | Deskripsi |
 |----------|--------|-------|-----------|
+| `/api/testimonials` | GET | Public | List testimoni **approved** |
+| `/api/testimonials` | POST | Public | Submit testimoni (pending, rate limit) |
 | `/api/admin/products` | GET | Public | List semua produk |
 | `/api/admin/products?slug=xxx` | GET | Public | Ambil produk by slug |
-| `/api/admin/products` | POST | Admin | Buat produk baru / reset seed |
-| `/api/admin/products/[id]` | PATCH | Admin | Update produk |
-| `/api/admin/products/[id]` | DELETE | Admin | Hapus produk |
-| `/api/admin/upload` | POST | Admin | Upload multi-gambar ke Supabase Storage |
-| `/api/admin/login` | POST | Public | Login admin (set cookie) |
-| `/api/admin/logout` | POST | Admin | Logout (hapus cookie) |
-| `/api/admin/session` | GET | Public | Cek status sesi admin |
+| `/api/admin/products` | POST | Admin | Buat produk / reset seed (**reset diblokir di production**) |
+| `/api/admin/products/[id]` | PATCH | Admin | Update produk (+ revalidate storefront) |
+| `/api/admin/products/[id]` | DELETE | Admin | Hapus produk + cleanup Storage |
+| `/api/admin/upload` | POST | Admin | Upload multi-gambar ke Storage |
+| `/api/admin/testimonials` | GET | Admin | List semua testimoni |
+| `/api/admin/testimonials/[id]` | PATCH/DELETE | Admin | Setujui / hapus testimoni |
+| `/api/admin/login` | POST | Public | Login (set cookie) |
+| `/api/admin/logout` | POST | Admin | Logout |
+| `/api/admin/session` | GET | Public | Cek sesi admin |
+
+### Admin routes (UI)
+
+| Path | Fungsi |
+|------|--------|
+| `/admin/login` | Login |
+| `/admin` | Ringkasan (stat produk & testimoni pending) |
+| `/admin/produk` | CRUD produk, search, filter, toggle stok |
+| `/admin/testimoni` | Moderasi (default: menunggu) |
+| `/admin/dashboard` | Redirect → `/admin` |
 
 > **Catatan:** Tanpa env Supabase, aplikasi masih bisa build (server components & sitemap fallback ke seed statis). Runtime reads/writes akan error jika tabel belum dibuat.
 
