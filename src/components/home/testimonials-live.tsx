@@ -1,24 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TestimonialMarquee } from "@/components/home/testimonial-marquee";
 import { testimonials as seedTestimonials } from "@/data/testimonials";
 import type { Testimonial } from "@/types";
 
 /**
  * Ambil testimoni approved dari API (DB) di client.
- * - Tidak tergantung ISR homepage 5 menit
- * - Poll ringan agar setelah admin setujui, homepage ikut update
- * - Seed hanya dipakai bila API gagal (bukan bila DB kosong)
+ * - Poll ringan setelah admin setujui
+ * - Seed hanya bila API gagal (bukan bila DB kosong)
+ * - Hindari setState berulang dengan data sama (bikin marquee “macet”/reset)
  */
 export function TestimonialsLive({
   initialItems,
 }: {
-  /** SSR snapshot (approved / seed) untuk first paint. */
   initialItems: Testimonial[];
 }) {
   const [items, setItems] = useState<Testimonial[]>(initialItems);
   const [source, setSource] = useState<"ssr" | "db" | "seed" | "empty">("ssr");
+  const lastKeyRef = useRef(initialItems.map((t) => t.id).join("|"));
 
   const refresh = useCallback(async () => {
     try {
@@ -31,7 +31,6 @@ export function TestimonialsLive({
       } | null;
 
       if (!res.ok || !json?.ok || !Array.isArray(json.testimonials)) {
-        // API gagal — fallback seed hanya jika belum ada apa-apa.
         setItems((prev) => {
           if (prev.length > 0) return prev;
           setSource("seed");
@@ -41,10 +40,14 @@ export function TestimonialsLive({
       }
 
       if (json.testimonials.length > 0) {
-        setItems(json.testimonials);
+        const key = json.testimonials.map((t) => t.id).join("|");
+        if (key !== lastKeyRef.current) {
+          lastKeyRef.current = key;
+          setItems(json.testimonials);
+        }
         setSource("db");
       } else {
-        // DB hidup tapi belum ada approved — jangan pakai seed palsu.
+        lastKeyRef.current = "";
         setItems([]);
         setSource("empty");
       }
@@ -59,11 +62,9 @@ export function TestimonialsLive({
 
   useEffect(() => {
     void refresh();
-    // Poll 45s — cukup "realtime" untuk moderasi tanpa websocket.
     const id = window.setInterval(() => {
       void refresh();
     }, 45_000);
-    // Refresh saat tab fokus kembali (admin approve di tab lain).
     const onFocus = () => {
       void refresh();
     };
@@ -74,7 +75,7 @@ export function TestimonialsLive({
     };
   }, [refresh]);
 
-  if (source === "empty" || items.length === 0) {
+  if (source === "empty") {
     return (
       <div className="container mt-12">
         <div className="rounded-2xl border border-dashed border-border/70 bg-white/70 px-6 py-12 text-center">
@@ -89,6 +90,11 @@ export function TestimonialsLive({
         </div>
       </div>
     );
+  }
+
+  if (items.length === 0) {
+    // Masih SSR/loading — jangan flash empty.
+    return null;
   }
 
   return <TestimonialMarquee items={items} />;

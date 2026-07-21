@@ -47,8 +47,8 @@ export function Navbar() {
     (href !== "/" && !href.startsWith("/#") && pathname.startsWith(href));
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-white/75 backdrop-blur-xl">
-      <div className="container flex h-[4.25rem] items-center justify-between gap-6">
+    <header className="sticky top-0 z-50 isolate w-full border-b border-border/30 bg-white/75 backdrop-blur-xl">
+      <div className="container relative z-[60] flex h-[4.25rem] items-center justify-between gap-6">
         <BrandLogo size="sm" priority />
 
         <nav className="hidden items-center gap-1 md:flex">
@@ -85,12 +85,13 @@ export function Navbar() {
           </Button>
         </div>
 
+        {/* z tinggi + di atas overlay — pastikan selalu bisa diklik di mobile */}
         <button
           type="button"
           aria-label={open ? "Tutup menu" : "Buka menu"}
           aria-expanded={open}
           aria-controls={menuId}
-          className="relative z-50 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border/50 bg-white/90 text-foreground shadow-sm transition-transform active:scale-95 md:hidden"
+          className="relative z-[70] inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border/50 bg-white text-foreground shadow-sm transition-transform active:scale-95 md:hidden"
           onClick={() => setOpen((v) => !v)}
         >
           <Menu
@@ -114,68 +115,47 @@ export function Navbar() {
         </button>
       </div>
 
-      <div
-        aria-hidden
-        onClick={() => setOpen(false)}
-        className={cn(
-          "fixed inset-0 top-[4.25rem] z-40 bg-foreground/15 backdrop-blur-sm transition-opacity duration-300 ease-out md:hidden motion-reduce:transition-none",
-          open ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-      />
-
-      <div
-        id={menuId}
-        className={cn(
-          "absolute inset-x-0 top-[4.25rem] z-40 origin-top border-b border-border/40 bg-white/95 shadow-xl shadow-primary/5 backdrop-blur-xl transition-all duration-300 ease-out md:hidden motion-reduce:transition-none motion-reduce:duration-0",
-          open
-            ? "translate-y-0 scale-100 opacity-100"
-            : "pointer-events-none -translate-y-3 scale-[0.98] opacity-0",
-        )}
-      >
-        <div className="container flex flex-col gap-1 py-5">
-          {navLinks.map((link, i) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              style={{
-                transitionDelay: open ? `${80 + i * 45}ms` : "0ms",
-              }}
-              className={cn(
-                "rounded-xl px-4 py-3.5 text-sm tracking-wide transition-all duration-300 ease-out motion-reduce:transition-none motion-reduce:delay-0",
-                open
-                  ? "translate-y-0 opacity-100"
-                  : "translate-y-1 opacity-0",
-                isActive(link.href)
-                  ? "bg-blush-50 font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-secondary hover:text-foreground",
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
+      {/* Overlay hanya di-mount saat open — hindari layer tak terlihat menahan klik */}
+      {open ? (
+        <>
+          <div
+            aria-hidden
+            onClick={() => setOpen(false)}
+            className="fixed inset-0 top-[4.25rem] z-[55] bg-foreground/15 backdrop-blur-sm md:hidden"
+          />
 
           <div
-            style={{
-              transitionDelay: open
-                ? `${80 + navLinks.length * 45}ms`
-                : "0ms",
-            }}
-            className={cn(
-              "mt-3 transition-all duration-300 ease-out motion-reduce:transition-none motion-reduce:delay-0",
-              open
-                ? "translate-y-0 opacity-100"
-                : "translate-y-1 opacity-0",
-            )}
+            id={menuId}
+            className="absolute inset-x-0 top-full z-[56] origin-top border-b border-border/40 bg-white/95 shadow-xl shadow-primary/5 backdrop-blur-xl md:hidden"
           >
-            <Button asChild className="w-full tracking-wide">
-              <Link href="/katalog" onClick={() => setOpen(false)}>
-                Lihat Katalog
-              </Link>
-            </Button>
+            <div className="container flex flex-col gap-1 py-5">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "rounded-xl px-4 py-3.5 text-sm tracking-wide transition-colors",
+                    isActive(link.href)
+                      ? "bg-blush-50 font-medium text-foreground"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+
+              <div className="mt-3">
+                <Button asChild className="w-full tracking-wide">
+                  <Link href="/katalog" onClick={() => setOpen(false)}>
+                    Lihat Katalog
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      ) : null}
 
       <noscript>
         <nav className="border-t border-border/60 bg-white md:hidden">

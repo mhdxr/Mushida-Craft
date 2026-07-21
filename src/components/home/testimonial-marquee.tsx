@@ -102,19 +102,16 @@ function splitIntoRows(items: Testimonial[], rows: number): Testimonial[][] {
     result[i % rows].push(item);
   });
 
-  // Isi baris kosong / tipis dari pool agar 3 baris tetap terisi.
   const pool = items.length > 0 ? items : [];
   for (let r = 0; r < rows; r++) {
     if (result[r].length === 0 && pool.length > 0) {
       result[r].push(pool[r % pool.length]);
     }
-    // Pad sampai MIN_PER_ROW dengan siklus item baris itu sendiri.
     if (result[r].length > 0) {
       let i = 0;
       while (result[r].length < MIN_PER_ROW) {
         result[r].push(result[r][i % result[r].length]);
         i++;
-        // Safety: jangan infinite loop jika sesuatu aneh.
         if (i > MIN_PER_ROW * 4) break;
       }
     }
@@ -124,8 +121,8 @@ function splitIntoRows(items: Testimonial[], rows: number): Testimonial[][] {
 }
 
 /**
- * Satu baris marquee — arah kiri/kanan, pause via shared pausedRef.
- * Loop seamless: 2 salinan track, reset offset di setengah lebar.
+ * Satu baris marquee — arah kiri/kanan.
+ * Pause hanya saat hover pointer fine (bukan touch sticky).
  */
 function MarqueeRow({
   items,
@@ -143,9 +140,9 @@ function MarqueeRow({
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const rafRef = useRef<number | null>(null);
-
-  // Duplikasi 2× untuk loop seamless (translate -50% setara half scrollWidth).
-  const loop = useMemo(() => [...items, ...items], [items]);
+  // Stabilkan dependency: id list, bukan referensi array baru tiap poll.
+  const itemsKey = items.map((t) => t.id).join("|");
+  const loop = useMemo(() => [...items, ...items], [items, itemsKey]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -153,18 +150,20 @@ function MarqueeRow({
 
     const dir = direction === "left" ? 1 : -1;
     let last = performance.now();
+    let running = true;
 
     const tick = (now: number) => {
+      if (!running) return;
       const dt = Math.min(64, now - last) / 1000;
       last = now;
 
       if (!pausedRef.current) {
         const half = track.scrollWidth / 2;
-        if (half > 0) {
+        if (half > 1) {
           offsetRef.current += speed * dt * dir;
           // Normalisasi ke [0, half)
-          if (offsetRef.current >= half) offsetRef.current -= half;
-          if (offsetRef.current < 0) offsetRef.current += half;
+          while (offsetRef.current >= half) offsetRef.current -= half;
+          while (offsetRef.current < 0) offsetRef.current += half;
           track.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`;
         }
       }
@@ -173,10 +172,25 @@ function MarqueeRow({
     };
 
     rafRef.current = requestAnimationFrame(tick);
+
+    // Recalc saat layout/gambar berubah
+    const ro =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => {
+            const half = track.scrollWidth / 2;
+            if (half > 1 && offsetRef.current >= half) {
+              offsetRef.current %= half;
+            }
+          })
+        : null;
+    ro?.observe(track);
+
     return () => {
+      running = false;
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+      ro?.disconnect();
     };
-  }, [items, direction, speed, pausedRef]);
+  }, [itemsKey, direction, speed, pausedRef, items.length]);
 
   if (items.length === 0) return null;
 
@@ -196,34 +210,34 @@ function MarqueeRow({
 }
 
 /**
- * 2 baris marquee bergiliran (boutique, tidak ramai).
- * - Semua item di-sebar round-robin ke baris (tidak ada yang "hilang").
- * - Arah selang-seling (kiri / kanan) biar dinamis.
- * - Hover di area mana pun = pause semua baris.
- * - JS rAF: tetap jalan di Windows Server (CSS animation sering dimatikan).
+ * 2 baris marquee bergiliran.
+ * Pause: hanya hover desktop (pointer fine) — touch tidak membuat pause macet.
  */
 export function TestimonialMarquee({ items }: { items: Testimonial[] }) {
   const pausedRef = useRef(false);
+  // Key stabil agar poll API tidak mereset baris tanpa perlu.
+  const itemsKey = items.map((t) => t.id).join("|");
 
   const rows = useMemo(
     () => splitIntoRows(items, ROW_COUNT),
-    [items],
+    [items, itemsKey],
   );
+
+  // Desktop hover pause only — hindari mouseenter sticky di touch.
+  const isFinePointer = () =>
+    typeof window !== "undefined" &&
+    Boolean(
+      window.matchMedia?.("(hover: hover) and (pointer: fine)").matches,
+    );
 
   return (
     <div
       className="testimonial-marquee relative mt-12 space-y-4"
       aria-label="Testimoni pelanggan"
       onMouseEnter={() => {
-        pausedRef.current = true;
+        if (isFinePointer()) pausedRef.current = true;
       }}
       onMouseLeave={() => {
-        pausedRef.current = false;
-      }}
-      onFocusCapture={() => {
-        pausedRef.current = true;
-      }}
-      onBlurCapture={() => {
         pausedRef.current = false;
       }}
     >
@@ -232,7 +246,6 @@ export function TestimonialMarquee({ items }: { items: Testimonial[] }) {
           key={`row-${idx}`}
           rowKey={`row-${idx}`}
           items={rowItems}
-          // Baris tengah ke arah berlawanan — terasa lebih hidup.
           direction={idx % 2 === 0 ? "left" : "right"}
           speed={ROW_SPEEDS[idx] ?? 36}
           pausedRef={pausedRef}
