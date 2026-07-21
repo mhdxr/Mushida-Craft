@@ -47,6 +47,10 @@ export interface CustomOrderForm {
   bouquetType: string;
   budget: string;
   neededDate: string;
+  /** Momen / occasion, mis. Ulang tahun, Wisuda. */
+  occasion: string;
+  /** Area tujuan pengiriman. */
+  deliveryArea: string;
   notes?: string;
 }
 

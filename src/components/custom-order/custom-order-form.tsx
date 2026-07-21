@@ -40,6 +40,26 @@ const budgets = [
   "Di atas Rp2.000.000",
 ];
 
+const occasions = [
+  "Ulang tahun",
+  "Anniversary",
+  "Wisuda",
+  "Wedding / Lamaran",
+  "Thank you / Apresiasi",
+  "Custom / Lainnya",
+];
+
+/** Area same-day ditandai di label — luar area tetap boleh, estimasi via WA. */
+const deliveryAreas = [
+  "Jakarta Barat (same-day)",
+  "Jakarta Pusat (same-day)",
+  "Jakarta Selatan",
+  "Jakarta Timur",
+  "Jakarta Utara",
+  "Tangerang / sekitarnya",
+  "Bekasi / Depok / lainnya",
+];
+
 export function CustomOrderForm() {
   const [submitted, setSubmitted] = useState(false);
 
@@ -57,12 +77,16 @@ export function CustomOrderForm() {
       bouquetType: "",
       budget: "",
       neededDate: "",
+      occasion: "",
+      deliveryArea: "",
       notes: "",
     },
   });
 
   const bouquetType = watch("bouquetType");
   const budget = watch("budget");
+  const occasion = watch("occasion");
+  const deliveryArea = watch("deliveryArea");
 
   const onSubmit = (data: CustomOrderSchema) => {
     const url = buildWhatsAppUrl(buildCustomOrderMessage(data));
@@ -70,6 +94,8 @@ export function CustomOrderForm() {
       bouquet_type: data.bouquetType,
       budget: data.budget,
       needed_date: data.neededDate,
+      occasion: data.occasion,
+      delivery_area: data.deliveryArea,
       source: "custom_order_form",
     });
     setSubmitted(true);
@@ -102,6 +128,8 @@ export function CustomOrderForm() {
           <Input
             id="whatsapp"
             placeholder="cth. 081234567890"
+            inputMode="tel"
+            autoComplete="tel"
             {...register("whatsapp")}
           />
           {errors.whatsapp && (
@@ -138,6 +166,30 @@ export function CustomOrderForm() {
         </div>
 
         <div className="space-y-2">
+          <Label>Momen</Label>
+          <Select
+            value={occasion}
+            onValueChange={(v) =>
+              setValue("occasion", v, { shouldValidate: true })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih momen" />
+            </SelectTrigger>
+            <SelectContent>
+              {occasions.map((o) => (
+                <SelectItem key={o} value={o}>
+                  {o}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.occasion && (
+            <p className="text-xs text-destructive">{errors.occasion.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
           <Label>Budget</Label>
           <Select
             value={budget}
@@ -161,6 +213,36 @@ export function CustomOrderForm() {
           )}
         </div>
 
+        <div className="space-y-2">
+          <Label>Area pengiriman</Label>
+          <Select
+            value={deliveryArea}
+            onValueChange={(v) =>
+              setValue("deliveryArea", v, { shouldValidate: true })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih area tujuan" />
+            </SelectTrigger>
+            <SelectContent>
+              {deliveryAreas.map((a) => (
+                <SelectItem key={a} value={a}>
+                  {a}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.deliveryArea && (
+            <p className="text-xs text-destructive">
+              {errors.deliveryArea.message}
+            </p>
+          )}
+          <p className="text-[11px] text-muted-foreground">
+            Same-day: Jakarta Barat & Pusat (order sebelum 15.00). Area lain
+            tetap bisa — estimasi via WhatsApp.
+          </p>
+        </div>
+
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="neededDate">Tanggal dibutuhkan</Label>
           <Input
@@ -179,7 +261,7 @@ export function CustomOrderForm() {
           <Label htmlFor="notes">Catatan tambahan (opsional)</Label>
           <Textarea
             id="notes"
-            placeholder="Misal: warna favorit, tema, jenis bunga, dll"
+            placeholder="Misal: warna favorit, tema, alamat lengkap, dll"
             {...register("notes")}
           />
           {errors.notes && (

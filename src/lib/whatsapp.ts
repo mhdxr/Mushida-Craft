@@ -122,11 +122,13 @@ export function buildCustomOrderMessage(form: CustomOrderForm): string {
     `• Nama: ${form.name}`,
     `• WhatsApp: ${form.whatsapp}`,
     `• Jenis bouquet: ${form.bouquetType}`,
+    `• Momen: ${form.occasion}`,
     `• Budget: ${form.budget}`,
     `• Tanggal dibutuhkan: ${form.neededDate}`,
+    `• Area pengiriman: ${form.deliveryArea}`,
     form.notes ? `• Catatan: ${form.notes}` : "",
     "",
-    "Mohon bantu cek ketersediaan & estimasi ya. Terima kasih banyak!",
+    "Mohon bantu cek ketersediaan, ongkir, & estimasi ya. Terima kasih banyak!",
   ]
     .filter(Boolean)
     .join("\n");

@@ -17,6 +17,8 @@ export const customOrderSchema = z.object({
   bouquetType: z.string().min(2, "Pilih jenis bouquet").max(80),
   budget: z.string().min(2, "Masukkan kisaran budget").max(60),
   neededDate: z.string().min(1, "Tanggal wajib diisi"),
+  occasion: z.string().min(2, "Pilih momen / occasion").max(80),
+  deliveryArea: z.string().min(2, "Pilih area pengiriman").max(80),
   notes: z.string().max(500, "Catatan maksimal 500 karakter").optional(),
 });
 
