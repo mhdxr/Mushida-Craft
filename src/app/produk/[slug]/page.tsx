@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { ProductDetailContent } from "@/components/product/product-detail-content";
-import { fetchProductBySlug } from "@/lib/product-api";
+import { fetchAllSlugs, fetchProductBySlug } from "@/lib/product-api";
 import { getProductBySlug, products as seedProducts } from "@/data/products";
 import { categoryMap } from "@/data/categories";
+import { toAbsoluteImageUrls } from "@/lib/image-url";
 import { absoluteUrl, canonicalAlternates, getSiteUrl } from "@/lib/site";
 import type { Product } from "@/types";
 
@@ -10,8 +11,13 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+/** Izinkan slug admin baru di luar generateStaticParams. */
+export const dynamicParams = true;
+
 function productMetadata(product: Product): Metadata {
   const path = `/produk/${product.slug}`;
+  const images = toAbsoluteImageUrls(product.images, 3);
+
   return {
     title: product.name,
     description: product.description,
@@ -20,21 +26,37 @@ function productMetadata(product: Product): Metadata {
       title: product.name,
       description: product.description,
       url: absoluteUrl(path),
-      images: product.images.slice(0, 1),
+      type: "website",
+      images: images.map((url) => ({
+        url,
+        alt: product.name,
+      })),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: product.description,
+      images: images.slice(0, 1),
     },
   };
 }
 
 /**
- * generateStaticParams tetap memakai seed statis agar 12 produk default
- * di-prerender (SSG) untuk SEO. Produk yang dibuat via admin di-render
- * on-demand oleh ProductDetailContent (client component).
- *
- * Catatan: kita tidak query Supabase di sini karena generateStaticParams
- * berjalan saat build — tabel mungkin belum ada. Seed statis cukup.
+ * SSG params: seed (selalu) ∪ slug Supabase (jika DB tersedia saat build).
+ * Gagal query → tetap build dari seed saja.
  */
 export async function generateStaticParams() {
-  return seedProducts.map((p) => ({ slug: p.slug }));
+  const fromSeed = seedProducts.map((p) => p.slug);
+  let fromDb: string[] = [];
+
+  try {
+    fromDb = await fetchAllSlugs();
+  } catch {
+    // Build tanpa Supabase / tabel belum ada.
+  }
+
+  const slugs = Array.from(new Set([...fromSeed, ...fromDb]));
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -42,36 +64,28 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  // Coba seed statis dulu (sync, cepat).
   const seedProduct = getProductBySlug(slug);
+  if (seedProduct) return productMetadata(seedProduct);
 
-  // Jika tidak ada di seed, coba Supabase (produk admin).
-  if (!seedProduct) {
-    try {
-      const supaProduct = await fetchProductBySlug(slug);
-      if (supaProduct) return productMetadata(supaProduct);
-    } catch {
-      // Supabase belum dikonfigurasi atau tabel belum ada — abaikan.
-    }
-    return { title: "Produk tidak ditemukan" };
+  try {
+    const supaProduct = await fetchProductBySlug(slug);
+    if (supaProduct) return productMetadata(supaProduct);
+  } catch {
+    // ignore
   }
 
-  return productMetadata(seedProduct);
+  return { title: "Produk tidak ditemukan" };
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
-  // Coba seed statis dulu (untuk SSG & metadata build-time).
-  const seedProduct = getProductBySlug(slug);
-
-  // Resolve produk (seed SSG atau admin Supabase) untuk JSON-LD + detail.
-  let product = seedProduct ?? null;
+  let product: Product | null = getProductBySlug(slug) ?? null;
   if (!product) {
     try {
       product = await fetchProductBySlug(slug);
     } catch {
-      // Supabase belum dikonfigurasi — serahkan ke client component.
+      // serahkan ke client
     }
   }
 
@@ -82,12 +96,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const cat = categoryMap[product.category];
   const isAvailable = product.isAvailable && product.badge !== "sold-out";
   const productUrl = absoluteUrl(`/produk/${product.slug}`);
+  const images = toAbsoluteImageUrls(product.images, 8);
+
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.description,
-    image: product.images,
+    image: images.length > 0 ? images : undefined,
     sku: product.id,
     category: cat?.name,
     brand: { "@type": "Brand", name: "Mushida Craft" },
@@ -96,9 +112,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
       url: productUrl,
       priceCurrency: "IDR",
       price: product.price,
+      // Fixed horizon (bukan Date.now di render — lolos purity lint).
+      priceValidUntil: "2027-12-31",
       availability: isAvailable
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
       seller: {
         "@type": "Organization",
         name: "Mushida Craft",
