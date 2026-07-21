@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { Check, Loader2, Star, Trash2, UserRound } from "lucide-react";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTestimonials } from "@/hooks/use-testimonials";
@@ -141,6 +142,8 @@ export function TestimonialModeration() {
   const [busyId, setBusyId] = useState<string | null>(null);
   // Default: antrean menunggu — job harian admin.
   const [filter, setFilter] = useState<Filter>("pending");
+  const [deleteTarget, setDeleteTarget] = useState<Testimonial | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleApprove = async (t: Testimonial) => {
     setBusyId(t.id);
@@ -156,17 +159,24 @@ export function TestimonialModeration() {
     }
   };
 
-  const handleDelete = async (t: Testimonial) => {
-    if (!window.confirm(`Hapus testimoni dari "${t.name}"?`)) return;
-    setBusyId(t.id);
+  const handleDeleteRequest = (t: Testimonial) => {
+    setDeleteTarget(t);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setBusyId(deleteTarget.id);
     try {
-      await remove(t.id);
+      await remove(deleteTarget.id);
       toast.success("Testimoni dihapus.");
+      setDeleteTarget(null);
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Gagal menghapus testimoni.",
       );
     } finally {
+      setDeleting(false);
       setBusyId(null);
     }
   };
@@ -261,11 +271,28 @@ export function TestimonialModeration() {
               t={t}
               busy={busyId === t.id}
               onApprove={handleApprove}
-              onDelete={handleDelete}
+              onDelete={handleDeleteRequest}
             />
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setDeleteTarget(null);
+        }}
+        title="Hapus testimoni?"
+        description={
+          deleteTarget
+            ? `Testimoni dari “${deleteTarget.name}” akan dihapus permanen.`
+            : ""
+        }
+        confirmLabel="Hapus"
+        destructive
+        loading={deleting}
+        onConfirm={handleDeleteConfirm}
+      />
     </section>
   );
 }

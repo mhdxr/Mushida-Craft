@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Plus, RotateCcw, Search } from "lucide-react";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { ProductForm } from "@/components/admin/product-form";
 import { ProductTable } from "@/components/admin/product-table";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,8 @@ export function AdminProducts() {
   const [resetting, setResetting] = useState(false);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<ProductCategory | "all">("all");
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -97,15 +100,23 @@ export function AdminProducts() {
     }
   };
 
-  const handleDelete = async (p: Product) => {
-    if (!window.confirm(`Hapus produk "${p.name}"?`)) return;
+  const handleDeleteRequest = (p: Product) => {
+    setDeleteTarget(p);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      await remove(p.id);
-      toast.success(`"${p.name}" dihapus.`);
+      await remove(deleteTarget.id);
+      toast.success(`"${deleteTarget.name}" dihapus.`);
+      setDeleteTarget(null);
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Gagal menghapus produk.",
       );
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -255,11 +266,28 @@ export function AdminProducts() {
         <ProductTable
           products={filtered}
           onEdit={openEdit}
-          onDelete={handleDelete}
+          onDelete={handleDeleteRequest}
           onCreate={openCreate}
           onToggleAvailable={handleToggleAvailable}
         />
       )}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => {
+          if (!open && !deleting) setDeleteTarget(null);
+        }}
+        title="Hapus produk?"
+        description={
+          deleteTarget
+            ? `Produk “${deleteTarget.name}” akan dihapus permanen, termasuk gambar di storage bila ada.`
+            : ""
+        }
+        confirmLabel="Hapus"
+        destructive
+        loading={deleting}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

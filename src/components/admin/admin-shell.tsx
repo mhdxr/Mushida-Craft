@@ -50,6 +50,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [email, setEmail] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [pendingTestimonials, setPendingTestimonials] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -67,6 +68,33 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       }
     })();
   }, [router]);
+
+  // Badge pending testimoni di nav (ringan, refresh periodik).
+  useEffect(() => {
+    if (!authChecked) return;
+    let active = true;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/admin/testimonials", {
+          cache: "no-store",
+        });
+        const json = await res.json();
+        if (!active || !json.ok || !Array.isArray(json.testimonials)) return;
+        const n = json.testimonials.filter(
+          (t: { status?: string }) => t.status === "pending",
+        ).length;
+        setPendingTestimonials(n);
+      } catch {
+        // ignore
+      }
+    };
+    void load();
+    const id = window.setInterval(load, 60_000);
+    return () => {
+      active = false;
+      window.clearInterval(id);
+    };
+  }, [authChecked, pathname]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -119,6 +147,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           {navItems.map((item) => {
             const active = item.match(pathname);
             const Icon = item.icon;
+            const showBadge =
+              item.href === "/admin/testimoni" && pendingTestimonials > 0;
             return (
               <Link
                 key={item.href}
@@ -131,8 +161,24 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                 )}
               >
-                <Icon className="h-4 w-4 shrink-0" />
-                {sidebarOpen ? item.label : null}
+                <span className="relative shrink-0">
+                  <Icon className="h-4 w-4" />
+                  {showBadge && !sidebarOpen ? (
+                    <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-accent" />
+                  ) : null}
+                </span>
+                {sidebarOpen ? (
+                  <>
+                    <span className="flex-1">{item.label}</span>
+                    {showBadge ? (
+                      <span className="rounded-full bg-accent/20 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-accent-foreground">
+                        {pendingTestimonials > 99
+                          ? "99+"
+                          : pendingTestimonials}
+                      </span>
+                    ) : null}
+                  </>
+                ) : null}
               </Link>
             );
           })}
@@ -215,6 +261,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             {navItems.map((item) => {
               const active = item.match(pathname);
               const Icon = item.icon;
+              const showBadge =
+                item.href === "/admin/testimoni" && pendingTestimonials > 0;
               return (
                 <Link
                   key={item.href}
@@ -228,6 +276,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 >
                   <Icon className="h-3.5 w-3.5" />
                   {item.label}
+                  {showBadge ? (
+                    <span className="rounded-full bg-accent/25 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-accent-foreground">
+                      {pendingTestimonials > 99
+                        ? "99+"
+                        : pendingTestimonials}
+                    </span>
+                  ) : null}
                 </Link>
               );
             })}
