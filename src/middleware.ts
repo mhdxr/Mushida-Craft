@@ -6,29 +6,35 @@ import {
 } from "@/lib/session-token";
 
 /**
- * Middleware proteksi rute /admin/* (kecuali /admin/login).
+ * Middleware proteksi rute /admin/* .
  *
- * Verifikasi cookie sesi HMAC di Edge runtime SEBELUM halaman ter-render,
- * sehingga shell dashboard tidak bocor ke non-admin.
+ * - /admin/login: publik; jika sudah login → redirect ke dashboard
+ * - rute admin lain: wajib cookie sesi HMAC valid
  *
  * Operasi tulis tetap dilindungi lagi di API routes via isAdminAuthenticated().
  */
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-
-  // /admin/login selalu publik.
-  if (pathname === "/admin/login" || pathname.startsWith("/admin/login/")) {
-    return NextResponse.next();
-  }
+  const isLogin =
+    pathname === "/admin/login" || pathname.startsWith("/admin/login/");
 
   const raw = req.cookies.get(SESSION_COOKIE)?.value;
   const secret = process.env.SESSION_SECRET;
+  const session =
+    raw && secret
+      ? await verifySessionToken(raw, secret, SESSION_MAX_AGE)
+      : null;
 
-  if (!raw || !secret) {
-    return redirectToLogin(req);
+  if (isLogin) {
+    if (session) {
+      const dash = req.nextUrl.clone();
+      dash.pathname = "/admin/dashboard";
+      dash.search = "";
+      return NextResponse.redirect(dash);
+    }
+    return NextResponse.next();
   }
 
-  const session = await verifySessionToken(raw, secret, SESSION_MAX_AGE);
   if (!session) {
     return redirectToLogin(req);
   }
@@ -44,6 +50,5 @@ function redirectToLogin(req: NextRequest) {
 }
 
 export const config = {
-  // Lindungi semua path /admin/* kecuali login (dicek di handler di atas juga).
   matcher: ["/admin", "/admin/:path*"],
 };

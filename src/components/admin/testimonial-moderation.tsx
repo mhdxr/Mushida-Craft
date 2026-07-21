@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { Check, Star, Trash2, UserRound } from "lucide-react";
+import { Check, Loader2, Star, Trash2, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTestimonials } from "@/hooks/use-testimonials";
@@ -49,10 +50,12 @@ function StarRating({ rating }: { rating: number }) {
 
 function TestimonialRow({
   t,
+  busy,
   onApprove,
   onDelete,
 }: {
   t: Testimonial;
+  busy: boolean;
   onApprove: (t: Testimonial) => void;
   onDelete: (t: Testimonial) => void;
 }) {
@@ -60,7 +63,7 @@ function TestimonialRow({
 
   return (
     <div
-      className={`flex flex-col gap-4 border-b border-border/60 p-4 last:border-b-0 md:flex-row md:items-start md:justify-between md:p-5 ${
+      className={`flex flex-col gap-4 border-b border-border/50 p-4 last:border-b-0 md:flex-row md:items-start md:justify-between md:p-5 ${
         isPending ? "bg-accent/5" : "bg-white"
       }`}
     >
@@ -103,13 +106,26 @@ function TestimonialRow({
 
       <div className="flex shrink-0 gap-2 md:pt-0.5">
         {isPending && (
-          <Button size="sm" onClick={() => onApprove(t)}>
-            <Check className="h-4 w-4" />
+          <Button size="sm" onClick={() => onApprove(t)} disabled={busy}>
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Check className="h-4 w-4" />
+            )}
             Setujui
           </Button>
         )}
-        <Button size="sm" variant="outline" onClick={() => onDelete(t)}>
-          <Trash2 className="h-4 w-4" />
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => onDelete(t)}
+          disabled={busy}
+        >
+          {busy ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
           Hapus
         </Button>
       </div>
@@ -119,23 +135,34 @@ function TestimonialRow({
 
 export function TestimonialModeration() {
   const { testimonials, isLoading, approve, remove } = useTestimonials();
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const handleApprove = async (t: Testimonial) => {
+    setBusyId(t.id);
     try {
       await approve(t.id);
       toast.success(`Testimoni dari ${t.name} disetujui.`);
-    } catch {
-      toast.error("Gagal menyetujui testimoni.");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Gagal menyetujui testimoni.",
+      );
+    } finally {
+      setBusyId(null);
     }
   };
 
   const handleDelete = async (t: Testimonial) => {
     if (!window.confirm(`Hapus testimoni dari "${t.name}"?`)) return;
+    setBusyId(t.id);
     try {
       await remove(t.id);
       toast.success("Testimoni dihapus.");
-    } catch {
-      toast.error("Gagal menghapus testimoni.");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Gagal menghapus testimoni.",
+      );
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -147,7 +174,7 @@ export function TestimonialModeration() {
       <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h2 className="font-serif text-2xl font-semibold tracking-tight">
-            Moderasi Testimoni
+            Moderasi testimoni
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Setujui testimoni pelanggan sebelum ditampilkan di homepage.
@@ -156,11 +183,11 @@ export function TestimonialModeration() {
 
         {!isLoading && testimonials.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-white px-3 py-1 text-xs font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-white px-3 py-1 text-xs font-medium text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" />
               {pendingCount} menunggu
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-white px-3 py-1 text-xs font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-white px-3 py-1 text-xs font-medium text-muted-foreground">
               <span className="h-1.5 w-1.5 rounded-full bg-primary/70" />
               {approvedCount} disetujui
             </span>
@@ -169,12 +196,20 @@ export function TestimonialModeration() {
       </div>
 
       {isLoading ? (
-        <div className="rounded-2xl border border-border/60 bg-white p-10 text-center text-sm text-muted-foreground">
-          Memuat testimoni...
+        <div className="space-y-3 rounded-2xl border border-border/50 bg-white p-4 shadow-sm">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex gap-3 py-2">
+              <div className="h-10 w-10 animate-pulse rounded-full bg-secondary" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3.5 w-1/4 animate-pulse rounded bg-secondary" />
+                <div className="h-3 w-3/4 animate-pulse rounded bg-secondary" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : testimonials.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+        <div className="rounded-2xl border border-dashed border-border/70 bg-secondary/20 p-10 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white text-muted-foreground shadow-sm ring-1 ring-border/50">
             <UserRound className="h-5 w-5" />
           </div>
           <p className="text-sm font-medium">Belum ada testimoni</p>
@@ -183,11 +218,12 @@ export function TestimonialModeration() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border/60 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-border/50 bg-white shadow-sm">
           {testimonials.map((t) => (
             <TestimonialRow
               key={t.id}
               t={t}
+              busy={busyId === t.id}
               onApprove={handleApprove}
               onDelete={handleDelete}
             />
