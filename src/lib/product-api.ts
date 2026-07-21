@@ -1,10 +1,44 @@
 import { randomUUID } from "node:crypto";
+import { PRODUCT_IMAGES_BUCKET } from "@/lib/product-images";
 import { getBrowserSupabaseClient, getServerSupabaseClient } from "@/lib/supabase";
 import { rowToProduct } from "@/lib/product-store";
 import { slugify } from "@/lib/utils";
 import type { Product } from "@/types";
 
 const TABLE = "products";
+
+/** Ekstrak path Storage dari public URL product-images (abaikan URL eksternal). */
+function storagePathFromPublicUrl(url: string): string | null {
+  try {
+    const marker = `/object/public/${PRODUCT_IMAGES_BUCKET}/`;
+    const idx = url.indexOf(marker);
+    if (idx === -1) return null;
+    const path = url.slice(idx + marker.length).split("?")[0];
+    return path || null;
+  } catch {
+    return null;
+  }
+}
+
+/** Best-effort hapus file gambar produk di Storage. */
+export async function removeProductImagesFromStorage(
+  images: string[] | undefined | null,
+): Promise<void> {
+  if (!images?.length) return;
+  const paths = images
+    .map(storagePathFromPublicUrl)
+    .filter((p): p is string => Boolean(p));
+  if (paths.length === 0) return;
+
+  try {
+    const { error } = await getServerSupabaseClient()
+      .storage.from(PRODUCT_IMAGES_BUCKET)
+      .remove(paths);
+    if (error) console.error("Gagal menghapus gambar produk di Storage:", error);
+  } catch (err) {
+    console.error("Gagal menghapus gambar produk di Storage:", err);
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Public reads (anon key — RLS SELECT only)
@@ -145,8 +179,34 @@ export async function updateProduct(
 
 export async function deleteProduct(id: string): Promise<void> {
   const client = getServerSupabaseClient();
+
+  // Ambil images dulu untuk cleanup Storage.
+  const { data: existing } = await client
+    .from(TABLE)
+    .select("images")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await client.from(TABLE).delete().eq("id", id);
   if (error) throw error;
+
+  if (existing && typeof existing === "object" && "images" in existing) {
+    await removeProductImagesFromStorage(
+      (existing as { images: string[] | null }).images,
+    );
+  }
+}
+
+/** Ambil produk by id (server) — untuk revalidate path by slug. */
+export async function fetchProductById(id: string): Promise<Product | null> {
+  const client = getServerSupabaseClient();
+  const { data, error } = await client
+    .from(TABLE)
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? rowToProduct(data) : null;
 }
 
 /** Hapus semua produk & re-seed dari data statis (untuk tombol "Reset data"). */

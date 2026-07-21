@@ -7,6 +7,7 @@ import {
   resetProducts,
 } from "@/lib/product-api";
 import { products as seedProducts } from "@/data/products";
+import { revalidateStorefront } from "@/lib/revalidate-storefront";
 import { productSchema } from "@/lib/validations";
 import type { Product } from "@/types";
 
@@ -67,9 +68,7 @@ export async function GET(req: Request) {
 /**
  * POST /api/admin/products
  *   Buat produk baru (admin only).
- *   Body: Omit<Product, "id" | "createdAt">
- *
- * Special: body { action: "reset" } → reset ke seed (admin only).
+ *   Special: body { action: "reset" } → reset ke seed (hanya non-production).
  */
 export async function POST(req: Request) {
   try {
@@ -90,31 +89,64 @@ export async function POST(req: Request) {
       );
     }
 
-    // Reset ke seed
+    // Reset ke seed — diblokir di production agar tidak wipe katalog live.
     if (
       typeof body === "object" &&
       body !== null &&
       (body as { action?: unknown }).action === "reset"
     ) {
+      if (process.env.NODE_ENV === "production") {
+        return NextResponse.json(
+          {
+            ok: false,
+            message:
+              "Reset seed dinonaktifkan di production. Gunakan di development saja.",
+          },
+          { status: 403 },
+        );
+      }
       await resetProducts(seedProducts as Product[]);
+      revalidateStorefront();
       return NextResponse.json({ ok: true, message: "Data direset ke seed." });
     }
 
     // Create produk baru
     const result = productSchema.safeParse(body);
     if (!result.success) {
+      const first = result.error.issues[0]?.message;
       return NextResponse.json(
-        { ok: false, message: "Data produk tidak valid." },
+        { ok: false, message: first || "Data produk tidak valid." },
         { status: 400 },
       );
     }
 
-    const product = await createProduct(result.data);
-    return NextResponse.json({ ok: true, product }, { status: 201 });
+    try {
+      const product = await createProduct(result.data);
+      revalidateStorefront(product.slug);
+      return NextResponse.json({ ok: true, product }, { status: 201 });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      if (/duplicate|unique|slug/i.test(msg)) {
+        return NextResponse.json(
+          {
+            ok: false,
+            message: "Slug produk sudah dipakai. Ubah nama atau slug.",
+          },
+          { status: 409 },
+        );
+      }
+      throw err;
+    }
   } catch (err) {
     console.error("Gagal membuat produk:", err);
     return NextResponse.json(
-      { ok: false, message: "Terjadi kesalahan pada server." },
+      {
+        ok: false,
+        message:
+          err instanceof Error && err.message
+            ? err.message
+            : "Terjadi kesalahan pada server.",
+      },
       { status: 500 },
     );
   }

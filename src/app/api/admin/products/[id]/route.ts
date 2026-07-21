@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
-import { updateProduct, deleteProduct } from "@/lib/product-api";
+import {
+  deleteProduct,
+  fetchProductById,
+  updateProduct,
+} from "@/lib/product-api";
+import { revalidateStorefront } from "@/lib/revalidate-storefront";
 import { productSchema } from "@/lib/validations";
 
 const productPatchSchema = productSchema
   .partial()
   .refine((input) => Object.keys(input).length > 0);
-
-/**
- * GET /api/admin/products/[id] — ambil satu produk by id (public).
- * (Saat ini tidak dipakai — list sudah cukup, tapi disediakan untuk masa depan.)
- */
 
 /**
  * PATCH /api/admin/products/[id] — update produk (admin only).
@@ -40,11 +40,15 @@ export async function PATCH(
 
     const result = productPatchSchema.safeParse(body);
     if (!result.success) {
+      const first = result.error.issues[0]?.message;
       return NextResponse.json(
-        { ok: false, message: "Data produk tidak valid." },
+        { ok: false, message: first || "Data produk tidak valid." },
         { status: 400 },
       );
     }
+
+    // Slug lama untuk revalidate path detail (jika slug diganti).
+    const before = await fetchProductById(id);
 
     const product = await updateProduct(id, result.data);
 
@@ -55,11 +59,29 @@ export async function PATCH(
       );
     }
 
+    revalidateStorefront(product.slug);
+    if (before?.slug && before.slug !== product.slug) {
+      revalidateStorefront(before.slug);
+    }
+
     return NextResponse.json({ ok: true, product });
   } catch (err) {
     console.error("Gagal memperbarui produk:", err);
+    const msg = err instanceof Error ? err.message : "";
+    if (/duplicate|unique|slug/i.test(msg)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "Slug produk sudah dipakai. Ubah nama atau slug.",
+        },
+        { status: 409 },
+      );
+    }
     return NextResponse.json(
-      { ok: false, message: "Terjadi kesalahan pada server." },
+      {
+        ok: false,
+        message: msg || "Terjadi kesalahan pada server.",
+      },
       { status: 500 },
     );
   }
@@ -67,6 +89,7 @@ export async function PATCH(
 
 /**
  * DELETE /api/admin/products/[id] — hapus produk (admin only).
+ * Juga membersihkan file di Supabase Storage (best-effort).
  */
 export async function DELETE(
   _req: Request,
@@ -81,12 +104,20 @@ export async function DELETE(
     }
 
     const { id } = await params;
+    const before = await fetchProductById(id);
     await deleteProduct(id);
+    revalidateStorefront(before?.slug);
     return NextResponse.json({ ok: true, message: "Produk dihapus." });
   } catch (err) {
     console.error("Gagal menghapus produk:", err);
     return NextResponse.json(
-      { ok: false, message: "Terjadi kesalahan pada server." },
+      {
+        ok: false,
+        message:
+          err instanceof Error && err.message
+            ? err.message
+            : "Terjadi kesalahan pada server.",
+      },
       { status: 500 },
     );
   }

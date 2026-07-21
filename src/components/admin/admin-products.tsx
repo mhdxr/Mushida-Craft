@@ -109,6 +109,20 @@ export function AdminProducts() {
     }
   };
 
+  const handleToggleAvailable = async (p: Product, next: boolean) => {
+    try {
+      await update(p.id, { isAvailable: next });
+      toast.success(
+        next ? `"${p.name}" diaktifkan.` : `"${p.name}" dinonaktifkan.`,
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Gagal mengubah status stok.",
+      );
+      throw err;
+    }
+  };
+
   const handleReset = async () => {
     if (
       !window.confirm(
@@ -116,6 +130,11 @@ export function AdminProducts() {
       )
     )
       return;
+    // Konfirmasi ketik di production-like — API juga memblokir NODE_ENV=production.
+    if (process.env.NODE_ENV === "production") {
+      toast.error("Reset seed dinonaktifkan di production.");
+      return;
+    }
     setResetting(true);
     try {
       await reset();
@@ -128,6 +147,8 @@ export function AdminProducts() {
       setResetting(false);
     }
   };
+
+  const showReset = process.env.NODE_ENV !== "production";
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -146,19 +167,21 @@ export function AdminProducts() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleReset}
-            disabled={resetting || isLoading}
-          >
-            {resetting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RotateCcw className="h-4 w-4" />
-            )}
-            Reset seed
-          </Button>
+          {showReset ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              disabled={resetting || isLoading}
+            >
+              {resetting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RotateCcw className="h-4 w-4" />
+              )}
+              Reset seed
+            </Button>
+          ) : null}
           <Button size="sm" onClick={openCreate}>
             <Plus className="h-4 w-4" />
             Tambah produk
@@ -234,6 +257,7 @@ export function AdminProducts() {
           onEdit={openEdit}
           onDelete={handleDelete}
           onCreate={openCreate}
+          onToggleAvailable={handleToggleAvailable}
         />
       )}
     </div>
