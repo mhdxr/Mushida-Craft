@@ -1,6 +1,7 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
+import { AnalyticsEvent, track } from "@/lib/analytics";
 import {
   buildProductOrderMessage,
   buildWhatsAppUrl,
@@ -41,6 +42,16 @@ export function StickyOrderBar({ product }: { product: Product }) {
             href={url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() =>
+              track(AnalyticsEvent.CLICK_WA_STICKY, {
+                product_id: product.id,
+                product_slug: product.slug,
+                product_name: product.name,
+                price: product.price,
+                category: product.category,
+                source: "pdp_sticky",
+              })
+            }
             className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-medium tracking-wide text-primary-foreground shadow-sm shadow-primary/25 transition-transform active:scale-[0.98]"
           >
             <MessageCircle className="h-4 w-4" />

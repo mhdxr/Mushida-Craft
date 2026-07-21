@@ -19,6 +19,7 @@ import {
   customOrderSchema,
   type CustomOrderSchema,
 } from "@/lib/validations";
+import { AnalyticsEvent, track } from "@/lib/analytics";
 import { buildCustomOrderMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
 import { toast } from "@/hooks/use-toast";
 
@@ -65,6 +66,12 @@ export function CustomOrderForm() {
 
   const onSubmit = (data: CustomOrderSchema) => {
     const url = buildWhatsAppUrl(buildCustomOrderMessage(data));
+    track(AnalyticsEvent.SUBMIT_CUSTOM_ORDER, {
+      bouquet_type: data.bouquetType,
+      budget: data.budget,
+      needed_date: data.neededDate,
+      source: "custom_order_form",
+    });
     setSubmitted(true);
     toast.success("Form terkirim. Membuka WhatsApp...");
     if (typeof window !== "undefined") {

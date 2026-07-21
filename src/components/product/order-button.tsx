@@ -2,6 +2,7 @@
 
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AnalyticsEvent, track } from "@/lib/analytics";
 import {
   buildProductOrderMessage,
   buildWhatsAppUrl,
@@ -32,7 +33,21 @@ export function OrderButton({
 
   return (
     <Button asChild size={size} className={className}>
-      <a href={url} target="_blank" rel="noopener noreferrer">
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() =>
+          track(AnalyticsEvent.CLICK_WA_PRODUCT, {
+            product_id: product.id,
+            product_slug: product.slug,
+            product_name: product.name,
+            price: product.price,
+            category: product.category,
+            source: "pdp_inline",
+          })
+        }
+      >
         <MessageCircle className="h-4 w-4" />
         Order via WhatsApp
       </a>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { StickyOrderBar } from "@/components/product/sticky-order-bar";
 import { ProductGrid } from "@/components/product/product-grid";
 import { SectionHeading } from "@/components/common/section-heading";
 import { categoryMap } from "@/data/categories";
+import { AnalyticsEvent, track } from "@/lib/analytics";
 import { formatCurrency } from "@/lib/utils";
 import { findRelatedProducts } from "@/lib/product-store";
 import type { Product } from "@/types";
@@ -33,6 +34,21 @@ export function ProductDetailContent({
   const [status, setStatus] = useState<"loading" | "found" | "not-found">(
     initialProduct ? "found" : "loading",
   );
+  const trackedViewId = useRef<string | null>(null);
+
+  // view_item sekali per product id (seed SSR atau hasil fetch).
+  useEffect(() => {
+    if (!product) return;
+    if (trackedViewId.current === product.id) return;
+    trackedViewId.current = product.id;
+    track(AnalyticsEvent.VIEW_ITEM, {
+      product_id: product.id,
+      product_slug: product.slug,
+      product_name: product.name,
+      price: product.price,
+      category: product.category,
+    });
+  }, [product]);
 
   useEffect(() => {
     if (initialProduct) {

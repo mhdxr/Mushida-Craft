@@ -12,6 +12,7 @@ import {
   testimonialSchema,
   type TestimonialSchema,
 } from "@/lib/validations";
+import { AnalyticsEvent, track } from "@/lib/analytics";
 import { MAX_AVATAR_FILE_SIZE } from "@/lib/testimonial-avatar";
 import { toast } from "@/hooks/use-toast";
 
@@ -104,6 +105,12 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
       if (!res.ok || !json?.ok) {
         throw new Error(json?.message || "Gagal mengirim testimoni.");
       }
+
+      track(AnalyticsEvent.SUBMIT_TESTIMONIAL, {
+        rating: data.rating,
+        has_avatar: Boolean(avatarFile),
+        source: "homepage_form",
+      });
 
       toast.success(
         json.message ||

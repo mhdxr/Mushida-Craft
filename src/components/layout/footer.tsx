@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Camera, Mail, MessageCircle } from "lucide-react";
 import { BrandLogo } from "@/components/common/brand-logo";
+import { TrackedWhatsAppLink } from "@/components/analytics/tracked-whatsapp-link";
 import { categories } from "@/data/categories";
+import { AnalyticsEvent } from "@/lib/analytics";
 import {
   buildDefaultInquiryMessage,
   buildWhatsAppUrl,
@@ -29,15 +31,15 @@ export function Footer() {
               Bouquet premium handmade — snack, money, artifisial, graduation,
               dan satin — dirangkai personal untuk momen yang berarti.
             </p>
-            <a
+            <TrackedWhatsAppLink
               href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              event={AnalyticsEvent.CLICK_WA_FOOTER}
+              eventProps={{ source: "footer" }}
               className="inline-flex items-center gap-2 text-sm font-medium tracking-wide text-foreground transition-colors hover:text-primary"
             >
               <MessageCircle className="h-4 w-4 text-primary" />
               WhatsApp {whatsappLabel}
-            </a>
+            </TrackedWhatsAppLink>
           </div>
 
           <div className="md:col-span-2">

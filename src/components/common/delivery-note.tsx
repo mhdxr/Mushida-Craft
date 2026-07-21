@@ -1,4 +1,6 @@
 import { Clock3, MapPin, MessageCircle } from "lucide-react";
+import { TrackedWhatsAppLink } from "@/components/analytics/tracked-whatsapp-link";
+import { AnalyticsEvent } from "@/lib/analytics";
 import {
   buildDeliveryBullets,
   buildDeliverySummary,
@@ -72,15 +74,15 @@ export function DeliveryNote({
       </ul>
 
       {showWhatsAppCta ? (
-        <a
+        <TrackedWhatsAppLink
           href={waUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          event={AnalyticsEvent.CLICK_WA_DELIVERY}
+          eventProps={{ source: "delivery_note" }}
           className="mt-4 inline-flex items-center gap-2 text-sm font-medium tracking-wide text-foreground transition-colors hover:text-primary"
         >
           <MessageCircle className="h-4 w-4 text-primary" />
           Cek ongkir & slot via WhatsApp
-        </a>
+        </TrackedWhatsAppLink>
       ) : null}
     </div>
   );
