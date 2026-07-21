@@ -227,11 +227,15 @@ Migration `0002_product_images_storage.sql` membuat bucket publik `product-image
 |----------|--------|-------|-----------|
 | `/api/testimonials` | GET | Public | List testimoni **approved** |
 | `/api/testimonials` | POST | Public | Submit testimoni (pending, rate limit) |
-| `/api/admin/products` | GET | Public | List semua produk |
-| `/api/admin/products?slug=xxx` | GET | Public | Ambil produk by slug |
+| `/api/products` | GET | Public | List semua produk |
+| `/api/products?slug=xxx` | GET | Public | Ambil produk by slug |
+| `/api/admin/products` | GET | Public | Alias baca (deprecated; prefer `/api/products`) |
 | `/api/admin/products` | POST | Admin | Buat produk / reset seed (**reset diblokir di production**) |
 | `/api/admin/products/[id]` | PATCH | Admin | Update produk (+ revalidate storefront) |
 | `/api/admin/products/[id]` | DELETE | Admin | Hapus produk + cleanup Storage |
+| `/api/inquiries` | POST | Public | Log klik WA / custom order |
+| `/api/admin/inquiries` | GET | Admin | List inquiry WA |
+| `/api/health` | GET | Public | Env readiness (`ok` / `degraded` / `error`) |
 | `/api/admin/upload` | POST | Admin | Upload multi-gambar ke Storage |
 | `/api/admin/testimonials` | GET | Admin | List semua testimoni |
 | `/api/admin/testimonials/[id]` | PATCH/DELETE | Admin | Setujui / hapus testimoni |

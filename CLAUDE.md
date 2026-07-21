@@ -69,9 +69,11 @@ Product seed reset (`POST { action: "reset" }`) is **blocked in production**.
 
 ### Public API surface (high level)
 
-- `GET/POST /api/testimonials` — list approved (public); submit pending (rate-limited)
-- `GET /api/admin/products` — public list/by-slug (legacy path name; reads are public)
-- `POST/PATCH/DELETE` product + upload — admin only
+- `GET /api/products` — public list / by-slug (preferred). `GET /api/admin/products` remains a read alias.
+- `GET/POST /api/testimonials` — list approved; submit pending (rate-limited)
+- `POST /api/inquiries` — fire-and-forget WA lead log
+- `GET /api/health` — env readiness (no secrets)
+- `POST/PATCH/DELETE` under `/api/admin/*` + upload — admin only
 - Admin testimonials approve/delete — revalidate homepage
 
 Bodies validated with Zod (`src/lib/validations.ts`).

@@ -65,11 +65,10 @@ export function ProductDetailContent({
         // Ambil detail + list paralel, lalu hitung related dari produk final
         // (hindari race: related dihitung dari product state yang masih lama).
         const [detailRes, listRes] = await Promise.all([
-          fetch(
-            `/api/admin/products?slug=${encodeURIComponent(slug)}`,
-            { cache: "no-store" },
-          ),
-          fetch("/api/admin/products", { cache: "no-store" }),
+          fetch(`/api/products?slug=${encodeURIComponent(slug)}`, {
+            cache: "no-store",
+          }),
+          fetch("/api/products", { cache: "no-store" }),
         ]);
 
         if (!active) return;

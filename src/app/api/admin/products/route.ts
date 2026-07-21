@@ -12,9 +12,8 @@ import { productSchema } from "@/lib/validations";
 import type { Product } from "@/types";
 
 /**
- * GET /api/admin/products
- *   ?slug=xxx  → ambil satu produk by slug (public, tidak butuh auth)
- *   (tanpa query) → list semua produk (public, tidak butuh auth)
+ * GET /api/admin/products — deprecated for public reads.
+ * Prefer GET /api/products. Kept as thin alias for backward compatibility.
  */
 export async function GET(req: Request) {
   try {
@@ -25,7 +24,6 @@ export async function GET(req: Request) {
       try {
         const product = await fetchProductBySlug(slug);
         if (!product) {
-          // Fallback seed by slug agar detail publik tidak 500.
           const seed = seedProducts.find((p) => p.slug === slug) ?? null;
           if (!seed) {
             return NextResponse.json(
@@ -52,7 +50,6 @@ export async function GET(req: Request) {
       const products = await fetchProducts();
       return NextResponse.json({ ok: true, products });
     } catch (err) {
-      // Supabase down / misconfig → seed agar katalog admin & client tidak hang.
       console.error("Gagal fetch Supabase, fallback seed:", err);
       return NextResponse.json({ ok: true, products: seedProducts });
     }
@@ -66,9 +63,8 @@ export async function GET(req: Request) {
 }
 
 /**
- * POST /api/admin/products
- *   Buat produk baru (admin only).
- *   Special: body { action: "reset" } → reset ke seed (hanya non-production).
+ * POST /api/admin/products — create / reset seed (admin only).
+ * Reset diblokir di production.
  */
 export async function POST(req: Request) {
   try {
@@ -89,7 +85,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Reset ke seed — diblokir di production agar tidak wipe katalog live.
     if (
       typeof body === "object" &&
       body !== null &&
@@ -110,7 +105,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, message: "Data direset ke seed." });
     }
 
-    // Create produk baru
     const result = productSchema.safeParse(body);
     if (!result.success) {
       const first = result.error.issues[0]?.message;

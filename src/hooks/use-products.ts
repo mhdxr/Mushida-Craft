@@ -6,12 +6,12 @@ import type { Product } from "@/types";
 /**
  * Hook untuk mengelola data produk via API routes (Supabase backend).
  *
- * Reads:  GET  /api/admin/products          (public, anon key)
- * Create: POST /api/admin/products          (admin only, service role)
+ * Reads:  GET  /api/products                (public)
+ * Create: POST /api/admin/products          (admin only)
  * Update: PATCH /api/admin/products/[id]    (admin only)
  * Delete: DELETE /api/admin/products/[id]   (admin only)
- * Reset:  POST /api/admin/products { action: "reset" }  (admin only)
- * Upload: POST /api/admin/upload            (admin only, service role)
+ * Reset:  POST /api/admin/products { action: "reset" }  (admin only, non-prod)
+ * Upload: POST /api/admin/upload            (admin only)
  */
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -20,7 +20,7 @@ export function useProducts() {
   const refresh = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/admin/products", { cache: "no-store" });
+      const res = await fetch("/api/products", { cache: "no-store" });
       const json = await res.json();
       if (json.ok && Array.isArray(json.products)) {
         setProducts(json.products as Product[]);
