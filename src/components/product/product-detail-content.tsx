@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { DeliveryNote } from "@/components/common/delivery-note";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { OrderButton } from "@/components/product/order-button";
 import { ProductGrid } from "@/components/product/product-grid";
@@ -24,7 +25,9 @@ export function ProductDetailContent({
   slug,
   initialProduct,
 }: ProductDetailContentProps) {
-  const [product, setProduct] = useState<Product | null>(initialProduct ?? null);
+  const [product, setProduct] = useState<Product | null>(
+    initialProduct ?? null,
+  );
   const [related, setRelated] = useState<Product[]>([]);
   const [status, setStatus] = useState<"loading" | "found" | "not-found">(
     initialProduct ? "found" : "loading",
@@ -35,45 +38,51 @@ export function ProductDetailContent({
       setProduct(initialProduct);
       setStatus("found");
     }
+
     let active = true;
+
     (async () => {
       try {
-        // Selalu fetch fresh dari API (Supabase) untuk dapat data terbaru.
-        const res = await fetch(`/api/admin/products?slug=${encodeURIComponent(slug)}`, {
-          cache: "no-store",
-        });
-        const json = await res.json();
+        // Ambil detail + list paralel, lalu hitung related dari produk final
+        // (hindari race: related dihitung dari product state yang masih lama).
+        const [detailRes, listRes] = await Promise.all([
+          fetch(
+            `/api/admin/products?slug=${encodeURIComponent(slug)}`,
+            { cache: "no-store" },
+          ),
+          fetch("/api/admin/products", { cache: "no-store" }),
+        ]);
+
         if (!active) return;
-        if (!res.ok || !json.ok || !json.product) {
-          if (!initialProduct) setStatus("not-found");
+
+        const detailJson = await detailRes.json().catch(() => null);
+        const listJson = await listRes.json().catch(() => null);
+
+        let resolved: Product | null = initialProduct ?? null;
+
+        if (detailRes.ok && detailJson?.ok && detailJson.product) {
+          resolved = detailJson.product as Product;
+          setProduct(resolved);
+          setStatus("found");
+        } else if (!initialProduct) {
+          setStatus("not-found");
           return;
         }
-        setProduct(json.product as Product);
-        setStatus("found");
+
+        if (resolved && listRes.ok && listJson?.ok && Array.isArray(listJson.products)) {
+          setRelated(
+            findRelatedProducts(resolved, listJson.products as Product[], 4),
+          );
+        }
       } catch {
         if (!initialProduct) setStatus("not-found");
-      }
-    })();
-
-    // Fetch related products
-    (async () => {
-      try {
-        const res = await fetch("/api/admin/products", { cache: "no-store" });
-        const json = await res.json();
-        if (!active || !json.ok) return;
-        const all = json.products as Product[];
-        const base = product ?? initialProduct;
-        if (base) setRelated(findRelatedProducts(base, all, 4));
-      } catch {
-        // ignore
       }
     })();
 
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug]);
+  }, [slug, initialProduct]);
 
   if (status === "loading") {
     return null; // loading.tsx yang menangani skeleton
@@ -151,18 +160,15 @@ export function ProductDetailContent({
             </p>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-border/60 bg-secondary/40 p-4 text-sm text-muted-foreground">
-            <p>
-              💌 <strong className="text-foreground">Free greeting card</strong>{" "}
-              + same-day delivery untuk wilayah dalam kota.
-            </p>
+          <div className="mt-6">
+            <DeliveryNote showWhatsAppCta />
           </div>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <OrderButton product={product} className="w-full sm:w-auto" />
             <Link
               href="/custom-order"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-background px-8 text-sm font-medium hover:bg-secondary"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-background px-8 text-sm font-medium tracking-wide hover:bg-secondary"
             >
               Custom Bouquet
             </Link>
@@ -173,7 +179,7 @@ export function ProductDetailContent({
       {related.length > 0 && (
         <section className="mt-20">
           <SectionHeading
-            eyebrow="Produk Terkait"
+            eyebrow="Produk terkait"
             title="Mungkin kamu juga suka"
             description="Pilihan rangkaian serupa dari kategori yang sama."
           />

@@ -1,4 +1,5 @@
 import type { CustomOrderForm, Product } from "@/types";
+import { categoryMap } from "@/data/categories";
 import { formatCurrency } from "@/lib/utils";
 
 // Nomor bisnis Mushida Craft — fallback bila env tidak di-set.
@@ -77,21 +78,39 @@ function buildGreetingOpener(): string {
   return "Halo, Mushida Craft! 🌸";
 }
 
+/** Base URL publik untuk link produk di pesan WA. */
+function getSiteUrl(): string {
+  const raw =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    "https://mushida-craft.vercel.app";
+  return raw.replace(/\/$/, "");
+}
+
 /** Pesan inquiry umum (FAB, footer). */
 export function buildDefaultInquiryMessage(): string {
   return `${buildGreetingOpener()} Saya ingin tanya-tanya tentang rangkaian bouquet.`;
 }
 
 export function buildProductOrderMessage(product: Product): string {
+  const categoryLabel =
+    categoryMap[product.category]?.name ?? product.category;
+  const productUrl = `${getSiteUrl()}/produk/${product.slug}`;
+
   return [
     buildGreetingOpener(),
     "",
     "Saya tertarik dengan produk berikut:",
     `• Nama: ${product.name}`,
     `• Harga: ${formatCurrency(product.price)}`,
-    `• Kategori: ${product.category}`,
+    `• Kategori: ${categoryLabel}`,
+    `• Link: ${productUrl}`,
     "",
-    "Boleh info lebih lanjut untuk pemesanannya? Terima kasih.",
+    "Mohon bantu konfirmasi:",
+    "1) Ketersediaan stok",
+    "2) Ongkir & area pengiriman",
+    "3) Estimasi selesai / same-day",
+    "",
+    "Terima kasih 🙏",
   ].join("\n");
 }
 
@@ -107,7 +126,7 @@ export function buildCustomOrderMessage(form: CustomOrderForm): string {
     `• Tanggal dibutuhkan: ${form.neededDate}`,
     form.notes ? `• Catatan: ${form.notes}` : "",
     "",
-    "Mohon dibantu ya, terima kasih banyak!",
+    "Mohon bantu cek ketersediaan & estimasi ya. Terima kasih banyak!",
   ]
     .filter(Boolean)
     .join("\n");

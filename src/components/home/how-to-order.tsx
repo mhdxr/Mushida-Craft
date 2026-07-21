@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MessageCircle, Search, Sparkles, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/common/section-heading";
+import { buildDeliverySummary } from "@/lib/delivery";
 
 const steps = [
   {
@@ -17,12 +18,12 @@ const steps = [
   {
     icon: Sparkles,
     title: "Dirangkai khusus",
-    description: "Setiap bouquet dibuat fresh dengan sentuhan personal.",
+    description: "Setiap bouquet dibuat handmade dengan sentuhan personal.",
   },
   {
     icon: Truck,
     title: "Diantar tepat waktu",
-    description: "Same-day delivery untuk momen yang tak terlewatkan.",
+    description: buildDeliverySummary(),
   },
 ];
 
