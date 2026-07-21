@@ -3,9 +3,26 @@ import { ProductDetailContent } from "@/components/product/product-detail-conten
 import { fetchProductBySlug } from "@/lib/product-api";
 import { getProductBySlug, products as seedProducts } from "@/data/products";
 import { categoryMap } from "@/data/categories";
+import { absoluteUrl, canonicalAlternates, getSiteUrl } from "@/lib/site";
+import type { Product } from "@/types";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+function productMetadata(product: Product): Metadata {
+  const path = `/produk/${product.slug}`;
+  return {
+    title: product.name,
+    description: product.description,
+    alternates: canonicalAlternates(path),
+    openGraph: {
+      title: product.name,
+      description: product.description,
+      url: absoluteUrl(path),
+      images: product.images.slice(0, 1),
+    },
+  };
 }
 
 /**
@@ -32,32 +49,14 @@ export async function generateMetadata({
   if (!seedProduct) {
     try {
       const supaProduct = await fetchProductBySlug(slug);
-      if (supaProduct) {
-        return {
-          title: supaProduct.name,
-          description: supaProduct.description,
-          openGraph: {
-            title: supaProduct.name,
-            description: supaProduct.description,
-            images: supaProduct.images.slice(0, 1),
-          },
-        };
-      }
+      if (supaProduct) return productMetadata(supaProduct);
     } catch {
       // Supabase belum dikonfigurasi atau tabel belum ada — abaikan.
     }
     return { title: "Produk tidak ditemukan" };
   }
 
-  return {
-    title: seedProduct.name,
-    description: seedProduct.description,
-    openGraph: {
-      title: seedProduct.name,
-      description: seedProduct.description,
-      images: seedProduct.images.slice(0, 1),
-    },
-  };
+  return productMetadata(seedProduct);
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
@@ -66,52 +65,55 @@ export default async function ProductDetailPage({ params }: PageProps) {
   // Coba seed statis dulu (untuk SSG & metadata build-time).
   const seedProduct = getProductBySlug(slug);
 
-  // Jika ada di seed, gunakan untuk JSON-LD statis.
-  if (seedProduct) {
-    const cat = categoryMap[seedProduct.category];
-    const isAvailable =
-      seedProduct.isAvailable && seedProduct.badge !== "sold-out";
-    const siteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL || "https://mushida-craft.vercel.app";
-    const productJsonLd = {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      name: seedProduct.name,
-      description: seedProduct.description,
-      image: seedProduct.images,
-      sku: seedProduct.id,
-      category: cat?.name,
-      brand: { "@type": "Brand", name: "Mushida Craft" },
-      offers: {
-        "@type": "Offer",
-        url: `${siteUrl}/produk/${seedProduct.slug}`,
-        priceCurrency: "IDR",
-        price: seedProduct.price,
-        availability: isAvailable
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
+  // Resolve produk (seed SSG atau admin Supabase) untuk JSON-LD + detail.
+  let product = seedProduct ?? null;
+  if (!product) {
+    try {
+      product = await fetchProductBySlug(slug);
+    } catch {
+      // Supabase belum dikonfigurasi — serahkan ke client component.
+    }
+  }
+
+  if (!product) {
+    return <ProductDetailContent slug={slug} initialProduct={null} />;
+  }
+
+  const cat = categoryMap[product.category];
+  const isAvailable = product.isAvailable && product.badge !== "sold-out";
+  const productUrl = absoluteUrl(`/produk/${product.slug}`);
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.images,
+    sku: product.id,
+    category: cat?.name,
+    brand: { "@type": "Brand", name: "Mushida Craft" },
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: "IDR",
+      price: product.price,
+      availability: isAvailable
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      seller: {
+        "@type": "Organization",
+        name: "Mushida Craft",
+        url: getSiteUrl(),
       },
-    };
+    },
+  };
 
-    return (
-      <>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
-        />
-        <ProductDetailContent slug={slug} initialProduct={seedProduct} />
-      </>
-    );
-  }
-
-  // Slug tidak ada di seed → bisa jadi produk admin (Supabase) atau 404.
-  // Coba fetch dari Supabase untuk metadata JSON-LD.
-  let adminProduct = null;
-  try {
-    adminProduct = await fetchProductBySlug(slug);
-  } catch {
-    // Supabase belum dikonfigurasi — serahkan ke client component.
-  }
-
-  return <ProductDetailContent slug={slug} initialProduct={adminProduct} />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <ProductDetailContent slug={slug} initialProduct={product} />
+    </>
+  );
 }

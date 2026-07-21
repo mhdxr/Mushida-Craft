@@ -3,11 +3,13 @@ import { Clock, Heart, Sparkles } from "lucide-react";
 import { CustomOrderForm } from "@/components/custom-order/custom-order-form";
 import { DeliveryNote } from "@/components/common/delivery-note";
 import { getDeliveryInfo } from "@/lib/delivery";
+import { canonicalAlternates } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Custom Order Bouquet",
   description:
     "Request bouquet custom sesuai kebutuhanmu — pilih jenis, budget, dan tanggal. Submit langsung terhubung ke WhatsApp Mushida Craft.",
+  alternates: canonicalAlternates("/custom-order"),
 };
 
 export default function CustomOrderPage() {

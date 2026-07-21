@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/footer";
 import { WhatsAppFab } from "@/components/common/whatsapp-fab";
 import { Toaster } from "@/components/common/toaster";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
+import { buildLocalBusinessJsonLd, getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,17 +20,16 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://mushida-craft.vercel.app";
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Mushida Craft — Hand-tied Bouquet Artisan",
+    default: "Mushida Craft — Bouquet Handmade Premium",
     template: "%s | Mushida Craft",
   },
   description:
-    "Katalog Snack, Money, Artifisial, Graduation, dan Satin. Custom order mudah via WhatsApp — Mushida Craft.",
+    "Katalog Snack, Money, Artifisial, Graduation, dan Satin. Custom order mudah via WhatsApp — Mushida Craft, Jakarta Barat.",
   keywords: [
     "snack bouquet",
     "money bouquet",
@@ -38,6 +38,7 @@ export const metadata: Metadata = {
     "graduation bouquet",
     "bouquet wisuda",
     "bunga satin",
+    "bouquet jakarta barat",
     "Mushida Craft",
   ],
   authors: [{ name: "Mushida Craft" }],
@@ -46,9 +47,9 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: siteUrl,
     siteName: "Mushida Craft",
-    title: "Mushida Craft — Hand-tied Bouquet Artisan",
+    title: "Mushida Craft — Bouquet Handmade Premium",
     description:
-      "Katalog bouquet premium untuk setiap momen spesialmu.",
+      "Katalog bouquet premium untuk setiap momen spesialmu. Same-day Jakarta Barat & sekitarnya.",
     // Share card: JPG 1200×630 (bukan wordmark PNG persegi).
     images: [
       {
@@ -61,13 +62,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mushida Craft — Hand-tied Bouquet Artisan",
+    title: "Mushida Craft — Bouquet Handmade Premium",
     description:
       "Katalog bouquet premium untuk setiap momen spesialmu.",
     images: ["/og-image.jpg"],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "/" },
+  // Canonical per-halaman di-set di page metadata — jangan hardcode "/" di root.
   icons: {
     // Favicon modern: PNG (bukan .ico palsu / wordmark lebar).
     icon: [{ url: "/favicon-32.png", sizes: "32x32", type: "image/png" }],
@@ -82,19 +83,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Store",
-  name: "Mushida Craft",
-  description:
-    "Toko Snack, Money, Artifisial, Graduation, dan Satin — order via WhatsApp dan custom request.",
-  url: siteUrl,
-  image: `${siteUrl}/og-image.jpg`,
-  logo: `${siteUrl}/images/logo-wordmark.png`,
-  priceRange: "Rp200.000 - Rp2.000.000",
-  currenciesAccepted: "IDR",
-  paymentAccepted: "Cash, Bank Transfer, E-Wallet",
-};
+const jsonLd = buildLocalBusinessJsonLd();
 
 export default function RootLayout({
   children,

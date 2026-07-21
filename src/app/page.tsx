@@ -1,12 +1,18 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Hero } from "@/components/home/hero";
 import { CategorySection } from "@/components/home/category-section";
 import { FeaturedProducts } from "@/components/home/featured-products";
 import { TestimonialsSection } from "@/components/home/testimonials-section";
 import { HowToOrder } from "@/components/home/how-to-order";
+import { canonicalAlternates } from "@/lib/site";
 
 /** ISR 5 menit — homepage tidak memicu loading overlay dinamis terus-menerus. */
 export const revalidate = 300;
+
+export const metadata: Metadata = {
+  alternates: canonicalAlternates("/"),
+};
 
 function HeroFallback() {
   return (

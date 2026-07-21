@@ -2,11 +2,10 @@ import type { MetadataRoute } from "next";
 import { fetchProducts } from "@/lib/product-api";
 import { products as seedProducts } from "@/data/products";
 import { categories } from "@/data/categories";
-
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://mushida-craft.vercel.app";
+import { getSiteUrl } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const siteUrl = getSiteUrl();
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
