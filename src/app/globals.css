@@ -50,14 +50,19 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-size: 1rem;
+    line-height: 1.65;
   }
 
   /*
    * Heading boutique: Cormorant Garamond via .font-serif.
-   * Sedikit lebih longgar di size besar biar lekukan elegan terbaca.
+   * Weight default medium — lebih soft/premium daripada bold keras.
+   * Lekukan Garamond butuh leading longgar di size besar.
    */
   .font-serif {
-    letter-spacing: -0.015em;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
     font-feature-settings: "kern" 1, "liga" 1;
   }
 }

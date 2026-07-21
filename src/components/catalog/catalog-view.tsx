@@ -196,15 +196,15 @@ export function CatalogView({ initialProducts }: CatalogViewProps) {
 function CatalogHeader({ categoryTitle }: { categoryTitle?: string | null }) {
   return (
     <div className="mb-10 max-w-2xl">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">
         Katalog
       </p>
-      <h1 className="mt-2 font-serif text-3xl font-semibold leading-[1.15] tracking-tight md:text-4xl">
+      <h1 className="mt-2 font-serif text-[2rem] font-medium leading-[1.15] md:text-[2.5rem]">
         {categoryTitle
           ? `Koleksi ${categoryTitle}`
           : "Jelajahi koleksi bouquet"}
       </h1>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+      <p className="mt-3 max-w-xl text-[0.95rem] leading-[1.7] text-muted-foreground md:text-base">
         Snack, money, artifisial, graduation, dan satin — handmade premium.
         Filter sesuai momen dan budgetmu.
       </p>

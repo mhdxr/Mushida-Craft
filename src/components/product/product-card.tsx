@@ -53,13 +53,13 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
       <div className="space-y-1.5 px-4 py-4 md:px-5 md:py-5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary/90">
+        <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-primary/90">
           {cat?.name}
         </p>
-        <h3 className="font-serif text-base font-semibold leading-snug tracking-tight md:text-lg">
+        <h3 className="font-serif text-lg font-medium leading-snug md:text-xl">
           {product.name}
         </h3>
-        <p className="pt-0.5 text-sm font-medium tracking-wide text-foreground/90">
+        <p className="pt-0.5 text-sm font-medium text-foreground/90">
           {formatCurrency(product.price)}
         </p>
       </div>

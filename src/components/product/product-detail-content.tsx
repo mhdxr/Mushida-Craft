@@ -165,13 +165,13 @@ export function ProductDetailContent({
         <ProductGallery images={product.images} alt={product.name} />
 
         <div className="flex flex-col">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">
             {cat?.name}
           </p>
-          <h1 className="mt-2 font-serif text-3xl font-semibold tracking-tight md:text-4xl">
+          <h1 className="mt-2 font-serif text-[2rem] font-medium leading-[1.15] md:text-[2.75rem]">
             {product.name}
           </h1>
-          <p className="mt-4 font-serif text-3xl font-semibold tracking-tight text-foreground">
+          <p className="mt-4 font-serif text-[1.85rem] font-medium text-foreground md:text-[2.15rem]">
             {formatCurrency(product.price)}
           </p>
 

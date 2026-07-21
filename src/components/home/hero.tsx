@@ -73,12 +73,12 @@ export async function Hero() {
         <div className="space-y-6">
           <HeroGreeting />
 
-          <h1 className="font-serif text-4xl font-semibold leading-[1.1] tracking-tight md:text-5xl lg:text-6xl">
+          <h1 className="font-serif text-[2.5rem] font-medium leading-[1.12] md:text-5xl lg:text-[3.5rem]">
             Setiap rangkaian{" "}
-            <span className="italic text-primary">bercerita</span>, untuk
-            momen tak terlupakan.
+            <span className="italic font-medium text-primary">bercerita</span>,
+            untuk momen tak terlupakan.
           </h1>
-          <p className="max-w-md text-base leading-relaxed text-muted-foreground md:text-lg">
+          <p className="max-w-md text-[0.98rem] leading-[1.7] text-muted-foreground md:text-lg md:leading-[1.7]">
             Bouquet handmade premium — snack, money, artifisial, graduation,
             dan satin — dirangkai personal untuk momen spesialmu.
           </p>
@@ -110,24 +110,30 @@ export async function Hero() {
           {/* Trust metrics */}
           <div className="flex flex-wrap items-end gap-x-8 gap-y-4 pt-2 text-sm text-muted-foreground">
             <div>
-              <p className="font-serif text-2xl font-semibold tracking-tight text-foreground md:text-[1.75rem]">
+              <p className="font-serif text-[1.65rem] font-medium text-foreground md:text-[1.85rem]">
                 {DELIVERED_COUNT}
               </p>
-              <p className="mt-0.5 text-xs tracking-wide">Bouquet terkirim</p>
+              <p className="mt-0.5 text-xs font-medium tracking-wide text-muted-foreground">
+                Bouquet terkirim
+              </p>
             </div>
             <div className="hidden h-11 w-px bg-border/70 sm:block" />
             <div>
-              <p className="font-serif text-2xl font-semibold tracking-tight text-foreground md:text-[1.75rem]">
+              <p className="font-serif text-[1.65rem] font-medium text-foreground md:text-[1.85rem]">
                 {ratingLabel}
               </p>
-              <p className="mt-0.5 text-xs tracking-wide">Rating pelanggan</p>
+              <p className="mt-0.5 text-xs font-medium tracking-wide text-muted-foreground">
+                Rating pelanggan
+              </p>
             </div>
             <div className="hidden h-11 w-px bg-border/70 sm:block" />
             <div>
-              <p className="font-serif text-2xl font-semibold tracking-tight text-foreground md:text-[1.75rem]">
+              <p className="font-serif text-[1.65rem] font-medium text-foreground md:text-[1.85rem]">
                 {DELIVERY_TIME}
               </p>
-              <p className="mt-0.5 text-xs tracking-wide">Same-day</p>
+              <p className="mt-0.5 text-xs font-medium tracking-wide text-muted-foreground">
+                Same-day
+              </p>
             </div>
           </div>
         </div>
