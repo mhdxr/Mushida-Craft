@@ -23,9 +23,37 @@ const failedLoginAttempts = new Map<string, LoginAttempts>();
 let warnedAboutFallback = false;
 let redisRatelimit: Ratelimit | null = null;
 
-function hasUpstashEnv(): boolean {
+/** True jika env Upstash REST lengkap. */
+export function hasUpstashEnv(): boolean {
   return Boolean(
     process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN,
+  );
+}
+
+/** Runtime production (Vercel set VERCEL=1). */
+export function isProductionRuntime(): boolean {
+  return (
+    process.env.NODE_ENV === "production" || process.env.VERCEL === "1"
+  );
+}
+
+/**
+ * Di production multi-instance, in-memory rate limit tidak aman.
+ * Kembalikan true jika Upstash wajib tapi belum dikonfigurasi.
+ */
+export function isRateLimitDegraded(): boolean {
+  return isProductionRuntime() && !hasUpstashEnv();
+}
+
+let warnedProductionMissingUpstash = false;
+
+function warnProductionMissingUpstashOnce() {
+  if (!isRateLimitDegraded() || warnedProductionMissingUpstash) return;
+  warnedProductionMissingUpstash = true;
+  console.error(
+    "[rate-limit] PRODUCTION tanpa UPSTASH_REDIS_REST_URL/TOKEN — " +
+      "rate limit memakai Map in-memory (tidak konsisten antar instance Vercel). " +
+      "Set Upstash segera. Lihat GET /api/health.",
   );
 }
 
@@ -49,8 +77,10 @@ function getRedisRatelimit(): Ratelimit | null {
 }
 
 function warnFallbackOnce() {
+  warnProductionMissingUpstashOnce();
   if (warnedAboutFallback) return;
   warnedAboutFallback = true;
+  if (isProductionRuntime()) return; // sudah error di atas
   console.warn(
     "[rate-limit] UPSTASH_REDIS_REST_URL/TOKEN belum diset — " +
       "rate limit login memakai Map in-memory (tidak terdistribusi). " +
@@ -152,8 +182,10 @@ function getTestimonialRedisRatelimit(): Ratelimit | null {
 }
 
 function warnTestimonialFallbackOnce() {
+  warnProductionMissingUpstashOnce();
   if (warnedAboutTestimonialFallback) return;
   warnedAboutTestimonialFallback = true;
+  if (isProductionRuntime()) return;
   console.warn(
     "[rate-limit] Upstash belum diset — rate limit testimoni memakai Map in-memory.",
   );
@@ -224,8 +256,10 @@ function getInquiryRedisRatelimit(): Ratelimit | null {
 }
 
 function warnInquiryFallbackOnce() {
+  warnProductionMissingUpstashOnce();
   if (warnedAboutInquiryFallback) return;
   warnedAboutInquiryFallback = true;
+  if (isProductionRuntime()) return;
   console.warn(
     "[rate-limit] Upstash belum diset — rate limit inquiry memakai Map in-memory.",
   );

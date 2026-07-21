@@ -106,3 +106,4 @@ Public Supabase Storage bucket `product-images`. `next.config.mjs` derives `next
 - Deploy on Vercel. Full env list: `.env.example` and `README.md`.
 - CI: `.github/workflows/ci.yml` runs `npm run verify` on push/PR to `master`.
 - Security headers: `vercel.json` + `next.config.mjs` `headers()` (CSP, HSTS, frame deny, nosniff).
+- Health: `GET /api/health` — env readiness (`ok` | `degraded` | `error`). Production without Upstash → `degraded` (in-memory rate limits).

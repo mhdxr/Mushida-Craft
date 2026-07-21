@@ -13,6 +13,20 @@ Web katalog bouquet bunga premium dengan halaman publik (beranda, katalog, detai
 - **SEO** — canonical per route, `robots.ts`, sitemap dinamis, JSON-LD LocalBusiness/Florist + Product + FAQPage.
 - **Observability** — Sentry + PostHog (no-op jika env kosong); funnel events (view_item, click_wa_*, submit_*).
 
+## 🩺 Health check
+
+```bash
+curl -s https://your-domain/api/health | jq
+```
+
+| `status` | HTTP | Arti |
+|----------|------|------|
+| `ok` | 200 | Env wajib lengkap; di production Upstash juga terpasang |
+| `degraded` | 200 | Env wajib OK, tapi rate limit masih in-memory (set Upstash) |
+| `error` | 503 | Ada env wajib yang hilang |
+
+Response hanya boolean (tidak membocorkan secret). Cocok untuk uptime monitor.
+
 ## 🔒 Security headers
 
 Ditetapkan di `vercel.json` (production Vercel) dan di-mirror di `next.config.mjs` `headers()` (berlaku juga untuk `next start`):
