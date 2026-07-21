@@ -80,8 +80,18 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "sans-serif"],
-        serif: ["var(--font-playfair)", "serif"],
+        sans: [
+          "var(--font-jakarta)",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+        ],
+        serif: [
+          "var(--font-cormorant)",
+          "ui-serif",
+          "Georgia",
+          "serif",
+        ],
       },
       keyframes: {
         "accordion-down": {

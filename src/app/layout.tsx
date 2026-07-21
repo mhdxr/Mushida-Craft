@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFab } from "@/components/common/whatsapp-fab";
@@ -8,16 +8,21 @@ import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { buildLocalBusinessJsonLd, getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
-const inter = Inter({
+/** Body UI — rapi, modern, premium (lebih soft dari Inter). */
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-jakarta",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
-const playfair = Playfair_Display({
+/** Heading serif — elegan editorial (lebih halus dari Playfair). */
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-playfair",
+  variable: "--font-cormorant",
   display: "swap",
+  weight: ["500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 const siteUrl = getSiteUrl();
@@ -91,8 +96,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="font-sans">
+    <html lang="id" className={`${jakarta.variable} ${cormorant.variable}`}>
+      <body className="font-sans antialiased">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
