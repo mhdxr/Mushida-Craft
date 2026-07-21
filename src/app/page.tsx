@@ -8,6 +8,33 @@ import { HowToOrder } from "@/components/home/how-to-order";
 /** ISR 5 menit — homepage tidak memicu loading overlay dinamis terus-menerus. */
 export const revalidate = 300;
 
+function HeroFallback() {
+  return (
+    <section className="hero-gradient relative overflow-hidden" aria-busy="true">
+      <div className="container relative grid items-center gap-10 py-14 md:grid-cols-2 md:gap-12 md:py-24 lg:py-28">
+        <div className="space-y-6">
+          <div className="h-8 w-56 animate-pulse rounded-full bg-white/70" />
+          <div className="space-y-3">
+            <div className="h-10 w-full max-w-md animate-pulse rounded bg-white/80" />
+            <div className="h-10 w-4/5 max-w-sm animate-pulse rounded bg-white/80" />
+          </div>
+          <div className="h-4 w-full max-w-lg animate-pulse rounded bg-white/60" />
+          <div className="flex gap-3 pt-1">
+            <div className="h-11 w-36 animate-pulse rounded-full bg-white/80" />
+            <div className="h-11 w-36 animate-pulse rounded-full bg-white/60" />
+          </div>
+          <div className="flex gap-6 pt-2">
+            <div className="h-12 w-20 animate-pulse rounded bg-white/60" />
+            <div className="h-12 w-20 animate-pulse rounded bg-white/60" />
+            <div className="h-12 w-20 animate-pulse rounded bg-white/60" />
+          </div>
+        </div>
+        <div className="relative aspect-[4/5] animate-pulse rounded-3xl bg-white/50 shadow-xl" />
+      </div>
+    </section>
+  );
+}
+
 function FeaturedProductsFallback() {
   return (
     <section className="container py-16 md:py-24" aria-busy="true">
@@ -32,11 +59,20 @@ function FeaturedProductsFallback() {
   );
 }
 
+/**
+ * Tata letak homepage (kembali ke alur asli):
+ * 1. Hero        — janji brand + CTA
+ * 2. Unggulan    — produk nyata dulu
+ * 3. Kategori    — browse tipe bouquet
+ * 4. Testimoni   — social proof
+ * 5. Cara order  — penutup alur beli
+ */
 export default function HomePage() {
   return (
     <>
-      <Hero />
-      {/* Suspense: hero tetap tampil dulu; produk unggulan stream belakangan. */}
+      <Suspense fallback={<HeroFallback />}>
+        <Hero />
+      </Suspense>
       <Suspense fallback={<FeaturedProductsFallback />}>
         <FeaturedProducts />
       </Suspense>

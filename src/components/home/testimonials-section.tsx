@@ -8,8 +8,7 @@ import type { Testimonial } from "@/types";
 export async function TestimonialsSection() {
   let items: Testimonial[] = [];
   try {
-    // Ambil banyak approved agar 3 baris marquee bisa menampilkan semua
-    // (cap 60: cukup untuk toko, tetap ringan di homepage).
+    // Cap 60: cukup untuk 2-baris marquee, tetap ringan di homepage.
     items = await fetchApprovedTestimonials(60);
   } catch {
     items = [];

@@ -5,11 +5,12 @@ import { useEffect, useMemo, useRef } from "react";
 import { Quote, Star } from "lucide-react";
 import type { Testimonial } from "@/types";
 
-const ROW_COUNT = 3;
+/** 2 baris — lebih boutique; 3 baris terasa ramai di homepage. */
+const ROW_COUNT = 2;
 /** Minimal item per baris agar loop marquee terasa penuh. */
 const MIN_PER_ROW = 4;
 /** Kecepatan geser (px/detik) — beda tipis per baris biar tidak sinkron kaku. */
-const ROW_SPEEDS = [38, 32, 44] as const;
+const ROW_SPEEDS = [34, 28] as const;
 
 function getInitials(name: string): string {
   return name
@@ -44,12 +45,12 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 /**
- * Kartu compact untuk 3-row marquee.
- * ~272px (17rem) — pas: 4–5 kartu terlihat di desktop, tetap kebaca di HP.
+ * Kartu compact untuk 2-row marquee.
+ * ~288px — sedikit lebih lapang biar terasa premium, tetap kebaca di HP.
  */
 function TestimonialCard({ t }: { t: Testimonial }) {
   return (
-    <article className="group relative flex h-full w-[min(78vw,17rem)] shrink-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md hover:shadow-primary/10">
+    <article className="group relative flex h-full w-[min(80vw,18rem)] shrink-0 flex-col overflow-hidden rounded-2xl border border-border/50 bg-white/95 p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md hover:shadow-primary/10">
       <div
         aria-hidden
         className="pointer-events-none absolute -right-5 -top-5 h-16 w-16 rounded-full bg-primary/5 transition-transform duration-300 group-hover:scale-110"
@@ -57,25 +58,25 @@ function TestimonialCard({ t }: { t: Testimonial }) {
 
       <div className="relative flex items-start justify-between gap-2">
         <StarRating rating={t.rating} />
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blush-50 text-primary/70">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blush-50 text-primary/65">
           <Quote className="h-3 w-3" aria-hidden />
         </span>
       </div>
 
-      <blockquote className="relative mt-2.5 flex-1">
+      <blockquote className="relative mt-3 flex-1">
         <p className="line-clamp-3 text-[13px] leading-relaxed text-foreground/80">
           “{t.message}”
         </p>
       </blockquote>
 
-      <footer className="relative mt-3.5 flex items-center gap-2.5 border-t border-border/50 pt-3">
-        <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary/15 to-blush-50 text-[10px] font-semibold text-primary shadow-sm ring-2 ring-white">
+      <footer className="relative mt-4 flex items-center gap-2.5 border-t border-border/40 pt-3.5">
+        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary/15 to-blush-50 text-[10px] font-semibold text-primary shadow-sm ring-2 ring-white">
           {t.avatar ? (
             <Image
               src={t.avatar}
               alt={t.name}
               fill
-              sizes="32px"
+              sizes="36px"
               className="object-cover"
             />
           ) : (
@@ -83,7 +84,7 @@ function TestimonialCard({ t }: { t: Testimonial }) {
           )}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-[13px] font-semibold tracking-tight">
+          <p className="truncate text-sm font-semibold tracking-tight">
             {t.name}
           </p>
         </div>
@@ -195,9 +196,9 @@ function MarqueeRow({
 }
 
 /**
- * 3 baris marquee bergiliran.
+ * 2 baris marquee bergiliran (boutique, tidak ramai).
  * - Semua item di-sebar round-robin ke baris (tidak ada yang "hilang").
- * - Arah selang-seling (kiri / kanan / kiri) biar dinamis.
+ * - Arah selang-seling (kiri / kanan) biar dinamis.
  * - Hover di area mana pun = pause semua baris.
  * - JS rAF: tetap jalan di Windows Server (CSS animation sering dimatikan).
  */
@@ -211,7 +212,7 @@ export function TestimonialMarquee({ items }: { items: Testimonial[] }) {
 
   return (
     <div
-      className="testimonial-marquee relative mt-12 space-y-3"
+      className="testimonial-marquee relative mt-12 space-y-4"
       aria-label="Testimoni pelanggan"
       onMouseEnter={() => {
         pausedRef.current = true;

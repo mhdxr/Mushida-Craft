@@ -19,7 +19,7 @@ interface ProductCardProps {
   index?: number;
 }
 
-/** Kartu produk tanpa animasi client — gambar & link selalu aktif. */
+/** Kartu produk premium — spasi lapang, tipografi tenang, hover halus. */
 export function ProductCard({ product }: ProductCardProps) {
   const cat = categoryMap[product.category];
   const isSoldOut = product.badge === "sold-out" || !product.isAvailable;
@@ -27,15 +27,15 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={`/produk/${product.slug}`}
-      className="group block overflow-hidden rounded-2xl border border-border/60 bg-white shadow-sm transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10"
+      className="group block overflow-hidden rounded-2xl border border-border/50 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/10"
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
+      <div className="relative aspect-[4/5] overflow-hidden bg-secondary/60">
         <Image
           src={product.images[0] ?? "/placeholder.png"}
           alt={product.name}
           fill
           sizes="(max-width: 768px) 50vw, 25vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
         {product.badge && (
           <div className="absolute left-3 top-3">
@@ -45,21 +45,21 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
         {isSoldOut && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <span className="rounded-full bg-white/90 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-foreground">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/35 backdrop-blur-[1px]">
+            <span className="rounded-full bg-white/95 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
               Sold Out
             </span>
           </div>
         )}
       </div>
-      <div className="space-y-2 p-4">
-        <p className="text-xs font-medium uppercase tracking-wider text-primary">
+      <div className="space-y-1.5 px-4 py-4 md:px-5 md:py-5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary/90">
           {cat?.name}
         </p>
-        <h3 className="font-serif text-lg font-semibold leading-tight tracking-tight">
+        <h3 className="font-serif text-base font-semibold leading-snug tracking-tight md:text-lg">
           {product.name}
         </h3>
-        <p className="text-sm font-semibold text-foreground">
+        <p className="pt-0.5 text-sm font-medium tracking-wide text-foreground/90">
           {formatCurrency(product.price)}
         </p>
       </div>

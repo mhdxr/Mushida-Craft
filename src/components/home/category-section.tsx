@@ -21,31 +21,33 @@ const categoryIcons: Record<ProductCategory, LucideIcon> = {
 
 export function CategorySection() {
   return (
-    <section className="section-soft py-16 md:py-24">
+    <section id="kategori" className="section-soft py-16 md:py-24">
       <div className="container">
         <SectionHeading
           eyebrow="Kategori"
-          title="Temukan rangkaian sesuai momen"
-          description="Spesialisasi kami: Snack, Money, Artifisial, Graduation, dan Satin."
+          title="Rangkaian untuk setiap momen"
+          description="Snack, money, artifisial, graduation, dan satin — pilih yang paling dekat dengan ceritamu."
         />
-        <div className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-5">
+        <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-5">
           {categories.map((cat) => {
             const Icon = categoryIcons[cat.id];
             return (
               <Link
                 key={cat.id}
                 href={`/katalog?category=${cat.id}`}
-                className="group flex h-full flex-col items-center gap-3 rounded-2xl border border-border/60 bg-white p-6 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
+                className="group flex h-full flex-col items-center gap-3.5 rounded-2xl border border-border/50 bg-white/90 px-4 py-7 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md hover:shadow-primary/10"
               >
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-blush-50 text-primary transition-colors group-hover:bg-primary/10">
-                  <Icon className="h-7 w-7" />
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blush-50 to-cream-100 text-primary ring-1 ring-primary/10 transition-transform duration-300 group-hover:scale-105">
+                  <Icon className="h-6 w-6" />
                 </span>
-                <h3 className="font-serif text-base font-semibold tracking-tight">
-                  {cat.name}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {cat.description}
-                </p>
+                <div className="space-y-1.5">
+                  <h3 className="font-serif text-[15px] font-semibold tracking-tight">
+                    {cat.name}
+                  </h3>
+                  <p className="text-[11px] leading-relaxed text-muted-foreground">
+                    {cat.description}
+                  </p>
+                </div>
               </Link>
             );
           })}

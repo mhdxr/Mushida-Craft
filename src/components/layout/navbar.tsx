@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/", label: "Beranda" },
   { href: "/katalog", label: "Katalog" },
-  { href: "/custom-order", label: "Custom Order" },
+  { href: "/custom-order", label: "Custom" },
   { href: "/#testimoni", label: "Testimoni" },
+  { href: "/#cara-order", label: "Cara Order" },
 ];
 
 export function Navbar() {
@@ -20,12 +20,10 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const menuId = useId();
 
-  // Tutup menu saat route berubah.
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  // Tutup menu saat Escape ditekan.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -35,7 +33,6 @@ export function Navbar() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  // Kunci scroll body saat menu mobile terbuka.
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -50,40 +47,50 @@ export function Navbar() {
     (href !== "/" && !href.startsWith("/#") && pathname.startsWith(href));
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-white/80 backdrop-blur-md">
-      <div className="container flex h-16 items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 w-full border-b border-border/30 bg-white/75 backdrop-blur-xl">
+      <div className="container flex h-[4.25rem] items-center justify-between gap-6">
         <BrandLogo size="sm" priority />
 
-        <nav className="hidden min-w-0 items-center gap-6 lg:gap-8 md:flex">
+        <nav className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "text-sm font-medium transition-colors hover:text-foreground",
+                "relative rounded-full px-4 py-2 text-[13px] tracking-wide transition-colors",
                 isActive(link.href)
-                  ? "text-foreground"
-                  : "text-muted-foreground",
+                  ? "font-medium text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {link.label}
+              {isActive(link.href) ? (
+                <span
+                  aria-hidden
+                  className="absolute inset-x-4 -bottom-0.5 mx-auto h-px bg-primary/70"
+                />
+              ) : null}
             </Link>
           ))}
         </nav>
 
         <div className="hidden md:flex">
-          <Button asChild size="sm">
-            <Link href="/katalog">Belanja Sekarang</Link>
+          <Button
+            asChild
+            size="sm"
+            variant="outline"
+            className="border-primary/25 bg-white/80 px-5 text-[13px] tracking-wide hover:border-primary/40 hover:bg-blush-50"
+          >
+            <Link href="/katalog">Lihat Katalog</Link>
           </Button>
         </div>
 
-        {/* Hit target ≥ 44×44; ikon Menu/X cross-fade + rotate. */}
         <button
           type="button"
           aria-label={open ? "Tutup menu" : "Buka menu"}
           aria-expanded={open}
           aria-controls={menuId}
-          className="relative z-50 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border/60 bg-white text-foreground shadow-sm transition-transform active:scale-95 md:hidden"
+          className="relative z-50 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border/50 bg-white/90 text-foreground shadow-sm transition-transform active:scale-95 md:hidden"
           onClick={() => setOpen((v) => !v)}
         >
           <Menu
@@ -107,27 +114,25 @@ export function Navbar() {
         </button>
       </div>
 
-      {/* Backdrop: selalu ter-mount, fade + blur; klik menutup menu. */}
       <div
         aria-hidden
         onClick={() => setOpen(false)}
         className={cn(
-          "fixed inset-0 top-16 z-40 bg-foreground/20 backdrop-blur-sm transition-opacity duration-300 ease-out md:hidden motion-reduce:transition-none",
+          "fixed inset-0 top-[4.25rem] z-40 bg-foreground/15 backdrop-blur-sm transition-opacity duration-300 ease-out md:hidden motion-reduce:transition-none",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
       />
 
-      {/* Panel: selalu ter-mount — fade + slide-down + scale (bukan unmount). */}
       <div
         id={menuId}
         className={cn(
-          "absolute inset-x-0 top-16 z-40 origin-top border-b border-border/60 bg-white shadow-lg transition-all duration-300 ease-out md:hidden motion-reduce:transition-none motion-reduce:duration-0",
+          "absolute inset-x-0 top-[4.25rem] z-40 origin-top border-b border-border/40 bg-white/95 shadow-xl shadow-primary/5 backdrop-blur-xl transition-all duration-300 ease-out md:hidden motion-reduce:transition-none motion-reduce:duration-0",
           open
             ? "translate-y-0 scale-100 opacity-100"
             : "pointer-events-none -translate-y-3 scale-[0.98] opacity-0",
         )}
       >
-        <div className="container flex flex-col gap-1 py-4">
+        <div className="container flex flex-col gap-1 py-5">
           {navLinks.map((link, i) => (
             <Link
               key={link.href}
@@ -137,12 +142,12 @@ export function Navbar() {
                 transitionDelay: open ? `${80 + i * 45}ms` : "0ms",
               }}
               className={cn(
-                "rounded-lg px-3 py-3 text-sm font-medium transition-all duration-300 ease-out motion-reduce:transition-none motion-reduce:delay-0",
+                "rounded-xl px-4 py-3.5 text-sm tracking-wide transition-all duration-300 ease-out motion-reduce:transition-none motion-reduce:delay-0",
                 open
                   ? "translate-y-0 opacity-100"
                   : "translate-y-1 opacity-0",
                 isActive(link.href)
-                  ? "bg-secondary text-foreground"
+                  ? "bg-blush-50 font-medium text-foreground"
                   : "text-muted-foreground hover:bg-secondary hover:text-foreground",
               )}
             >
@@ -157,22 +162,21 @@ export function Navbar() {
                 : "0ms",
             }}
             className={cn(
-              "mt-2 transition-all duration-300 ease-out motion-reduce:transition-none motion-reduce:delay-0",
+              "mt-3 transition-all duration-300 ease-out motion-reduce:transition-none motion-reduce:delay-0",
               open
                 ? "translate-y-0 opacity-100"
                 : "translate-y-1 opacity-0",
             )}
           >
-            <Button asChild size="sm" className="w-full">
+            <Button asChild className="w-full tracking-wide">
               <Link href="/katalog" onClick={() => setOpen(false)}>
-                Belanja Sekarang
+                Lihat Katalog
               </Link>
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Fallback navigasi tanpa JS (SEO + HP dengan script gagal). */}
       <noscript>
         <nav className="border-t border-border/60 bg-white md:hidden">
           <div className="container flex flex-col gap-1 py-3">
@@ -189,7 +193,7 @@ export function Navbar() {
               href="/katalog"
               className="mt-1 rounded-full bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground"
             >
-              Belanja Sekarang
+              Lihat Katalog
             </a>
           </div>
         </nav>

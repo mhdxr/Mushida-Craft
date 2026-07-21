@@ -54,6 +54,30 @@ export async function fetchApprovedTestimonials(
 }
 
 /**
+ * Public: rata-rata rating testimoni approved (untuk social proof hero).
+ * Return null bila belum ada data — caller pakai fallback statis.
+ */
+export async function fetchApprovedRatingStats(): Promise<{
+  average: number;
+  count: number;
+} | null> {
+  const client = getBrowserSupabaseClient();
+  const { data, error } = await client
+    .from(TABLE)
+    .select("rating")
+    .eq("status", "approved");
+
+  if (error) throw error;
+  const rows = (data ?? []) as Array<{ rating: number }>;
+  if (rows.length === 0) return null;
+
+  const sum = rows.reduce((acc, row) => acc + (row.rating || 0), 0);
+  // 1 desimal, mis. 4.9 — cukup untuk badge hero.
+  const average = Math.round((sum / rows.length) * 10) / 10;
+  return { average, count: rows.length };
+}
+
+/**
  * Upload avatar ke Storage (service role).
  * Path: testimonials/<uuid>.<ext> di bucket product-images.
  * Return public URL, atau null bila file kosong.
