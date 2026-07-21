@@ -68,6 +68,24 @@
   .section-soft {
     background: linear-gradient(180deg, #fffaf6 0%, #fff5f1 100%);
   }
+
+  /* Marquee testimoni — fade di tepi (animasi di client component). */
+  .testimonial-marquee {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 5%,
+      #000 95%,
+      transparent
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 5%,
+      #000 95%,
+      transparent
+    );
+  }
 }
 
 /* ---------------------------------------------------------------------------

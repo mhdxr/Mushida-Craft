@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Send, Star } from "lucide-react";
+import { Camera, Send, Star, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,10 +12,18 @@ import {
   testimonialSchema,
   type TestimonialSchema,
 } from "@/lib/validations";
+import { MAX_AVATAR_FILE_SIZE } from "@/lib/testimonial-avatar";
 import { toast } from "@/hooks/use-toast";
+
+const ACCEPTED_AVATAR_TYPES = "image/jpeg,image/png,image/webp";
 
 export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
   const [hoverRating, setHoverRating] = useState(0);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const {
     register,
     handleSubmit,
@@ -27,7 +35,6 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
     resolver: zodResolver(testimonialSchema),
     defaultValues: {
       name: "",
-      role: "",
       message: "",
       rating: 5,
     },
@@ -35,17 +42,59 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
 
   const rating = watch("rating");
 
+  // Bersihkan object URL preview saat unmount / ganti file.
+  useEffect(() => {
+    return () => {
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    };
+  }, [avatarPreview]);
+
+  const clearAvatar = () => {
+    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setAvatarError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const onAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      clearAvatar();
+      return;
+    }
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setAvatarError("Format foto: JPEG, PNG, atau WebP.");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > MAX_AVATAR_FILE_SIZE) {
+      setAvatarError("Foto maksimal 1 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+    setAvatarError(null);
+  };
+
   const onSubmit = handleSubmit(async (data) => {
     try {
+      // multipart agar bisa kirim foto; tanpa foto tetap FormData (sederhana).
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("message", data.message);
+      formData.append("rating", String(data.rating));
+      if (avatarFile) {
+        formData.append("avatar", avatarFile);
+      }
+
       const res = await fetch("/api/testimonials", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: data.name,
-          role: data.role || undefined,
-          message: data.message,
-          rating: data.rating,
-        }),
+        body: formData,
       });
       const json = (await res.json().catch(() => null)) as {
         ok?: boolean;
@@ -60,7 +109,8 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
         json.message ||
           "Terima kasih! Testimoni Anda menunggu moderasi sebelum ditampilkan.",
       );
-      reset({ name: "", role: "", message: "", rating: 5 });
+      reset({ name: "", message: "", rating: 5 });
+      clearAvatar();
       onSuccess?.();
     } catch (err) {
       toast.error(
@@ -72,18 +122,84 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="rounded-2xl border border-border/60 bg-white p-6 shadow-sm md:p-8"
+      className="relative overflow-hidden rounded-2xl border border-border/60 bg-white p-6 shadow-sm md:p-8"
     >
-      <div className="mb-5">
-        <h3 className="font-serif text-lg font-semibold">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/5"
+      />
+
+      <div className="relative mb-6">
+        <h3 className="font-serif text-xl font-semibold tracking-tight">
           Bagikan pengalamanmu
         </h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1.5 text-sm text-muted-foreground">
           Testimoni akan ditinjau terlebih dahulu sebelum tampil di situs.
         </p>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="relative grid gap-5">
+        {/* Foto profil opsional */}
+        <div className="space-y-2">
+          <Label>
+            Foto profil{" "}
+            <span className="text-muted-foreground">(opsional)</span>
+          </Label>
+          <div className="flex items-center gap-4">
+            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/60 bg-secondary/50 text-muted-foreground">
+              {avatarPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element -- blob: preview, bukan remote URL
+                <img
+                  src={avatarPreview}
+                  alt="Preview foto profil"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <Camera className="h-5 w-5" aria-hidden />
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1 space-y-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept={ACCEPTED_AVATAR_TYPES}
+                className="sr-only"
+                id="testimonial-avatar"
+                onChange={onAvatarChange}
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Camera className="h-4 w-4" />
+                  {avatarFile ? "Ganti foto" : "Pilih foto"}
+                </Button>
+                {avatarFile ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearAvatar}
+                  >
+                    <X className="h-4 w-4" />
+                    Hapus
+                  </Button>
+                ) : null}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                JPEG/PNG/WebP · maks. 1 MB · tanpa foto pakai inisial nama
+              </p>
+              {avatarError ? (
+                <p className="text-xs text-destructive">{avatarError}</p>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="testimonial-name">Nama</Label>
           <Input
@@ -97,23 +213,9 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="testimonial-role">
-            Peran <span className="text-muted-foreground">(opsional)</span>
-          </Label>
-          <Input
-            id="testimonial-role"
-            placeholder="Contoh: Mahasiswi, Customer"
-            {...register("role")}
-          />
-          {errors.role && (
-            <p className="text-xs text-destructive">{errors.role.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-2 md:col-span-2">
           <Label>Rating</Label>
           <div
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 rounded-xl border border-border/60 bg-secondary/40 px-3 py-2.5"
             role="radiogroup"
             aria-label="Rating bintang"
           >
@@ -127,7 +229,7 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
                   role="radio"
                   aria-checked={rating === value}
                   aria-label={`${value} bintang`}
-                  className="rounded p-0.5 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="rounded-md p-0.5 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   onMouseEnter={() => setHoverRating(value)}
                   onMouseLeave={() => setHoverRating(0)}
                   onClick={() =>
@@ -138,16 +240,16 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
                   }
                 >
                   <Star
-                    className={`h-7 w-7 ${
+                    className={`h-7 w-7 transition-colors ${
                       active
                         ? "fill-amber-400 text-amber-400"
-                        : "text-muted-foreground/40"
+                        : "text-muted-foreground/35"
                     }`}
                   />
                 </button>
               );
             })}
-            <span className="ml-2 text-sm text-muted-foreground">
+            <span className="ml-2 text-sm font-medium text-muted-foreground">
               {rating}/5
             </span>
           </div>
@@ -156,7 +258,7 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
           )}
         </div>
 
-        <div className="space-y-2 md:col-span-2">
+        <div className="space-y-2">
           <Label htmlFor="testimonial-message">Testimoni</Label>
           <Textarea
             id="testimonial-message"
@@ -170,7 +272,7 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
         </div>
       </div>
 
-      <div className="mt-6 flex justify-end">
+      <div className="relative mt-6 flex justify-end">
         <Button type="submit" disabled={isSubmitting}>
           <Send className="h-4 w-4" />
           {isSubmitting ? "Mengirim..." : "Kirim testimoni"}

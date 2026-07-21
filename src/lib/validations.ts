@@ -157,11 +157,6 @@ export const testimonialSchema = z.object({
     .string()
     .min(2, "Nama minimal 2 karakter")
     .max(60, "Nama maksimal 60 karakter"),
-  role: z
-    .string()
-    .max(40, "Peran maksimal 40 karakter")
-    .optional()
-    .or(z.literal("")),
   message: z
     .string()
     .min(10, "Testimoni minimal 10 karakter")

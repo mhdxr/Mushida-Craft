@@ -10,8 +10,11 @@ export function TestimonialFormToggle() {
 
   if (!open) {
     return (
-      <div className="flex justify-center">
-        <Button variant="outline" onClick={() => setOpen(true)}>
+      <div className="flex flex-col items-center gap-3 text-center">
+        <p className="text-sm text-muted-foreground">
+          Pernah pesan di Mushida Craft? Ceritakan pengalamanmu.
+        </p>
+        <Button variant="outline" size="lg" onClick={() => setOpen(true)}>
           <MessageSquarePlus className="h-4 w-4" />
           Bagikan pengalamanmu
         </Button>
@@ -21,7 +24,10 @@ export function TestimonialFormToggle() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="mb-3 flex justify-end">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          Tulis testimoni — kami tinjau dulu sebelum ditampilkan.
+        </p>
         <Button
           type="button"
           variant="ghost"
