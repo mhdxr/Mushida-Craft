@@ -44,10 +44,9 @@ const priceOptions: { value: PriceRange; label: string }[] = [
 const categoryChips: {
   id: ProductCategory | "all";
   name: string;
-  icon?: string;
 }[] = [
-  { id: "all", name: "Semua", icon: "✨" },
-  ...categories.map((c) => ({ id: c.id, name: c.name, icon: c.icon })),
+  { id: "all", name: "Semua" },
+  ...categories.map((c) => ({ id: c.id, name: c.name })),
 ];
 
 export function CatalogFilters({
@@ -62,7 +61,6 @@ export function CatalogFilters({
 
   return (
     <div className="space-y-4">
-      {/* Search */}
       <div className="relative">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -70,11 +68,11 @@ export function CatalogFilters({
           aria-label="Cari bouquet"
           value={value.search}
           onChange={(e) => onChange({ ...value, search: e.target.value })}
-          className="h-11 rounded-full border-border/70 bg-white pl-10 pr-4 shadow-none"
+          className="h-11 rounded-full border-border/60 bg-secondary/30 pl-10 pr-4 shadow-none focus-visible:bg-white"
         />
       </div>
 
-      {/* Chip kategori — scroll horizontal di mobile */}
+      {/* Chip kategori — tenang, tanpa emoji berisik */}
       <div
         className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="listbox"
@@ -95,26 +93,20 @@ export function CatalogFilters({
                 })
               }
               className={cn(
-                "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition-all",
+                "inline-flex shrink-0 items-center rounded-full border px-3.5 py-2 text-[13px] font-medium tracking-wide transition-all",
                 active
-                  ? "border-primary/40 bg-primary text-primary-foreground shadow-sm shadow-primary/25"
-                  : "border-border/70 bg-white text-foreground hover:border-primary/30 hover:bg-blush-50",
+                  ? "border-primary/30 bg-blush-50 text-foreground shadow-sm"
+                  : "border-border/60 bg-white text-muted-foreground hover:border-primary/25 hover:text-foreground",
               )}
             >
-              {chip.icon ? (
-                <span className="text-sm leading-none" aria-hidden>
-                  {chip.icon}
-                </span>
-              ) : null}
               {chip.name}
             </button>
           );
         })}
       </div>
 
-      {/* Harga + hitungan + reset */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           <Select
             value={value.price}
             onValueChange={(v) =>
@@ -122,7 +114,7 @@ export function CatalogFilters({
             }
           >
             <SelectTrigger
-              className="h-9 w-auto min-w-[9.5rem] rounded-full border-border/70 bg-white px-3 text-xs md:min-w-[12rem] md:text-sm"
+              className="h-9 w-auto min-w-[10rem] rounded-full border-border/60 bg-white px-3 text-xs md:min-w-[12.5rem] md:text-sm"
               aria-label="Filter harga"
             >
               <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
@@ -138,7 +130,8 @@ export function CatalogFilters({
           </Select>
 
           <p className="text-sm text-muted-foreground">
-            <strong className="text-foreground">{total}</strong> produk
+            <strong className="font-medium text-foreground">{total}</strong>{" "}
+            produk
           </p>
         </div>
 
@@ -146,7 +139,7 @@ export function CatalogFilters({
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-full"
+            className="rounded-full text-muted-foreground hover:text-foreground"
             onClick={() =>
               onChange({ search: "", category: "all", price: "all" })
             }

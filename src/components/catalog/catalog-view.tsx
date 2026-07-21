@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { ArrowUpRight } from "lucide-react";
 import { ProductGrid } from "@/components/product/product-grid";
 import {
   CatalogFilters,
@@ -64,7 +66,6 @@ export function CatalogView({ initialProducts }: CatalogViewProps) {
     price: "all",
   });
 
-  // Data sudah dari server — tidak ada client fetch yang bisa hang.
   const products = initialProducts;
 
   useEffect(() => {
@@ -97,29 +98,36 @@ export function CatalogView({ initialProducts }: CatalogViewProps) {
     filters.price !== "all";
 
   const activeParts = buildActiveFilterSummary(filters);
+  const categoryTitle =
+    filters.category !== "all"
+      ? categoryMap[filters.category]?.name
+      : null;
 
-  const scrollToFilters = () => {
-    filtersRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  const resetFilters = () =>
+    setFilters({ search: "", category: "all", price: "all" });
+
+  // Katalog benar-benar kosong (bukan filter ketat).
+  if (products.length === 0) {
+    return (
+      <div className="container py-10 md:py-14">
+        <CatalogHeader />
+        <EmptyState
+          title="Katalog sedang diperbarui"
+          description="Belum ada produk yang ditampilkan. Kamu bisa request custom bouquet sementara, atau cek lagi nanti."
+          primaryHref="/custom-order"
+          primaryLabel="Request custom"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="container py-10 md:py-14">
-      <div className="mb-10 max-w-2xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-          Katalog
-        </p>
-        <h1 className="mt-2 font-serif text-3xl font-semibold tracking-tight md:text-4xl">
-          Jelajahi koleksi bouquet kami
-        </h1>
-        <p className="mt-3 text-base text-muted-foreground">
-          Setiap rangkaian dibuat tangan dengan bunga premium. Filter sesuai
-          momen dan budget yang kamu inginkan.
-        </p>
-      </div>
+      <CatalogHeader categoryTitle={categoryTitle} />
 
       <div
         ref={filtersRef}
-        className="mb-6 scroll-mt-24 rounded-2xl border border-border/40 bg-gradient-to-b from-white to-cream-50/80 p-4 shadow-sm md:p-5"
+        className="mb-8 scroll-mt-24 rounded-2xl border border-border/50 bg-white/90 p-4 shadow-sm md:p-5"
       >
         <CatalogFilters
           value={filters}
@@ -131,33 +139,75 @@ export function CatalogView({ initialProducts }: CatalogViewProps) {
       {isFiltered && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
           <p>
-            <strong className="text-foreground">{filtered.length}</strong> produk
+            <strong className="font-medium text-foreground">
+              {filtered.length}
+            </strong>{" "}
+            produk
             {activeParts.length > 0 ? (
-              <>
+              <span className="text-muted-foreground">
                 {" "}
                 · {activeParts.join(" · ")}
-              </>
+              </span>
             ) : null}
           </p>
           <button
             type="button"
-            onClick={scrollToFilters}
-            className="font-medium text-primary underline-offset-4 hover:underline"
+            onClick={resetFilters}
+            className="font-medium tracking-wide text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
           >
-            Ubah filter
+            Reset filter
           </button>
         </div>
       )}
 
       {filtered.length === 0 ? (
         <EmptyState
-          onReset={() =>
-            setFilters({ search: "", category: "all", price: "all" })
-          }
+          onReset={resetFilters}
+          title="Tidak ada yang cocok"
+          description="Coba ubah kata kunci, kategori, atau rentang harga — atau request custom sesuai momenmu."
+          primaryHref="/custom-order"
+          primaryLabel="Request custom"
         />
       ) : (
         <ProductGrid products={filtered} />
       )}
+
+      <div className="mt-14 flex flex-col items-start justify-between gap-4 rounded-2xl border border-border/50 bg-secondary/30 px-6 py-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="font-serif text-lg font-semibold tracking-tight">
+            Belum ketemu yang pas?
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Ceritakan ide kamu — kami bantu rancang custom via WhatsApp.
+          </p>
+        </div>
+        <Link
+          href="/custom-order"
+          className="group inline-flex shrink-0 items-center gap-1.5 border-b border-foreground/20 pb-0.5 text-sm font-medium tracking-wide transition-colors hover:border-primary hover:text-primary"
+        >
+          Custom bouquet
+          <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function CatalogHeader({ categoryTitle }: { categoryTitle?: string | null }) {
+  return (
+    <div className="mb-10 max-w-2xl">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+        Katalog
+      </p>
+      <h1 className="mt-2 font-serif text-3xl font-semibold leading-[1.15] tracking-tight md:text-4xl">
+        {categoryTitle
+          ? `Koleksi ${categoryTitle}`
+          : "Jelajahi koleksi bouquet"}
+      </h1>
+      <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+        Snack, money, artifisial, graduation, dan satin — handmade premium.
+        Filter sesuai momen dan budgetmu.
+      </p>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { CatalogView } from "@/components/catalog/catalog-view";
+import CatalogLoading from "@/app/katalog/loading";
 import { fetchProducts } from "@/lib/product-api";
 import { products as seedProducts } from "@/data/products";
 import { canonicalAlternates } from "@/lib/site";
@@ -9,7 +10,7 @@ import type { Product } from "@/types";
 export const metadata: Metadata = {
   title: "Katalog Bouquet",
   description:
-    "Jelajahi koleksi bouquet Mushida Craft. Filter berdasarkan kategori, harga, dan temukan rangkaian sempurna untuk momen spesialmu.",
+    "Jelajahi koleksi bouquet handmade Mushida Craft — snack, money, artifisial, graduation, dan satin. Filter kategori & budget.",
   alternates: canonicalAlternates("/katalog"),
 };
 
@@ -28,13 +29,7 @@ export default async function CatalogPage() {
   const products = await loadCatalogProducts();
 
   return (
-    <Suspense
-      fallback={
-        <div className="container py-10 text-sm text-muted-foreground">
-          Memuat katalog...
-        </div>
-      }
-    >
+    <Suspense fallback={<CatalogLoading />}>
       <CatalogView initialProducts={products} />
     </Suspense>
   );
