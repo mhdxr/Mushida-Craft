@@ -104,3 +104,5 @@ Public Supabase Storage bucket `product-images`. `next.config.mjs` derives `next
 
 - Client data fetching lives in hooks (`use-products`, `use-testimonials`) with `useEffect`+`setState`. Some ESLint rules are intentionally disabled for this and for RHF `watch()` — see `eslint.config.mjs`.
 - Deploy on Vercel. Full env list: `.env.example` and `README.md`.
+- CI: `.github/workflows/ci.yml` runs `npm run verify` on push/PR to `master`.
+- Security headers: `vercel.json` + `next.config.mjs` `headers()` (CSP, HSTS, frame deny, nosniff).

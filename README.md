@@ -13,6 +13,17 @@ Web katalog bouquet bunga premium dengan halaman publik (beranda, katalog, detai
 - **SEO** — canonical per route, `robots.ts`, sitemap dinamis, JSON-LD LocalBusiness/Florist + Product + FAQPage.
 - **Observability** — Sentry + PostHog (no-op jika env kosong); funnel events (view_item, click_wa_*, submit_*).
 
+## 🔒 Security headers
+
+Ditetapkan di `vercel.json` (production Vercel) dan di-mirror di `next.config.mjs` `headers()` (berlaku juga untuk `next start`):
+
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY` / CSP `frame-ancestors 'none'`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` (camera/mic/geo off)
+- `Strict-Transport-Security` (HSTS)
+- `Content-Security-Policy` — `script-src 'self'` (+ inline/eval untuk Next); gambar Unsplash + Supabase; connect Supabase + Sentry; PostHog lewat proxy `/ingest` (same-origin)
+
 ## 🛠️ Tech Stack
 
 | Layer | Teknologi |
@@ -122,6 +133,8 @@ npm run type-check   # tsc --noEmit
 npm run lint
 npm run verify       # type-check + lint
 ```
+
+CI GitHub Actions (`.github/workflows/ci.yml`) menjalankan `npm run verify` di setiap push/PR ke `master`.
 
 ## 🗄️ Supabase Setup (Backend Database)
 
