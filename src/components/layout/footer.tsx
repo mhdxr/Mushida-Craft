@@ -15,6 +15,7 @@ const exploreLinks = [
   { href: "/custom-order", label: "Custom Order" },
   { href: "/#cara-order", label: "Cara Order" },
   { href: "/#testimoni", label: "Testimoni" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 export function Footer() {

@@ -12,7 +12,7 @@ const navLinks = [
   { href: "/katalog", label: "Katalog" },
   { href: "/custom-order", label: "Custom" },
   { href: "/#testimoni", label: "Testimoni" },
-  { href: "/#cara-order", label: "Cara Order" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 export function Navbar() {

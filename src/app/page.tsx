@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Hero } from "@/components/home/hero";
+import { TrustStrip } from "@/components/home/trust-strip";
 import { CategorySection } from "@/components/home/category-section";
 import { FeaturedProducts } from "@/components/home/featured-products";
 import { TestimonialsSection } from "@/components/home/testimonials-section";
 import { HowToOrder } from "@/components/home/how-to-order";
+import { FaqSection } from "@/components/home/faq-section";
 import { canonicalAlternates } from "@/lib/site";
 
 /** ISR 5 menit — homepage tidak memicu loading overlay dinamis terus-menerus. */
@@ -66,12 +68,8 @@ function FeaturedProductsFallback() {
 }
 
 /**
- * Tata letak homepage (kembali ke alur asli):
- * 1. Hero        — janji brand + CTA
- * 2. Unggulan    — produk nyata dulu
- * 3. Kategori    — browse tipe bouquet
- * 4. Testimoni   — social proof
- * 5. Cara order  — penutup alur beli
+ * Tata letak homepage:
+ * Hero → Trust → Unggulan → Kategori → Testimoni → Cara order → FAQ
  */
 export default function HomePage() {
   return (
@@ -79,12 +77,14 @@ export default function HomePage() {
       <Suspense fallback={<HeroFallback />}>
         <Hero />
       </Suspense>
+      <TrustStrip />
       <Suspense fallback={<FeaturedProductsFallback />}>
         <FeaturedProducts />
       </Suspense>
       <CategorySection />
       <TestimonialsSection />
       <HowToOrder />
+      <FaqSection />
     </>
   );
 }

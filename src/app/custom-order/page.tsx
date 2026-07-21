@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Clock, Heart, Sparkles } from "lucide-react";
 import { CustomOrderForm } from "@/components/custom-order/custom-order-form";
 import { DeliveryNote } from "@/components/common/delivery-note";
+import { faqItems } from "@/data/faq";
 import { getDeliveryInfo } from "@/lib/delivery";
 import { canonicalAlternates } from "@/lib/site";
 
@@ -71,6 +72,36 @@ export default function CustomOrderPage() {
           </div>
 
           <DeliveryNote showWhatsAppCta />
+
+          {/* FAQ ringkas — 4 pertanyaan paling sering di custom order */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              FAQ singkat
+            </p>
+            <div className="space-y-2">
+              {faqItems.slice(0, 4).map((item) => (
+                <details
+                  key={item.question}
+                  className="group rounded-xl border border-border/50 bg-white px-4 open:shadow-sm"
+                >
+                  <summary className="cursor-pointer list-none py-3 text-sm font-medium tracking-tight marker:content-none [&::-webkit-details-marker]:hidden">
+                    <span className="flex items-center justify-between gap-3">
+                      <span>{item.question}</span>
+                      <span
+                        aria-hidden
+                        className="text-primary transition-transform group-open:rotate-45"
+                      >
+                        +
+                      </span>
+                    </span>
+                  </summary>
+                  <p className="border-t border-border/40 pb-3 pt-2 text-xs leading-relaxed text-muted-foreground">
+                    {item.answer}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="order-1 md:order-2">
