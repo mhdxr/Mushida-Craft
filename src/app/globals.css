@@ -46,18 +46,18 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Heading serif: tracking netral — rapi, tidak “poster” atau editorial keras. */
-  h1,
-  h2,
-  h3,
+  /*
+   * Heading boutique: Cormorant Garamond via .font-serif.
+   * Sedikit lebih longgar di size besar biar lekukan elegan terbaca.
+   */
   .font-serif {
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
     font-feature-settings: "kern" 1, "liga" 1;
   }
 }

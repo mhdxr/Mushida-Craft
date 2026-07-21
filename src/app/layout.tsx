@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Source_Sans_3, Source_Serif_4 } from "next/font/google";
+import { Cormorant_Garamond, Inter } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFab } from "@/components/common/whatsapp-fab";
@@ -9,23 +9,22 @@ import { buildLocalBusinessJsonLd, getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 /**
- * Body UI — netral, rapi, premium tanpa kesan “trendy”.
- * Source Sans 3: humanist sans klasik (Adobe), mudah dibaca.
+ * Body / UI — Inter (pasangan natural shadcn/ui).
+ * Navbar, form, filter, tabel admin, deskripsi: rapi & mudah dibaca.
  */
-const sourceSans = Source_Sans_3({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-source-sans",
+  variable: "--font-inter",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
 });
 
 /**
- * Heading — serif tenang, elegan, tidak display/nyentrik.
- * Source Serif 4: pasangan resmi Source Sans.
+ * Heading — Cormorant Garamond (premium boutique florist).
+ * Hero, H1–H3, nama produk: elegan, organik, kontras tinggi.
  */
-const sourceSerif = Source_Serif_4({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-source-serif",
+  variable: "--font-cormorant",
   display: "swap",
   weight: ["500", "600", "700"],
   style: ["normal", "italic"],
@@ -102,10 +101,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="id"
-      className={`${sourceSans.variable} ${sourceSerif.variable}`}
-    >
+    <html lang="id" className={`${inter.variable} ${cormorant.variable}`}>
       <body className="font-sans antialiased">
         <script
           type="application/ld+json"

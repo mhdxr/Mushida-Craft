@@ -80,14 +80,11 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: [
-          "var(--font-source-sans)",
-          "ui-sans-serif",
-          "system-ui",
-          "sans-serif",
-        ],
+        // Body / UI / admin — Inter (shadcn-friendly)
+        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui", "sans-serif"],
+        // Heading / hero / nama produk — Cormorant Garamond (boutique)
         serif: [
-          "var(--font-source-serif)",
+          "var(--font-cormorant)",
           "ui-serif",
           "Georgia",
           "Times New Roman",
