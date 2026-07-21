@@ -188,3 +188,71 @@ export async function consumeTestimonialSubmit(
   attempts.count += 1;
   return { allowed: true };
 }
+
+// ---------------------------------------------------------------------------
+// Inquiry log rate limit — 30 / jam / IP (klik WA sering, tapi cegah spam)
+// ---------------------------------------------------------------------------
+
+export const INQUIRY_MAX_PER_HOUR = 30;
+export const INQUIRY_WINDOW_MS = 60 * 60 * 1000;
+
+interface InquiryAttempts {
+  count: number;
+  expiresAt: number;
+}
+
+const inquiryAttempts = new Map<string, InquiryAttempts>();
+let inquiryRedisRatelimit: Ratelimit | null = null;
+let warnedAboutInquiryFallback = false;
+
+function getInquiryRedisRatelimit(): Ratelimit | null {
+  if (!hasUpstashEnv()) return null;
+  if (inquiryRedisRatelimit) return inquiryRedisRatelimit;
+
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL!,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  });
+
+  inquiryRedisRatelimit = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(INQUIRY_MAX_PER_HOUR, "1 h"),
+    prefix: "inquiry:log",
+    analytics: false,
+  });
+  return inquiryRedisRatelimit;
+}
+
+function warnInquiryFallbackOnce() {
+  if (warnedAboutInquiryFallback) return;
+  warnedAboutInquiryFallback = true;
+  console.warn(
+    "[rate-limit] Upstash belum diset — rate limit inquiry memakai Map in-memory.",
+  );
+}
+
+export async function consumeInquiryLog(
+  ip: string,
+): Promise<{ allowed: boolean }> {
+  const limiter = getInquiryRedisRatelimit();
+  if (limiter) {
+    const result = await limiter.limit(ip);
+    return { allowed: result.success };
+  }
+
+  warnInquiryFallbackOnce();
+  const now = Date.now();
+  const attempts = inquiryAttempts.get(ip);
+  if (!attempts || attempts.expiresAt <= now) {
+    inquiryAttempts.set(ip, {
+      count: 1,
+      expiresAt: now + INQUIRY_WINDOW_MS,
+    });
+    return { allowed: true };
+  }
+  if (attempts.count >= INQUIRY_MAX_PER_HOUR) {
+    return { allowed: false };
+  }
+  attempts.count += 1;
+  return { allowed: true };
+}

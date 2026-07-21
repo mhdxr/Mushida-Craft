@@ -20,6 +20,7 @@ import {
   type CustomOrderSchema,
 } from "@/lib/validations";
 import { AnalyticsEvent, track } from "@/lib/analytics";
+import { logInquiry } from "@/lib/log-inquiry";
 import { buildCustomOrderMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
 import { toast } from "@/hooks/use-toast";
 
@@ -97,6 +98,19 @@ export function CustomOrderForm() {
       occasion: data.occasion,
       delivery_area: data.deliveryArea,
       source: "custom_order_form",
+    });
+    logInquiry({
+      source: "custom_order",
+      customerName: data.name,
+      customerWa: data.whatsapp,
+      notes: data.notes,
+      meta: {
+        bouquetType: data.bouquetType,
+        budget: data.budget,
+        neededDate: data.neededDate,
+        occasion: data.occasion,
+        deliveryArea: data.deliveryArea,
+      },
     });
     setSubmitted(true);
     toast.success("Form terkirim. Membuka WhatsApp...");

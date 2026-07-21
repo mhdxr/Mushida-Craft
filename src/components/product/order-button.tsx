@@ -3,6 +3,7 @@
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnalyticsEvent, track } from "@/lib/analytics";
+import { logInquiry } from "@/lib/log-inquiry";
 import {
   buildProductOrderMessage,
   buildWhatsAppUrl,
@@ -37,7 +38,7 @@ export function OrderButton({
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={() =>
+        onClick={() => {
           track(AnalyticsEvent.CLICK_WA_PRODUCT, {
             product_id: product.id,
             product_slug: product.slug,
@@ -45,8 +46,16 @@ export function OrderButton({
             price: product.price,
             category: product.category,
             source: "pdp_inline",
-          })
-        }
+          });
+          logInquiry({
+            source: "pdp_inline",
+            productId: product.id,
+            productSlug: product.slug,
+            productName: product.name,
+            productPrice: product.price,
+            meta: { category: product.category },
+          });
+        }}
       >
         <MessageCircle className="h-4 w-4" />
         Order via WhatsApp

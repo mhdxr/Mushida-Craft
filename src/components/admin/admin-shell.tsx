@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Flower2,
+  Inbox,
   LayoutDashboard,
   Loader2,
   LogOut,
@@ -36,6 +37,12 @@ const navItems = [
     label: "Testimoni",
     icon: MessageSquareQuote,
     match: (path: string) => path.startsWith("/admin/testimoni"),
+  },
+  {
+    href: "/admin/inquiries",
+    label: "Inquiry WA",
+    icon: Inbox,
+    match: (path: string) => path.startsWith("/admin/inquiries"),
   },
 ];
 
