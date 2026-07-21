@@ -81,15 +81,16 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
-          "var(--font-jakarta)",
+          "var(--font-source-sans)",
           "ui-sans-serif",
           "system-ui",
           "sans-serif",
         ],
         serif: [
-          "var(--font-cormorant)",
+          "var(--font-source-serif)",
           "ui-serif",
           "Georgia",
+          "Times New Roman",
           "serif",
         ],
       },

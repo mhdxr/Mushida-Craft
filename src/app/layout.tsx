@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
+import { Source_Sans_3, Source_Serif_4 } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { WhatsAppFab } from "@/components/common/whatsapp-fab";
@@ -8,18 +8,24 @@ import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { buildLocalBusinessJsonLd, getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
-/** Body UI — rapi, modern, premium (lebih soft dari Inter). */
-const jakarta = Plus_Jakarta_Sans({
+/**
+ * Body UI — netral, rapi, premium tanpa kesan “trendy”.
+ * Source Sans 3: humanist sans klasik (Adobe), mudah dibaca.
+ */
+const sourceSans = Source_Sans_3({
   subsets: ["latin"],
-  variable: "--font-jakarta",
+  variable: "--font-source-sans",
   display: "swap",
   weight: ["400", "500", "600", "700"],
 });
 
-/** Heading serif — elegan editorial (lebih halus dari Playfair). */
-const cormorant = Cormorant_Garamond({
+/**
+ * Heading — serif tenang, elegan, tidak display/nyentrik.
+ * Source Serif 4: pasangan resmi Source Sans.
+ */
+const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
-  variable: "--font-cormorant",
+  variable: "--font-source-serif",
   display: "swap",
   weight: ["500", "600", "700"],
   style: ["normal", "italic"],
@@ -96,7 +102,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={`${jakarta.variable} ${cormorant.variable}`}>
+    <html
+      lang="id"
+      className={`${sourceSans.variable} ${sourceSerif.variable}`}
+    >
       <body className="font-sans antialiased">
         <script
           type="application/ld+json"
