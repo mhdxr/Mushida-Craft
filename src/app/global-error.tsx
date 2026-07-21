@@ -4,16 +4,8 @@ import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
 
 /**
- * Global error boundary.
- *
- * File ini WAJIB ada terpisah dari error.tsx karena menangkap error
- * yang terjadi di root layout (layout.tsx) — error.tsx tidak bisa
- * menangkap error dari komponen yang membungkusnya.
- *
- * Harus merender <html> dan <body> sendiri karena layout root
- * tidak di-render saat error terjadi di level ini.
- *
- * @see https://nextjs.org/docs/app/building-your-application/routing/error-handling#global-error
+ * Global error boundary (root layout).
+ * Harus merender <html> + <body> sendiri.
  */
 export default function GlobalError({
   error,
@@ -31,7 +23,8 @@ export default function GlobalError({
       <body
         style={{
           margin: 0,
-          fontFamily: "system-ui, -apple-system, sans-serif",
+          fontFamily:
+            "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
           background: "#fff8f5",
           color: "#2b1a1f",
           minHeight: "100vh",
@@ -40,19 +33,51 @@ export default function GlobalError({
           justifyContent: "center",
         }}
       >
-        <div style={{ textAlign: "center", padding: "2rem", maxWidth: 480 }}>
-          <h1 style={{ fontSize: "1.75rem", fontWeight: 600 }}>
+        <div style={{ textAlign: "center", padding: "2rem", maxWidth: 440 }}>
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              margin: "0 auto",
+              borderRadius: "9999px",
+              background: "rgba(232, 90, 122, 0.12)",
+              color: "#e85a7a",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 28,
+              fontWeight: 700,
+            }}
+            aria-hidden
+          >
+            !
+          </div>
+          <h1
+            style={{
+              marginTop: "1.25rem",
+              fontSize: "1.75rem",
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+            }}
+          >
             Terjadi kesalahan
           </h1>
-          <p style={{ marginTop: "0.5rem", color: "#6b5a5f", fontSize: "0.9rem" }}>
-            Maaf, terjadi error tak terduga. Tim kami sudah diberi notifikasi.
-            Silakan coba lagi.
+          <p
+            style={{
+              marginTop: "0.6rem",
+              color: "#6b5a5f",
+              fontSize: "0.9rem",
+              lineHeight: 1.55,
+            }}
+          >
+            Maaf, terjadi error tak terduga. Silakan coba muat ulang halaman.
           </p>
           <button
+            type="button"
             onClick={reset}
             style={{
               marginTop: "1.5rem",
-              padding: "0.625rem 1.5rem",
+              padding: "0.7rem 1.6rem",
               borderRadius: "9999px",
               border: "none",
               background: "#e85a7a",
@@ -60,6 +85,7 @@ export default function GlobalError({
               fontWeight: 600,
               fontSize: "0.875rem",
               cursor: "pointer",
+              letterSpacing: "0.02em",
             }}
           >
             Coba lagi

@@ -1,6 +1,8 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import {
   createTestimonial,
+  fetchApprovedTestimonials,
   removeTestimonialAvatarByUrl,
   uploadTestimonialAvatar,
 } from "@/lib/testimonial-api";
@@ -15,6 +17,37 @@ function getClientIp(req: Request): string {
     req.headers.get("x-real-ip") ||
     "unknown"
   );
+}
+
+/**
+ * GET /api/testimonials — daftar testimoni approved (publik).
+ * Dipakai homepage client fetch agar tidak tergantung ISR 5 menit.
+ */
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const limitRaw = Number(searchParams.get("limit") || "60");
+    const limit = Number.isFinite(limitRaw)
+      ? Math.min(Math.max(limitRaw, 1), 60)
+      : 60;
+
+    const testimonials = await fetchApprovedTestimonials(limit);
+    return NextResponse.json(
+      { ok: true, testimonials },
+      {
+        headers: {
+          // Browser boleh cache sebentar; admin approve akan revalidatePath.
+          "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+        },
+      },
+    );
+  } catch (err) {
+    console.error("Gagal mengambil testimoni publik:", err);
+    return NextResponse.json(
+      { ok: false, message: "Terjadi kesalahan pada server.", testimonials: [] },
+      { status: 500 },
+    );
+  }
 }
 
 /**
@@ -112,12 +145,19 @@ export async function POST(req: Request) {
       avatar: uploadedAvatarUrl ?? undefined,
     });
 
+    // Admin list / dashboard bisa stale di edge — soft revalidate.
+    try {
+      revalidatePath("/admin/dashboard");
+    } catch {
+      // ignore di env tanpa cache
+    }
+
     return NextResponse.json(
       {
         ok: true,
         message:
-          "Terima kasih! Testimoni Anda menunggu moderasi sebelum ditampilkan.",
-        testimonial: { id: testimonial.id },
+          "Terima kasih! Testimoni kamu menunggu moderasi admin sebelum tampil di homepage.",
+        testimonial: { id: testimonial.id, status: "pending" },
       },
       { status: 201 },
     );
@@ -128,7 +168,13 @@ export async function POST(req: Request) {
     }
     console.error("Gagal menyimpan testimoni:", err);
     return NextResponse.json(
-      { ok: false, message: "Terjadi kesalahan pada server." },
+      {
+        ok: false,
+        message:
+          err instanceof Error && /avatar|column/i.test(err.message)
+            ? "Gagal menyimpan. Pastikan migrasi testimoni (kolom avatar) sudah dijalankan di database."
+            : "Terjadi kesalahan pada server.",
+      },
       { status: 500 },
     );
   }

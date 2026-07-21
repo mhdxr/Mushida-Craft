@@ -1,9 +1,20 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
 import {
   approveTestimonial,
   deleteTestimonial,
 } from "@/lib/testimonial-api";
+
+function revalidatePublicTestimonials() {
+  try {
+    // Homepage SSR first paint + admin shell
+    revalidatePath("/");
+    revalidatePath("/admin/dashboard");
+  } catch {
+    // ignore
+  }
+}
 
 /**
  * PATCH /api/admin/testimonials/[id] — setujui testimoni (admin only).
@@ -45,6 +56,8 @@ export async function PATCH(
       );
     }
 
+    revalidatePublicTestimonials();
+
     return NextResponse.json({ ok: true, testimonial });
   } catch (err) {
     console.error("Gagal menyetujui testimoni:", err);
@@ -72,6 +85,7 @@ export async function DELETE(
 
     const { id } = await params;
     await deleteTestimonial(id);
+    revalidatePublicTestimonials();
     return NextResponse.json({ ok: true, message: "Testimoni dihapus." });
   } catch (err) {
     console.error("Gagal menghapus testimoni:", err);

@@ -114,7 +114,7 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
 
       toast.success(
         json.message ||
-          "Terima kasih! Testimoni Anda menunggu moderasi sebelum ditampilkan.",
+          "Terima kasih! Testimoni kamu masuk antrean moderasi. Setelah admin setujui, akan tampil di homepage.",
       );
       reset({ name: "", message: "", rating: 5 });
       clearAvatar();
