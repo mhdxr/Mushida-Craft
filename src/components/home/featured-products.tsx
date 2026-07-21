@@ -13,6 +13,9 @@ export async function FeaturedProducts() {
     products = getFeaturedProducts(4);
   }
 
+  // Jangan tampilkan heading kosong bila tidak ada produk.
+  if (products.length === 0) return null;
+
   return (
     <section className="container py-16 md:py-24">
       <div className="flex flex-col items-start justify-between gap-5 md:flex-row md:items-end md:gap-8">

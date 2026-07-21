@@ -10,13 +10,16 @@ import {
 
 /**
  * FAB WhatsApp global.
- * Disembunyikan di halaman produk: sticky order bar sudah jadi CTA utama di mobile.
+ * Disembunyikan di:
+ * - /produk/*  → sticky order bar jadi CTA utama
+ * - /admin/*   → jangan ganggu dashboard
  */
 export function WhatsAppFab() {
-  const pathname = usePathname();
-  const onProductPage = pathname?.startsWith("/produk/");
+  const pathname = usePathname() || "/";
+  const hidden =
+    pathname.startsWith("/produk/") || pathname.startsWith("/admin");
 
-  if (onProductPage) return null;
+  if (hidden) return null;
 
   const url = buildWhatsAppUrl(buildDefaultInquiryMessage());
 
@@ -29,12 +32,12 @@ export function WhatsAppFab() {
       onClick={() =>
         track(AnalyticsEvent.CLICK_WA_FAB, {
           source: "fab",
-          path: pathname || "/",
+          path: pathname,
         })
       }
       className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-emerald-500/30 transition-transform hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/40 active:scale-95 md:bottom-6 md:right-6"
     >
-      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#25D366] opacity-30" />
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#25D366] opacity-30 motion-reduce:animate-none" />
       <MessageCircle className="relative h-6 w-6" />
       <span className="sr-only">Chat WhatsApp</span>
     </a>

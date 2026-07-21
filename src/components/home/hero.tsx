@@ -80,7 +80,7 @@ export async function Hero() {
           </h1>
           <p className="max-w-md text-base leading-relaxed text-muted-foreground md:text-lg">
             Bouquet handmade premium — snack, money, artifisial, graduation,
-            dan satin — dirangkai personal untuk momen spesial Anda.
+            dan satin — dirangkai personal untuk momen spesialmu.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -127,7 +127,7 @@ export async function Hero() {
               <p className="font-serif text-2xl font-semibold tracking-tight text-foreground md:text-[1.75rem]">
                 {DELIVERY_TIME}
               </p>
-              <p className="mt-0.5 text-xs tracking-wide">Same-day delivery</p>
+              <p className="mt-0.5 text-xs tracking-wide">Same-day</p>
             </div>
           </div>
         </div>

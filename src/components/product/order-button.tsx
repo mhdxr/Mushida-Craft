@@ -26,7 +26,7 @@ export function OrderButton({
   if (disabled) {
     return (
       <Button disabled size={size} className={className}>
-        Stok Habis
+        Stok habis
       </Button>
     );
   }

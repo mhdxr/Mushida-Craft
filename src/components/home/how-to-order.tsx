@@ -8,7 +8,7 @@ const steps = [
   {
     icon: Search,
     title: "Pilih rangkaian",
-    description: "Jelajahi katalog atau ceritakan ide custom Anda.",
+    description: "Jelajahi katalog atau ceritakan ide custom kamu.",
   },
   {
     icon: MessageCircle,
@@ -67,7 +67,7 @@ export function HowToOrder() {
               Siap merangkai momenmu?
             </p>
             <p className="text-sm text-muted-foreground">
-              Mulai dari katalog siap kirim, atau request custom sesuai cerita Anda.
+              Mulai dari katalog siap kirim, atau request custom sesuai ceritamu.
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">

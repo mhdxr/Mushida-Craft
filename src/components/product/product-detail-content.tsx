@@ -2,13 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Flower2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { DeliveryNote } from "@/components/common/delivery-note";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { OrderButton } from "@/components/product/order-button";
 import { StickyOrderBar } from "@/components/product/sticky-order-bar";
+import { ProductDetailSkeleton } from "@/components/product/product-detail-skeleton";
 import { ProductGrid } from "@/components/product/product-grid";
 import { SectionHeading } from "@/components/common/section-heading";
 import { categoryMap } from "@/data/categories";
@@ -86,7 +88,12 @@ export function ProductDetailContent({
           return;
         }
 
-        if (resolved && listRes.ok && listJson?.ok && Array.isArray(listJson.products)) {
+        if (
+          resolved &&
+          listRes.ok &&
+          listJson?.ok &&
+          Array.isArray(listJson.products)
+        ) {
           setRelated(
             findRelatedProducts(resolved, listJson.products as Product[], 4),
           );
@@ -102,25 +109,41 @@ export function ProductDetailContent({
   }, [slug, initialProduct]);
 
   if (status === "loading") {
-    return null; // loading.tsx yang menangani skeleton
+    return <ProductDetailSkeleton />;
   }
 
   if (status === "not-found" || !product) {
     return (
-      <div className="container py-20 text-center">
-        <h1 className="font-serif text-2xl font-semibold">
-          Produk tidak ditemukan
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Produk mungkin telah dihapus atau URL tidak valid.
-        </p>
-        <Link
-          href="/katalog"
-          className="mt-6 inline-flex items-center gap-2 text-sm text-primary hover:underline"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Kembali ke katalog
-        </Link>
+      <div className="relative flex min-h-[60vh] items-center justify-center overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-60"
+          style={{
+            background:
+              "radial-gradient(circle at 50% 30%, rgba(255,196,213,0.35) 0%, transparent 60%)",
+          }}
+        />
+        <div className="container relative flex flex-col items-center py-16 text-center">
+          <Flower2 className="mb-4 h-12 w-12 text-primary/20" aria-hidden />
+          <h1 className="font-serif text-2xl font-semibold tracking-tight md:text-3xl">
+            Produk tidak ditemukan
+          </h1>
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+            Rangkaian ini mungkin sudah dihapus atau URL-nya tidak valid. Yuk
+            lihat koleksi lain yang masih tersedia.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button asChild>
+              <Link href="/katalog">Ke katalog</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/">
+                <ArrowLeft className="h-4 w-4" />
+                Ke beranda
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -132,7 +155,7 @@ export function ProductDetailContent({
     <div className="container py-10 md:py-14">
       <Link
         href="/katalog"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Kembali ke katalog
@@ -142,13 +165,13 @@ export function ProductDetailContent({
         <ProductGallery images={product.images} alt={product.name} />
 
         <div className="flex flex-col">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
             {cat?.name}
           </p>
           <h1 className="mt-2 font-serif text-3xl font-semibold tracking-tight md:text-4xl">
             {product.name}
           </h1>
-          <p className="mt-4 font-serif text-3xl font-semibold text-foreground">
+          <p className="mt-4 font-serif text-3xl font-semibold tracking-tight text-foreground">
             {formatCurrency(product.price)}
           </p>
 
@@ -183,12 +206,14 @@ export function ProductDetailContent({
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <OrderButton product={product} className="w-full sm:w-auto" />
-            <Link
-              href="/custom-order"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-border bg-background px-8 text-sm font-medium tracking-wide hover:bg-secondary"
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="w-full tracking-wide sm:w-auto"
             >
-              Custom Bouquet
-            </Link>
+              <Link href="/custom-order">Custom Bouquet</Link>
+            </Button>
           </div>
         </div>
       </div>

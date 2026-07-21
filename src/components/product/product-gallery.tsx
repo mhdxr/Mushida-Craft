@@ -15,7 +15,8 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-square overflow-hidden rounded-3xl border border-border/50 bg-secondary/60">
+      {/* aspect-[4/5] selaras kartu katalog & hero */}
+      <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-border/50 bg-secondary/60">
         <Image
           src={list[active]}
           alt={alt}
