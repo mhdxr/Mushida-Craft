@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { DeliveryNote } from "@/components/common/delivery-note";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { OrderButton } from "@/components/product/order-button";
+import { StickyOrderBar } from "@/components/product/sticky-order-bar";
 import { ProductGrid } from "@/components/product/product-grid";
 import { SectionHeading } from "@/components/common/section-heading";
 import { categoryMap } from "@/data/categories";
@@ -188,6 +189,10 @@ export function ProductDetailContent({
           </div>
         </section>
       )}
+
+      {/* Spacer agar konten tidak ketutup sticky bar di mobile */}
+      <div className="h-24 md:hidden" aria-hidden />
+      <StickyOrderBar product={product} />
     </div>
   );
 }

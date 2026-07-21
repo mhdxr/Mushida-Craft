@@ -1,11 +1,22 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { MessageCircle } from "lucide-react";
 import {
   buildDefaultInquiryMessage,
   buildWhatsAppUrl,
 } from "@/lib/whatsapp";
 
-/** FAB WhatsApp statis — tanpa Framer agar selalu klikable. */
+/**
+ * FAB WhatsApp global.
+ * Disembunyikan di halaman produk: sticky order bar sudah jadi CTA utama di mobile.
+ */
 export function WhatsAppFab() {
+  const pathname = usePathname();
+  const onProductPage = pathname?.startsWith("/produk/");
+
+  if (onProductPage) return null;
+
   const url = buildWhatsAppUrl(buildDefaultInquiryMessage());
 
   return (
