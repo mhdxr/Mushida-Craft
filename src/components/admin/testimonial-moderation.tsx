@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { Check, Loader2, Star, Trash2, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTestimonials } from "@/hooks/use-testimonials";
 import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import type { Testimonial } from "@/types";
+
+type Filter = "pending" | "approved" | "all";
 
 function getInitials(name: string): string {
   return name
@@ -136,6 +139,8 @@ function TestimonialRow({
 export function TestimonialModeration() {
   const { testimonials, isLoading, approve, remove } = useTestimonials();
   const [busyId, setBusyId] = useState<string | null>(null);
+  // Default: antrean menunggu — job harian admin.
+  const [filter, setFilter] = useState<Filter>("pending");
 
   const handleApprove = async (t: Testimonial) => {
     setBusyId(t.id);
@@ -169,31 +174,57 @@ export function TestimonialModeration() {
   const pendingCount = testimonials.filter((t) => t.status === "pending").length;
   const approvedCount = testimonials.length - pendingCount;
 
+  const visible = useMemo(() => {
+    if (filter === "pending") {
+      return testimonials.filter((t) => t.status === "pending");
+    }
+    if (filter === "approved") {
+      return testimonials.filter((t) => t.status === "approved");
+    }
+    return testimonials;
+  }, [testimonials, filter]);
+
+  const filters: { id: Filter; label: string; count: number }[] = [
+    { id: "pending", label: "Menunggu", count: pendingCount },
+    { id: "approved", label: "Disetujui", count: approvedCount },
+    { id: "all", label: "Semua", count: testimonials.length },
+  ];
+
   return (
-    <section className="mt-12">
+    <section>
       <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 className="font-serif text-2xl font-semibold tracking-tight">
-            Moderasi testimoni
-          </h2>
+          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
+            Testimoni
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Setujui testimoni pelanggan sebelum ditampilkan di homepage.
+            Setujui sebelum tampil di homepage. Pending ditampilkan dulu.
           </p>
         </div>
-
-        {!isLoading && testimonials.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-white px-3 py-1 text-xs font-medium text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-              {pendingCount} menunggu
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-white px-3 py-1 text-xs font-medium text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary/70" />
-              {approvedCount} disetujui
-            </span>
-          </div>
-        ) : null}
       </div>
+
+      {!isLoading && testimonials.length > 0 ? (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {filters.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              onClick={() => setFilter(f.id)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                filter === f.id
+                  ? "border-primary/30 bg-blush-50 text-foreground"
+                  : "border-border/50 bg-white text-muted-foreground hover:bg-secondary",
+              )}
+            >
+              {f.label}
+              <span className="tabular-nums text-muted-foreground">
+                {f.count}
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {isLoading ? (
         <div className="space-y-3 rounded-2xl border border-border/50 bg-white p-4 shadow-sm">
@@ -217,9 +248,14 @@ export function TestimonialModeration() {
             Testimoni yang dikirim pelanggan akan muncul di sini untuk ditinjau.
           </p>
         </div>
+      ) : visible.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border/70 bg-white p-10 text-center text-sm text-muted-foreground">
+          Tidak ada testimoni di filter ini.
+          {filter === "pending" ? " Semua sudah ditinjau." : null}
+        </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border/50 bg-white shadow-sm">
-          {testimonials.map((t) => (
+          {visible.map((t) => (
             <TestimonialRow
               key={t.id}
               t={t}

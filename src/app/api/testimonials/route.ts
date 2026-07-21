@@ -147,7 +147,7 @@ export async function POST(req: Request) {
 
     // Admin list / dashboard bisa stale di edge — soft revalidate.
     try {
-      revalidatePath("/admin/dashboard");
+      revalidatePath("/admin");
     } catch {
       // ignore di env tanpa cache
     }

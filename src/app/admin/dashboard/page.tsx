@@ -1,10 +1,6 @@
-import { AdminDashboard } from "@/components/admin/admin-dashboard";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Admin Dashboard",
-  robots: { index: false, follow: false },
-};
-
-export default function AdminDashboardPage() {
-  return <AdminDashboard />;
+/** Alias lama → ringkasan admin baru. */
+export default function AdminDashboardRedirect() {
+  redirect("/admin");
 }

@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { WhatsAppFab } from "@/components/common/whatsapp-fab";
+import { StoreChrome } from "@/components/layout/store-chrome";
 import { Toaster } from "@/components/common/toaster";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { buildLocalBusinessJsonLd, getSiteUrl } from "@/lib/site";
@@ -107,12 +105,10 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <Navbar />
         <PostHogProvider>
-          <main className="min-h-screen">{children}</main>
+          {/* StoreChrome: nav/footer/FAB toko; disembunyikan di /admin/* */}
+          <StoreChrome>{children}</StoreChrome>
         </PostHogProvider>
-        <Footer />
-        <WhatsAppFab />
         <Toaster />
       </body>
     </html>

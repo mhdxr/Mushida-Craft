@@ -28,7 +28,7 @@ export async function middleware(req: NextRequest) {
   if (isLogin) {
     if (session) {
       const dash = req.nextUrl.clone();
-      dash.pathname = "/admin/dashboard";
+      dash.pathname = "/admin";
       dash.search = "";
       return NextResponse.redirect(dash);
     }

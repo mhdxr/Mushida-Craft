@@ -10,7 +10,7 @@ function revalidatePublicTestimonials() {
   try {
     // Homepage SSR first paint + admin shell
     revalidatePath("/");
-    revalidatePath("/admin/dashboard");
+    revalidatePath("/admin");
   } catch {
     // ignore
   }

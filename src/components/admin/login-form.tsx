@@ -38,7 +38,7 @@ export function LoginForm() {
         return;
       }
       // Cookie sesi admin sudah di-set oleh API route (HTTP-only).
-      router.replace("/admin/dashboard");
+      router.replace("/admin");
     } catch {
       setError("Terjadi kesalahan. Coba lagi.");
     }

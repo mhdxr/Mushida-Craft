@@ -1,5 +1,10 @@
-import { redirect } from "next/navigation";
+import { AdminOverview } from "@/components/admin/admin-overview";
 
-export default function AdminIndexPage() {
-  redirect("/admin/login");
+export const metadata = {
+  title: "Admin · Ringkasan",
+  robots: { index: false, follow: false },
+};
+
+export default function AdminHomePage() {
+  return <AdminOverview />;
 }
