@@ -55,6 +55,8 @@ export async function GET() {
     checkOptional("UPSTASH_REDIS_REST_TOKEN"),
     checkOptional("NEXT_PUBLIC_SERVICE_CITY"),
     checkOptional("NEXT_PUBLIC_SERVICE_AREAS"),
+    checkOptional("RESEND_API_KEY"),
+    checkOptional("ADMIN_NOTIFY_EMAIL"),
   ];
 
   const missingRequired = required

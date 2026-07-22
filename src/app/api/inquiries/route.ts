@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { notifyNewInquiry } from "@/lib/admin-notify";
 import { createInquiry, type InquirySource } from "@/lib/inquiry-api";
 import { consumeInquiryLog } from "@/lib/rate-limit";
 
@@ -82,6 +83,16 @@ export async function POST(req: Request) {
         ip,
         userAgent: req.headers.get("user-agent")?.slice(0, 200) ?? undefined,
       },
+    });
+
+    // Email admin opsional (no-op tanpa RESEND_API_KEY) — fire-and-forget.
+    notifyNewInquiry({
+      id: inquiry.id,
+      source: inquiry.source,
+      productName: inquiry.productName,
+      customerName: inquiry.customerName,
+      customerWa: inquiry.customerWa,
+      notes: inquiry.notes,
     });
 
     return NextResponse.json(

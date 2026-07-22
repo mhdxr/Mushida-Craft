@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import { notifyNewTestimonial } from "@/lib/admin-notify";
 import {
   createTestimonial,
   fetchApprovedTestimonials,
@@ -143,6 +144,13 @@ export async function POST(req: Request) {
       message: result.data.message,
       rating: result.data.rating,
       avatar: uploadedAvatarUrl ?? undefined,
+    });
+
+    notifyNewTestimonial({
+      id: testimonial.id,
+      name: testimonial.name,
+      rating: testimonial.rating,
+      message: testimonial.message,
     });
 
     // Admin list / dashboard bisa stale di edge — soft revalidate.

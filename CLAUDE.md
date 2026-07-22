@@ -109,3 +109,4 @@ Public Supabase Storage bucket `product-images`. `next.config.mjs` derives `next
 - CI: `.github/workflows/ci.yml` runs `npm run verify` on push/PR to `master`.
 - Security headers: `vercel.json` + `next.config.mjs` `headers()` (CSP, HSTS, frame deny, nosniff).
 - Health: `GET /api/health` — env readiness (`ok` | `degraded` | `error`). Production without Upstash → `degraded` (in-memory rate limits).
+- Admin email notify (optional): `src/lib/admin-notify.ts` via Resend when `RESEND_API_KEY` set — fire-and-forget on new inquiry / pending testimonial.

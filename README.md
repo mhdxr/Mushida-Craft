@@ -27,6 +27,18 @@ curl -s https://your-domain/api/health | jq
 
 Response hanya boolean (tidak membocorkan secret). Cocok untuk uptime monitor.
 
+## 📧 Notifikasi admin (opsional)
+
+Email via [Resend](https://resend.com) saat ada **inquiry WA baru** atau **testimoni pending**.
+
+```env
+RESEND_API_KEY=re_xxx
+RESEND_FROM=Mushida Craft <noreply@your-domain.com>
+ADMIN_NOTIFY_EMAIL=owner@email.com   # default: ADMIN_EMAIL
+```
+
+Tanpa `RESEND_API_KEY`, notifikasi **no-op** (aman di dev). Link di email mengarah ke `/admin/inquiries` atau `/admin/testimoni`.
+
 ## 🔒 Security headers
 
 Ditetapkan di `vercel.json` (production Vercel) dan di-mirror di `next.config.mjs` `headers()` (berlaku juga untuk `next start`):
