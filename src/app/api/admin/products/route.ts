@@ -1,66 +1,17 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
-import {
-  fetchProducts,
-  fetchProductBySlug,
-  createProduct,
-  resetProducts,
-} from "@/lib/product-api";
+import { createProduct, resetProducts } from "@/lib/product-api";
 import { products as seedProducts } from "@/data/products";
 import { revalidateStorefront } from "@/lib/revalidate-storefront";
 import { productSchema } from "@/lib/validations";
+import { GET as publicProductsGet } from "@/app/api/products/route";
 import type { Product } from "@/types";
 
 /**
- * GET /api/admin/products — deprecated for public reads.
- * Prefer GET /api/products. Kept as thin alias for backward compatibility.
+ * GET /api/admin/products — alias baca (deprecated).
+ * Prefer GET /api/products. Delegasi penuh agar tidak ada logika ganda.
  */
-export async function GET(req: Request) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const slug = searchParams.get("slug");
-
-    if (slug) {
-      try {
-        const product = await fetchProductBySlug(slug);
-        if (!product) {
-          const seed = seedProducts.find((p) => p.slug === slug) ?? null;
-          if (!seed) {
-            return NextResponse.json(
-              { ok: false, message: "Produk tidak ditemukan." },
-              { status: 404 },
-            );
-          }
-          return NextResponse.json({ ok: true, product: seed });
-        }
-        return NextResponse.json({ ok: true, product });
-      } catch {
-        const seed = seedProducts.find((p) => p.slug === slug) ?? null;
-        if (!seed) {
-          return NextResponse.json(
-            { ok: false, message: "Produk tidak ditemukan." },
-            { status: 404 },
-          );
-        }
-        return NextResponse.json({ ok: true, product: seed });
-      }
-    }
-
-    try {
-      const products = await fetchProducts();
-      return NextResponse.json({ ok: true, products });
-    } catch (err) {
-      console.error("Gagal fetch Supabase, fallback seed:", err);
-      return NextResponse.json({ ok: true, products: seedProducts });
-    }
-  } catch (err) {
-    console.error("Gagal mengambil data produk:", err);
-    return NextResponse.json(
-      { ok: false, message: "Terjadi kesalahan pada server." },
-      { status: 500 },
-    );
-  }
-}
+export const GET = publicProductsGet;
 
 /**
  * POST /api/admin/products — create / reset seed (admin only).
