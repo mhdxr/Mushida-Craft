@@ -58,6 +58,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [pendingTestimonials, setPendingTestimonials] = useState(0);
+  const [newInquiries, setNewInquiries] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -82,15 +83,24 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     let active = true;
     const load = async () => {
       try {
-        const res = await fetch("/api/admin/testimonials", {
-          cache: "no-store",
-        });
-        const json = await res.json();
-        if (!active || !json.ok || !Array.isArray(json.testimonials)) return;
-        const n = json.testimonials.filter(
-          (t: { status?: string }) => t.status === "pending",
-        ).length;
-        setPendingTestimonials(n);
+        const [tRes, iRes] = await Promise.all([
+          fetch("/api/admin/testimonials", { cache: "no-store" }),
+          fetch("/api/admin/inquiries?count=new", { cache: "no-store" }),
+        ]);
+        const tJson = await tRes.json().catch(() => null);
+        const iJson = await iRes.json().catch(() => null);
+        if (!active) return;
+
+        if (tJson?.ok && Array.isArray(tJson.testimonials)) {
+          setPendingTestimonials(
+            tJson.testimonials.filter(
+              (t: { status?: string }) => t.status === "pending",
+            ).length,
+          );
+        }
+        if (iJson?.ok && typeof iJson.count === "number") {
+          setNewInquiries(iJson.count);
+        }
       } catch {
         // ignore
       }
@@ -154,8 +164,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           {navItems.map((item) => {
             const active = item.match(pathname);
             const Icon = item.icon;
-            const showBadge =
-              item.href === "/admin/testimoni" && pendingTestimonials > 0;
+            const badgeCount =
+              item.href === "/admin/testimoni"
+                ? pendingTestimonials
+                : item.href === "/admin/inquiries"
+                  ? newInquiries
+                  : 0;
+            const showBadge = badgeCount > 0;
             return (
               <Link
                 key={item.href}
@@ -179,9 +194,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     <span className="flex-1">{item.label}</span>
                     {showBadge ? (
                       <span className="rounded-full bg-accent/20 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-accent-foreground">
-                        {pendingTestimonials > 99
-                          ? "99+"
-                          : pendingTestimonials}
+                        {badgeCount > 99 ? "99+" : badgeCount}
                       </span>
                     ) : null}
                   </>
@@ -268,8 +281,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             {navItems.map((item) => {
               const active = item.match(pathname);
               const Icon = item.icon;
-              const showBadge =
-                item.href === "/admin/testimoni" && pendingTestimonials > 0;
+              const badgeCount =
+                item.href === "/admin/testimoni"
+                  ? pendingTestimonials
+                  : item.href === "/admin/inquiries"
+                    ? newInquiries
+                    : 0;
+              const showBadge = badgeCount > 0;
               return (
                 <Link
                   key={item.href}
@@ -285,9 +303,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   {item.label}
                   {showBadge ? (
                     <span className="rounded-full bg-accent/25 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-accent-foreground">
-                      {pendingTestimonials > 99
-                        ? "99+"
-                        : pendingTestimonials}
+                      {badgeCount > 99 ? "99+" : badgeCount}
                     </span>
                   ) : null}
                 </Link>
