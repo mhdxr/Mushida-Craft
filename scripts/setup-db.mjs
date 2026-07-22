@@ -64,16 +64,14 @@ async function main() {
 
   // ── Koneksi & eksekusi ───────────────────────────────────────────────────
   console.log("🔌 Menghubungkan ke database...");
-  // Supabase pooler di Windows/Node sering gagal dengan
-  // "self-signed certificate in certificate chain" (intermediate CA).
-  // Default: longgarkan verifikasi untuk host supabase.com.
-  // Set DB_SSL_STRICT=1 untuk enforce rejectUnauthorized:true.
+  // Default: SSL ketat (rejectUnauthorized:true).
+  // Hanya longgarkan bila DB_SSL_INSECURE=1 (Windows/Node + intermediate CA
+  // Supabase pooler kadang gagal verifikasi).
   const isSupabase = /supabase\.com/i.test(DB_URL);
-  const strictSsl =
-    process.env.DB_SSL_STRICT === "1" || process.env.DB_SSL_INSECURE === "0";
+  const allowInsecure = process.env.DB_SSL_INSECURE === "1";
   const client = new Client({
     connectionString: DB_URL,
-    ssl: isSupabase ? { rejectUnauthorized: strictSsl } : undefined,
+    ssl: isSupabase ? { rejectUnauthorized: !allowInsecure } : undefined,
   });
 
   try {

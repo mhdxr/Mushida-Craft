@@ -22,18 +22,16 @@ export async function GET(req: Request) {
     if (slug) {
       try {
         const product = await fetchProductBySlug(slug);
-        if (product) {
-          return NextResponse.json({ ok: true, product });
-        }
-        const seed = seedProducts.find((p) => p.slug === slug) ?? null;
-        if (!seed) {
+        // Query sukses + null = produk benar-benar tidak ada (jangan resurrect seed).
+        if (!product) {
           return NextResponse.json(
             { ok: false, message: "Produk tidak ditemukan." },
             { status: 404 },
           );
         }
-        return NextResponse.json({ ok: true, product: seed });
+        return NextResponse.json({ ok: true, product });
       } catch {
+        // DB belum siap / error → fallback seed agar dev tanpa Supabase tetap jalan.
         const seed = seedProducts.find((p) => p.slug === slug) ?? null;
         if (!seed) {
           return NextResponse.json(

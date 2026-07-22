@@ -16,7 +16,17 @@ export const customOrderSchema = z.object({
     .regex(/^[0-9+\-\s]+$/, "Nomor WhatsApp hanya boleh berisi angka"),
   bouquetType: z.string().min(2, "Pilih jenis bouquet").max(80),
   budget: z.string().min(2, "Masukkan kisaran budget").max(60),
-  neededDate: z.string().min(1, "Tanggal wajib diisi"),
+  neededDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Format tanggal tidak valid (YYYY-MM-DD)")
+    .refine((value) => {
+      const date = new Date(`${value}T00:00:00`);
+      if (Number.isNaN(date.getTime())) return false;
+      // Bandingkan tanggal lokal (bukan UTC) agar "hari ini" tidak ditolak di WIB.
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return date.getTime() >= today.getTime();
+    }, "Tanggal dibutuhkan tidak boleh di masa lalu"),
   occasion: z.string().min(2, "Pilih momen / occasion").max(80),
   deliveryArea: z.string().min(2, "Pilih area pengiriman").max(80),
   notes: z.string().max(500, "Catatan maksimal 500 karakter").optional(),
@@ -42,7 +52,9 @@ const productBaseSchema = z.object({
       error: (issue) =>
         issue.input === undefined ? "Harga wajib diisi" : "Harga harus berupa angka",
     })
-    .min(1000, "Harga minimal Rp1.000"),
+    .int("Harga harus bilangan bulat")
+    .min(1000, "Harga minimal Rp1.000")
+    .max(50_000_000, "Harga maksimal Rp50.000.000"),
   category: z.enum([
     "snack-bouquet",
     "money-bouquet",
@@ -135,7 +147,14 @@ const productImagesFormSchema = z.string().superRefine((value, context) => {
 });
 
 export const productSchema = productBaseSchema.extend({
-  slug: z.string().min(1, "Slug produk wajib diisi").max(100),
+  slug: z
+    .string()
+    .min(1, "Slug produk wajib diisi")
+    .max(100, "Slug maksimal 100 karakter")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Slug hanya boleh huruf kecil, angka, dan tanda hubung",
+    ),
   images: z
     .array(productImageSchema)
     .min(1, "Masukkan minimal 1 URL gambar")

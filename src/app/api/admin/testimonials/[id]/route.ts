@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { isAdminAuthenticated } from "@/lib/auth";
+import { guardAdminRequest } from "@/lib/admin-guard";
 import {
   approveTestimonial,
   deleteTestimonial,
@@ -25,12 +25,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    if (!(await isAdminAuthenticated())) {
-      return NextResponse.json(
-        { ok: false, message: "Unauthorized. Silakan login terlebih dahulu." },
-        { status: 401 },
-      );
-    }
+    const denied = await guardAdminRequest(req);
+    if (denied) return denied;
 
     const { id } = await params;
     let action = "approve";
@@ -72,16 +68,12 @@ export async function PATCH(
  * DELETE /api/admin/testimonials/[id] — hapus testimoni (admin only).
  */
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    if (!(await isAdminAuthenticated())) {
-      return NextResponse.json(
-        { ok: false, message: "Unauthorized. Silakan login terlebih dahulu." },
-        { status: 401 },
-      );
-    }
+    const denied = await guardAdminRequest(req);
+    if (denied) return denied;
 
     const { id } = await params;
     await deleteTestimonial(id);

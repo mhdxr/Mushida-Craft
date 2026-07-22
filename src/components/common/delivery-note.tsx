@@ -78,6 +78,7 @@ export function DeliveryNote({
           href={waUrl}
           event={AnalyticsEvent.CLICK_WA_DELIVERY}
           eventProps={{ source: "delivery_note" }}
+          inquiry={{ source: "delivery_note" }}
           className="mt-4 inline-flex items-center gap-2 text-sm font-medium tracking-wide text-foreground transition-colors hover:text-primary"
         >
           <MessageCircle className="h-4 w-4 text-primary" />

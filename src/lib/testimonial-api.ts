@@ -125,8 +125,12 @@ export async function removeTestimonialAvatarByUrl(
     const marker = `/object/public/${PRODUCT_IMAGES_BUCKET}/`;
     const idx = avatarUrl.indexOf(marker);
     if (idx === -1) return;
-    const path = avatarUrl.slice(idx + marker.length);
-    if (!path.startsWith(`${TESTIMONIAL_AVATAR_FOLDER}/`)) return;
+    // Strip query/hash (sama seperti product images) agar Storage remove akurat.
+    const path = avatarUrl
+      .slice(idx + marker.length)
+      .split("?")[0]
+      .split("#")[0];
+    if (!path || !path.startsWith(`${TESTIMONIAL_AVATAR_FOLDER}/`)) return;
 
     const { error } = await getServerSupabaseClient()
       .storage.from(PRODUCT_IMAGES_BUCKET)
@@ -179,6 +183,18 @@ export async function listAllTestimonials(): Promise<Testimonial[]> {
     if (a.status === b.status) return 0;
     return a.status === "pending" ? -1 : 1;
   });
+}
+
+/** Admin: hitung testimoni pending (badge nav — ringan). */
+export async function countPendingTestimonials(): Promise<number> {
+  const client = getServerSupabaseClient();
+  const { count, error } = await client
+    .from(TABLE)
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending");
+
+  if (error) throw error;
+  return count ?? 0;
 }
 
 /** Admin: setujui testimoni. */

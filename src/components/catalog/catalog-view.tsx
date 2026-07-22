@@ -14,20 +14,37 @@ import { EmptyState } from "@/components/catalog/empty-state";
 import { categoryIds, categoryMap } from "@/data/categories";
 import type { Product, ProductCategory } from "@/types";
 
-const priceRanges: Record<PriceRange, [number, number]> = {
-  all: [0, Number.POSITIVE_INFINITY],
-  "under-300": [0, 300_000],
-  "300-500": [300_000, 500_000],
-  "500-700": [500_000, 700_000],
-  "above-700": [700_000, Number.POSITIVE_INFINITY],
-};
+/**
+ * Rentang harga half-open di batas bawah bucket berikutnya agar
+ * harga persis di boundary (300rb / 500rb / 700rb) hanya masuk satu filter.
+ * - under-300:  price < 300_000
+ * - 300-500:    300_000 ≤ price ≤ 500_000
+ * - 500-700:    500_000 < price ≤ 700_000
+ * - above-700:  price > 700_000
+ */
+function matchesPriceRange(price: number, range: PriceRange): boolean {
+  switch (range) {
+    case "all":
+      return true;
+    case "under-300":
+      return price < 300_000;
+    case "300-500":
+      return price >= 300_000 && price <= 500_000;
+    case "500-700":
+      return price > 500_000 && price <= 700_000;
+    case "above-700":
+      return price > 700_000;
+    default:
+      return true;
+  }
+}
 
 const priceLabels: Record<PriceRange, string> = {
   all: "",
-  "under-300": "≤ Rp300rb",
+  "under-300": "< Rp300rb",
   "300-500": "Rp300–500rb",
   "500-700": "Rp500–700rb",
-  "above-700": "≥ Rp700rb",
+  "above-700": "> Rp700rb",
 };
 
 const allowedCategories: ProductCategory[] = categoryIds;
@@ -76,12 +93,11 @@ export function CatalogView({ initialProducts }: CatalogViewProps) {
   }, [searchParams]);
 
   const filtered = useMemo(() => {
-    const [min, max] = priceRanges[filters.price];
     const q = filters.search.trim().toLowerCase();
     return products.filter((p) => {
       if (filters.category !== "all" && p.category !== filters.category)
         return false;
-      if (p.price < min || p.price > max) return false;
+      if (!matchesPriceRange(p.price, filters.price)) return false;
       if (
         q &&
         !p.name.toLowerCase().includes(q) &&

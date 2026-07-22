@@ -28,6 +28,19 @@ export function canonicalAlternates(path = "/") {
 }
 
 /**
+ * Serialize JSON-LD aman untuk disisipkan di <script type="application/ld+json">.
+ * JSON.stringify saja tidak escape `</script>` / `<!--`, yang bisa break out dari tag.
+ */
+export function safeJsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\u003c")
+    .replace(/>/g, "\u003e")
+    .replace(/&/g, "\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
+
+/**
  * Parse jam operasional env → schema.org OpeningHoursSpecification.
  * Mendukung format seperti:
  *   "Senin–Sabtu · 09.00–18.00 WIB"

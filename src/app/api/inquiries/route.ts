@@ -16,6 +16,13 @@ const SOURCES = [
   "other",
 ] as const;
 
+const inquiryMetaValueSchema = z.union([
+  z.string().max(200),
+  z.number().finite(),
+  z.boolean(),
+  z.null(),
+]);
+
 const inquiryBodySchema = z.object({
   source: z.enum(SOURCES),
   productId: z.string().max(80).optional(),
@@ -25,7 +32,13 @@ const inquiryBodySchema = z.object({
   customerName: z.string().max(80).optional(),
   customerWa: z.string().max(30).optional(),
   notes: z.string().max(500).optional(),
-  meta: z.record(z.string(), z.any()).optional(),
+  // Batasi bentuk meta: primitif saja, max 12 key — cegah JSONB spam.
+  meta: z
+    .record(z.string().max(40), inquiryMetaValueSchema)
+    .refine((obj) => Object.keys(obj).length <= 12, {
+      message: "Meta terlalu banyak field.",
+    })
+    .optional(),
 });
 
 function getClientIp(req: Request): string {
@@ -43,13 +56,6 @@ function getClientIp(req: Request): string {
 export async function POST(req: Request) {
   try {
     const ip = getClientIp(req);
-    const { allowed } = await consumeInquiryLog(ip);
-    if (!allowed) {
-      return NextResponse.json(
-        { ok: false, message: "Terlalu banyak permintaan. Coba lagi nanti." },
-        { status: 429 },
-      );
-    }
 
     let body: unknown;
     try {
@@ -66,6 +72,15 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { ok: false, message: "Data inquiry tidak valid." },
         { status: 400 },
+      );
+    }
+
+    // Rate limit setelah validasi — body invalid tidak menghabiskan kuota.
+    const { allowed } = await consumeInquiryLog(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        { ok: false, message: "Terlalu banyak permintaan. Coba lagi nanti." },
+        { status: 429 },
       );
     }
 

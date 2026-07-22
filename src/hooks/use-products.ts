@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Product } from "@/types";
 
 /**
@@ -14,23 +15,36 @@ import type { Product } from "@/types";
  * Upload: POST /api/admin/upload            (admin only)
  */
 export function useProducts() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/products", { cache: "no-store" });
-      const json = await res.json();
-      if (json.ok && Array.isArray(json.products)) {
-        setProducts(json.products as Product[]);
+      if (res.status === 401) {
+        router.replace("/admin/login");
+        setError("Sesi berakhir. Silakan login ulang.");
+        return;
       }
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.ok || !Array.isArray(json.products)) {
+        setError(
+          (json && typeof json.message === "string" && json.message) ||
+            "Gagal memuat daftar produk.",
+        );
+        return;
+      }
+      setProducts(json.products as Product[]);
     } catch {
-      // Error sudah ditangani oleh error boundary; biarkan list kosong.
+      setError("Gagal memuat daftar produk. Periksa koneksi Anda.");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     refresh();
@@ -43,6 +57,10 @@ export function useProducts() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
+      if (res.status === 401) {
+        router.replace("/admin/login");
+        throw new Error("Sesi berakhir. Silakan login ulang.");
+      }
       const json = await res.json();
       if (!res.ok || !json.ok) {
         throw new Error(json.message || "Gagal membuat produk.");
@@ -50,7 +68,7 @@ export function useProducts() {
       await refresh();
       return json.product as Product;
     },
-    [refresh],
+    [refresh, router],
   );
 
   const update = useCallback(
@@ -60,6 +78,10 @@ export function useProducts() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
+      if (res.status === 401) {
+        router.replace("/admin/login");
+        throw new Error("Sesi berakhir. Silakan login ulang.");
+      }
       const json = await res.json();
       if (!res.ok || !json.ok) {
         throw new Error(json.message || "Gagal memperbarui produk.");
@@ -67,7 +89,7 @@ export function useProducts() {
       await refresh();
       return json.product as Product;
     },
-    [refresh],
+    [refresh, router],
   );
 
   const remove = useCallback(
@@ -75,13 +97,17 @@ export function useProducts() {
       const res = await fetch(`/api/admin/products/${id}`, {
         method: "DELETE",
       });
+      if (res.status === 401) {
+        router.replace("/admin/login");
+        throw new Error("Sesi berakhir. Silakan login ulang.");
+      }
       const json = await res.json();
       if (!res.ok || !json.ok) {
         throw new Error(json.message || "Gagal menghapus produk.");
       }
       await refresh();
     },
-    [refresh],
+    [refresh, router],
   );
 
   const reset = useCallback(async () => {
@@ -90,41 +116,53 @@ export function useProducts() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "reset" }),
     });
+    if (res.status === 401) {
+      router.replace("/admin/login");
+      throw new Error("Sesi berakhir. Silakan login ulang.");
+    }
     const json = await res.json();
     if (!res.ok || !json.ok) {
       throw new Error(json.message || "Gagal reset data.");
     }
     await refresh();
-  }, [refresh]);
+  }, [refresh, router]);
 
-  const uploadImages = useCallback(async (files: File[]): Promise<string[]> => {
-    const formData = new FormData();
-    files.forEach((file) => formData.append("files", file));
+  const uploadImages = useCallback(
+    async (files: File[]): Promise<string[]> => {
+      const formData = new FormData();
+      files.forEach((file) => formData.append("files", file));
 
-    const res = await fetch("/api/admin/upload", {
-      method: "POST",
-      body: formData,
-    });
-    const json = (await res.json().catch(() => null)) as {
-      ok?: boolean;
-      message?: string;
-      urls?: unknown;
-    } | null;
-    if (!res.ok || !json?.ok) {
-      throw new Error(json?.message || "Gagal mengunggah gambar.");
-    }
-    if (
-      !Array.isArray(json.urls) ||
-      !json.urls.every((url): url is string => typeof url === "string")
-    ) {
-      throw new Error("Respons upload gambar tidak valid.");
-    }
-    return json.urls;
-  }, []);
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.status === 401) {
+        router.replace("/admin/login");
+        throw new Error("Sesi berakhir. Silakan login ulang.");
+      }
+      const json = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        message?: string;
+        urls?: unknown;
+      } | null;
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.message || "Gagal mengunggah gambar.");
+      }
+      if (
+        !Array.isArray(json.urls) ||
+        !json.urls.every((url): url is string => typeof url === "string")
+      ) {
+        throw new Error("Respons upload gambar tidak valid.");
+      }
+      return json.urls;
+    },
+    [router],
+  );
 
   return {
     products,
     isLoading,
+    error,
     refresh,
     create,
     update,

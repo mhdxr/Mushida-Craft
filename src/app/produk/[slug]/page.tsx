@@ -5,7 +5,12 @@ import { fetchApprovedRatingStats } from "@/lib/testimonial-api";
 import { getProductBySlug, products as seedProducts } from "@/data/products";
 import { categoryMap } from "@/data/categories";
 import { toAbsoluteImageUrls } from "@/lib/image-url";
-import { absoluteUrl, canonicalAlternates, getSiteUrl } from "@/lib/site";
+import {
+  absoluteUrl,
+  canonicalAlternates,
+  getSiteUrl,
+  safeJsonLd,
+} from "@/lib/site";
 import type { Product } from "@/types";
 
 interface PageProps {
@@ -43,6 +48,21 @@ function productMetadata(product: Product): Metadata {
 }
 
 /**
+ * Resolve produk: DB dulu (data live), seed hanya jika query gagal
+ * (Supabase unconfigured/error). Null DB yang sukses = produk memang tidak ada.
+ */
+async function resolveProduct(slug: string): Promise<Product | null> {
+  try {
+    const fromDb = await fetchProductBySlug(slug);
+    // Query sukses: hormati hasil (termasuk null bila dihapus).
+    return fromDb;
+  } catch {
+    // DB belum siap / error jaringan → fallback seed agar build & dev tanpa DB tetap jalan.
+    return getProductBySlug(slug) ?? null;
+  }
+}
+
+/**
  * SSG params: seed (selalu) ∪ slug Supabase (jika DB tersedia saat build).
  * Gagal query → tetap build dari seed saja.
  */
@@ -64,31 +84,14 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-
-  const seedProduct = getProductBySlug(slug);
-  if (seedProduct) return productMetadata(seedProduct);
-
-  try {
-    const supaProduct = await fetchProductBySlug(slug);
-    if (supaProduct) return productMetadata(supaProduct);
-  } catch {
-    // ignore
-  }
-
+  const product = await resolveProduct(slug);
+  if (product) return productMetadata(product);
   return { title: "Produk tidak ditemukan" };
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
-
-  let product: Product | null = getProductBySlug(slug) ?? null;
-  if (!product) {
-    try {
-      product = await fetchProductBySlug(slug);
-    } catch {
-      // serahkan ke client
-    }
-  }
+  const product = await resolveProduct(slug);
 
   if (!product) {
     return <ProductDetailContent slug={slug} initialProduct={null} />;
@@ -184,11 +187,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(productJsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
       <ProductDetailContent slug={slug} initialProduct={product} />
     </>

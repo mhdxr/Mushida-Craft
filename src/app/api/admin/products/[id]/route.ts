@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthenticated } from "@/lib/auth";
+import { guardAdminRequest } from "@/lib/admin-guard";
 import {
   deleteProduct,
   fetchProductById,
@@ -20,12 +20,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    if (!(await isAdminAuthenticated())) {
-      return NextResponse.json(
-        { ok: false, message: "Unauthorized. Silakan login terlebih dahulu." },
-        { status: 401 },
-      );
-    }
+    const denied = await guardAdminRequest(req);
+    if (denied) return denied;
 
     const { id } = await params;
     let body: unknown;
@@ -78,10 +74,7 @@ export async function PATCH(
       );
     }
     return NextResponse.json(
-      {
-        ok: false,
-        message: msg || "Terjadi kesalahan pada server.",
-      },
+      { ok: false, message: "Terjadi kesalahan pada server." },
       { status: 500 },
     );
   }
@@ -92,32 +85,28 @@ export async function PATCH(
  * Juga membersihkan file di Supabase Storage (best-effort).
  */
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    if (!(await isAdminAuthenticated())) {
-      return NextResponse.json(
-        { ok: false, message: "Unauthorized. Silakan login terlebih dahulu." },
-        { status: 401 },
-      );
-    }
+    const denied = await guardAdminRequest(req);
+    if (denied) return denied;
 
     const { id } = await params;
     const before = await fetchProductById(id);
-    await deleteProduct(id);
+    const deleted = await deleteProduct(id);
+    if (!deleted) {
+      return NextResponse.json(
+        { ok: false, message: "Produk tidak ditemukan." },
+        { status: 404 },
+      );
+    }
     revalidateStorefront(before?.slug);
     return NextResponse.json({ ok: true, message: "Produk dihapus." });
   } catch (err) {
     console.error("Gagal menghapus produk:", err);
     return NextResponse.json(
-      {
-        ok: false,
-        message:
-          err instanceof Error && err.message
-            ? err.message
-            : "Terjadi kesalahan pada server.",
-      },
+      { ok: false, message: "Terjadi kesalahan pada server." },
       { status: 500 },
     );
   }

@@ -1,6 +1,6 @@
 import { SectionHeading } from "@/components/common/section-heading";
 import { faqItems } from "@/data/faq";
-import { absoluteUrl } from "@/lib/site";
+import { absoluteUrl, safeJsonLd } from "@/lib/site";
 
 /** FAQ accordion native (details/summary) + JSON-LD FAQPage. */
 export function FaqSection() {
@@ -22,7 +22,7 @@ export function FaqSection() {
     <section id="faq" className="container py-16 md:py-24">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
       />
 
       <SectionHeading

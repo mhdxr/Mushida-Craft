@@ -44,9 +44,15 @@ export function assertProductionAdminCredentials(): void {
     );
   }
 
-  if (!process.env.SESSION_SECRET?.trim()) {
+  const sessionSecret = process.env.SESSION_SECRET?.trim();
+  if (!sessionSecret) {
     throw new Error(
       "SESSION_SECRET wajib diisi di production. Gunakan nilai acak yang kuat.",
+    );
+  }
+  if (sessionSecret.length < 32) {
+    throw new Error(
+      "SESSION_SECRET terlalu pendek (<32 karakter). Gunakan minimal 32 karakter acak (mis. `openssl rand -base64 32`).",
     );
   }
 }

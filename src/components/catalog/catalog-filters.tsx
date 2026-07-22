@@ -38,7 +38,7 @@ const priceOptions: { value: PriceRange; label: string }[] = [
   { value: "all", label: "Semua harga" },
   { value: "under-300", label: "Di bawah Rp300.000" },
   { value: "300-500", label: "Rp300.000 – Rp500.000" },
-  { value: "500-700", label: "Rp500.000 – Rp700.000" },
+  { value: "500-700", label: "Di atas Rp500.000 – Rp700.000" },
   { value: "above-700", label: "Di atas Rp700.000" },
 ];
 

@@ -23,6 +23,8 @@ export function AdminProducts() {
   const {
     products,
     isLoading,
+    error,
+    refresh,
     create,
     update,
     remove,
@@ -174,7 +176,9 @@ export function AdminProducts() {
           <p className="mt-1 text-sm text-muted-foreground">
             {isLoading
               ? "Memuat..."
-              : `${products.length} produk · menampilkan ${filtered.length}`}
+              : error
+                ? "Gagal memuat data"
+                : `${products.length} produk · menampilkan ${filtered.length}`}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -261,6 +265,18 @@ export function AdminProducts() {
               </div>
             </div>
           ))}
+        </div>
+      ) : error ? (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center">
+          <p className="text-sm font-medium text-destructive">{error}</p>
+          <Button
+            size="sm"
+            variant="outline"
+            className="mt-4"
+            onClick={() => void refresh()}
+          >
+            Coba lagi
+          </Button>
         </div>
       ) : (
         <ProductTable

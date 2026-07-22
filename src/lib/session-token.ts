@@ -9,7 +9,8 @@
  */
 
 export const SESSION_COOKIE = "Mushida:admin-session";
-export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 hari (detik)
+/** Absolute session TTL — 3 hari (lebih pendek dari 7 agar cookie curian window lebih kecil). */
+export const SESSION_MAX_AGE = 60 * 60 * 24 * 3;
 
 export interface AdminSession {
   email: string;

@@ -39,12 +39,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  // Query sukses (termasuk list kosong) dihormati — jangan resurrect seed
+  // bila katalog production memang kosong. Seed hanya saat DB error/unconfigured.
   let products = seedProducts;
   try {
-    const supabaseProducts = await fetchProducts();
-    if (supabaseProducts.length > 0) {
-      products = supabaseProducts;
-    }
+    products = await fetchProducts();
   } catch {
     // fallback seed
   }
