@@ -129,6 +129,7 @@ export async function createProduct(
   // Seed lama (p01..p12) tetap tidak diubah.
   const id = randomUUID();
 
+  const now = new Date().toISOString();
   const { data, error } = await client
     .from(TABLE)
     .insert({
@@ -141,7 +142,8 @@ export async function createProduct(
       images: input.images,
       badge: input.badge ?? null,
       is_available: input.isAvailable,
-      created_at: new Date().toISOString(),
+      created_at: now,
+      updated_at: now,
     })
     .select("*")
     .single();
@@ -165,6 +167,8 @@ export async function updateProduct(
   if (input.images !== undefined) update.images = input.images;
   if (input.badge !== undefined) update.badge = input.badge ?? null;
   if (input.isAvailable !== undefined) update.is_available = input.isAvailable;
+  // Trigger DB juga set updated_at; set eksplisit agar konsisten meski trigger belum ada.
+  update.updated_at = new Date().toISOString();
 
   const { data, error } = await client
     .from(TABLE)

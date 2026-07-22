@@ -28,9 +28,26 @@ interface ProductRow {
   badge: ProductBadge | null;
   is_available: boolean;
   created_at: string;
+  updated_at?: string | null;
+}
+
+function toIsoDate(value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  if (typeof value === "string") {
+    // Simpan full ISO bila ada waktu; fallback slice date.
+    const d = new Date(value);
+    if (!Number.isNaN(d.getTime())) return d.toISOString();
+    return value.slice(0, 10);
+  }
+  return undefined;
 }
 
 export function rowToProduct(row: ProductRow): Product {
+  const createdAt =
+    typeof row.created_at === "string"
+      ? row.created_at.slice(0, 10)
+      : new Date(row.created_at).toISOString().slice(0, 10);
+
   return {
     id: row.id,
     slug: row.slug,
@@ -41,10 +58,8 @@ export function rowToProduct(row: ProductRow): Product {
     images: row.images ?? [],
     badge: row.badge ?? undefined,
     isAvailable: row.is_available,
-    createdAt:
-      typeof row.created_at === "string"
-        ? row.created_at.slice(0, 10)
-        : new Date(row.created_at).toISOString().slice(0, 10),
+    createdAt,
+    updatedAt: toIsoDate(row.updated_at) ?? createdAt,
   };
 }
 

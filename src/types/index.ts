@@ -18,6 +18,8 @@ export interface Product {
   badge?: ProductBadge | null;
   isAvailable: boolean;
   createdAt: string;
+  /** ISO date/time last modified — optional for seed/legacy rows. */
+  updatedAt?: string;
 }
 
 export interface CategoryInfo {

@@ -4,9 +4,13 @@ import { products as seedProducts } from "@/data/products";
 import { categories } from "@/data/categories";
 import { getSiteUrl } from "@/lib/site";
 
-function productLastModified(createdAt: string): Date {
-  // createdAt sering "YYYY-MM-DD" dari mapper — parse aman.
-  const d = new Date(createdAt);
+function productLastModified(product: {
+  createdAt: string;
+  updatedAt?: string;
+}): Date {
+  // Prefer updatedAt (edit terbaru); fallback createdAt.
+  const raw = product.updatedAt || product.createdAt;
+  const d = new Date(raw);
   return Number.isNaN(d.getTime()) ? new Date() : d;
 }
 
@@ -47,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${siteUrl}/produk/${p.slug}`,
-    lastModified: productLastModified(p.createdAt),
+    lastModified: productLastModified(p),
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));
