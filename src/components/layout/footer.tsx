@@ -1,14 +1,18 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Camera, Mail, MessageCircle } from "lucide-react";
 import { BrandLogo } from "@/components/common/brand-logo";
 import { TrackedWhatsAppLink } from "@/components/analytics/tracked-whatsapp-link";
-import { categories } from "@/data/categories";
+import { categories as seedCategories } from "@/data/categories";
 import { AnalyticsEvent } from "@/lib/analytics";
 import {
   buildDefaultInquiryMessage,
   buildWhatsAppUrl,
   formatWhatsAppDisplay,
 } from "@/lib/whatsapp";
+import type { CategoryInfo } from "@/types";
 
 const exploreLinks = [
   { href: "/katalog", label: "Katalog" },
@@ -19,8 +23,28 @@ const exploreLinks = [
 ];
 
 export function Footer() {
+  const [categories, setCategories] = useState<CategoryInfo[]>(seedCategories);
   const whatsappUrl = buildWhatsAppUrl(buildDefaultInquiryMessage());
   const whatsappLabel = formatWhatsAppDisplay();
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/categories", { cache: "no-store" });
+        const json = await res.json();
+        if (!active || !json?.ok || !Array.isArray(json.categories)) return;
+        if (json.categories.length > 0) {
+          setCategories(json.categories);
+        }
+      } catch {
+        // keep seed
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <footer className="border-t border-border/40 bg-[linear-gradient(180deg,#fffaf6_0%,#fff5f1_100%)]">
@@ -89,9 +113,9 @@ export function Footer() {
                   href="https://www.instagram.com/mushida_craft"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2.5 transition-colors hover:text-foreground"
+                  className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary shadow-sm ring-1 ring-border/50">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-foreground shadow-sm ring-1 ring-border/50">
                     <Camera className="h-3.5 w-3.5" />
                   </span>
                   @mushida_craft
@@ -100,9 +124,9 @@ export function Footer() {
               <li>
                 <a
                   href="mailto:mushidacraft@gmail.com"
-                  className="inline-flex items-center gap-2.5 transition-colors hover:text-foreground"
+                  className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-primary shadow-sm ring-1 ring-border/50">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-foreground shadow-sm ring-1 ring-border/50">
                     <Mail className="h-3.5 w-3.5" />
                   </span>
                   mushidacraft@gmail.com
@@ -112,9 +136,9 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-border/40 pt-7 text-xs tracking-wide text-muted-foreground md:flex-row">
-          <p>© {new Date().getFullYear()} Mushida Craft</p>
-          <p className="font-serif italic">Handmade with love in Indonesia</p>
+        <div className="mt-12 flex flex-col gap-2 border-t border-border/40 pt-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} Mushida Craft. All rights reserved.</p>
+          <p className="italic">Made with 🌸 in Indonesia.</p>
         </div>
       </div>
     </footer>

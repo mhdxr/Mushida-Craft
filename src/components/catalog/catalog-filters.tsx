@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Search, X, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { categories } from "@/data/categories";
+import { categories as seedCategories } from "@/data/categories";
 import { cn } from "@/lib/utils";
 import type { ProductCategory } from "@/types";
 
@@ -41,19 +42,45 @@ const priceOptions: { value: PriceRange; label: string }[] = [
   { value: "above-700", label: "Di atas Rp700.000" },
 ];
 
-const categoryChips: {
-  id: ProductCategory | "all";
-  name: string;
-}[] = [
-  { id: "all", name: "Semua" },
-  ...categories.map((c) => ({ id: c.id, name: c.name })),
-];
-
 export function CatalogFilters({
   value,
   onChange,
   total,
 }: CatalogFiltersProps) {
+  // Seed dulu; ganti dari API bila tersedia (nama kategori editable di admin).
+  const [categoryChips, setCategoryChips] = useState<
+    { id: ProductCategory | "all"; name: string }[]
+  >([
+    { id: "all", name: "Semua" },
+    ...seedCategories.map((c) => ({ id: c.id, name: c.name })),
+  ]);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/categories", { cache: "no-store" });
+        const json = await res.json();
+        if (!active || !json?.ok || !Array.isArray(json.categories)) return;
+        if (json.categories.length === 0) return;
+        setCategoryChips([
+          { id: "all", name: "Semua" },
+          ...json.categories.map(
+            (c: { id: ProductCategory; name: string }) => ({
+              id: c.id,
+              name: c.name,
+            }),
+          ),
+        ]);
+      } catch {
+        // keep seed
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const isFiltered =
     value.search.length > 0 ||
     value.category !== "all" ||

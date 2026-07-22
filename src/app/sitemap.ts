@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { fetchProducts } from "@/lib/product-api";
 import { products as seedProducts } from "@/data/products";
-import { categories } from "@/data/categories";
+import { fetchCategories } from "@/lib/category-api";
 import { getSiteUrl } from "@/lib/site";
 
 function productLastModified(product: {
@@ -56,9 +56,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => ({
+  const categoryList = await fetchCategories();
+  const categoryRoutes: MetadataRoute.Sitemap = categoryList.map((c) => ({
     url: `${siteUrl}/katalog?category=${c.id}`,
-    lastModified: now,
+    lastModified: c.updatedAt ? new Date(c.updatedAt) : now,
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));

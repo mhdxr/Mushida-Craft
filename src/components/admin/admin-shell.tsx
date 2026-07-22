@@ -14,6 +14,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Store,
+  Tags,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,12 @@ const navItems = [
     label: "Produk",
     icon: Package,
     match: (path: string) => path.startsWith("/admin/produk"),
+  },
+  {
+    href: "/admin/kategori",
+    label: "Kategori",
+    icon: Tags,
+    match: (path: string) => path.startsWith("/admin/kategori"),
   },
   {
     href: "/admin/testimoni",

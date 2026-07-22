@@ -8,7 +8,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { SectionHeading } from "@/components/common/section-heading";
-import { categories } from "@/data/categories";
+import { fetchCategories } from "@/lib/category-api";
 import type { ProductCategory } from "@/types";
 
 const categoryIcons: Record<ProductCategory, LucideIcon> = {
@@ -19,7 +19,9 @@ const categoryIcons: Record<ProductCategory, LucideIcon> = {
   "satin-flower": Sparkles,
 };
 
-export function CategorySection() {
+export async function CategorySection() {
+  const categories = await fetchCategories();
+
   return (
     <section id="kategori" className="section-soft py-16 md:py-24">
       <div className="container">
@@ -30,7 +32,7 @@ export function CategorySection() {
         />
         <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-5">
           {categories.map((cat) => {
-            const Icon = categoryIcons[cat.id];
+            const Icon = categoryIcons[cat.id] ?? Sparkles;
             return (
               <Link
                 key={cat.id}
