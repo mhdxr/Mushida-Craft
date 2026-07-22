@@ -4,6 +4,7 @@ import { StoreChrome } from "@/components/layout/store-chrome";
 import { Toaster } from "@/components/common/toaster";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { buildLocalBusinessJsonLd, getSiteUrl } from "@/lib/site";
+import { fetchApprovedRatingStats } from "@/lib/testimonial-api";
 import "./globals.css";
 
 /**
@@ -93,17 +94,28 @@ export const viewport: Viewport = {
 
 const jsonLd = buildLocalBusinessJsonLd();
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // AggregateRating dari testimoni approved (jika DB siap).
+  let ratingStats: { average: number; count: number } | null = null;
+  try {
+    ratingStats = await fetchApprovedRatingStats();
+  } catch {
+    // Supabase belum siap — LocalBusiness tanpa rating.
+  }
+  const businessJsonLd = ratingStats
+    ? buildLocalBusinessJsonLd({ aggregateRating: ratingStats })
+    : jsonLd;
+
   return (
     <html lang="id" className={`${inter.variable} ${cormorant.variable}`}>
       <body className="font-sans antialiased">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
         />
         <PostHogProvider>
           {/* StoreChrome: nav/footer/FAB toko; disembunyikan di /admin/* */}

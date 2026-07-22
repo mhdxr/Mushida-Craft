@@ -109,7 +109,9 @@ function parseOpeningHours(hours: string): {
  * Pakai data area (Jakarta Barat) bila env di-set; tanpa alamat jalan
  * agar tidak mengarang alamat fisik.
  */
-export function buildLocalBusinessJsonLd() {
+export function buildLocalBusinessJsonLd(options?: {
+  aggregateRating?: { average: number; count: number } | null;
+}) {
   const siteUrl = getSiteUrl();
   const delivery = getDeliveryInfo();
   const phone = getWhatsAppNumber();
@@ -137,6 +139,18 @@ export function buildLocalBusinessJsonLd() {
         addressCountry: "ID",
       };
 
+  const rating = options?.aggregateRating;
+  const aggregateRating =
+    rating && rating.count >= 2
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: rating.average,
+            reviewCount: rating.count,
+          },
+        }
+      : {};
+
   return {
     "@context": "https://schema.org",
     "@type": ["Store", "Florist"],
@@ -152,6 +166,7 @@ export function buildLocalBusinessJsonLd() {
     paymentAccepted: "Cash, Bank Transfer, E-Wallet",
     address,
     areaServed,
+    ...aggregateRating,
     openingHoursSpecification: [
       {
         "@type": "OpeningHoursSpecification",
@@ -170,5 +185,21 @@ export function buildLocalBusinessJsonLd() {
         email: "mushidacraft@gmail.com",
       },
     ],
+  };
+}
+
+/**
+ * Home breadcrumb (Beranda → section) sebagai JSON-LD.
+ */
+export function buildBreadcrumbJsonLd(items: { name: string; path: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: absoluteUrl(item.path),
+    })),
   };
 }

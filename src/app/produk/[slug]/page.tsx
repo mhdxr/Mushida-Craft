@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ProductDetailContent } from "@/components/product/product-detail-content";
 import { fetchAllSlugs, fetchProductBySlug } from "@/lib/product-api";
+import { fetchApprovedRatingStats } from "@/lib/testimonial-api";
 import { getProductBySlug, products as seedProducts } from "@/data/products";
 import { categoryMap } from "@/data/categories";
 import { toAbsoluteImageUrls } from "@/lib/image-url";
@@ -98,6 +99,23 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const productUrl = absoluteUrl(`/produk/${product.slug}`);
   const images = toAbsoluteImageUrls(product.images, 8);
 
+  // Aggregate rating site dari testimoni approved (bukan per-produk rating).
+  let aggregateRating:
+    | { "@type": "AggregateRating"; ratingValue: number; reviewCount: number }
+    | undefined;
+  try {
+    const stats = await fetchApprovedRatingStats();
+    if (stats && stats.count >= 2) {
+      aggregateRating = {
+        "@type": "AggregateRating",
+        ratingValue: stats.average,
+        reviewCount: stats.count,
+      };
+    }
+  } catch {
+    // skip bila Supabase down
+  }
+
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -107,6 +125,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     sku: product.id,
     category: cat?.name,
     brand: { "@type": "Brand", name: "Mushida Craft" },
+    ...(aggregateRating ? { aggregateRating } : {}),
     offers: {
       "@type": "Offer",
       url: productUrl,
@@ -126,11 +145,50 @@ export default async function ProductDetailPage({ params }: PageProps) {
     },
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Beranda",
+        item: getSiteUrl(),
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Katalog",
+        item: absoluteUrl("/katalog"),
+      },
+      ...(cat
+        ? [
+            {
+              "@type": "ListItem" as const,
+              position: 3,
+              name: cat.name,
+              item: absoluteUrl(`/katalog?category=${product.category}`),
+            },
+          ]
+        : []),
+      {
+        "@type": "ListItem",
+        position: cat ? 4 : 3,
+        name: product.name,
+        item: productUrl,
+      },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <ProductDetailContent slug={slug} initialProduct={product} />
     </>
