@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
   ArrowRight,
+  Inbox,
   MessageSquareQuote,
   Package,
   Plus,
@@ -12,16 +14,42 @@ import { Button } from "@/components/ui/button";
 import { useProducts } from "@/hooks/use-products";
 import { useTestimonials } from "@/hooks/use-testimonials";
 import { getTimeGreeting } from "@/lib/greeting";
+import { cn } from "@/lib/utils";
 
 export function AdminOverview() {
   const { products, isLoading: productsLoading } = useProducts();
   const { testimonials, isLoading: testimonialsLoading } = useTestimonials();
+  const [newInquiries, setNewInquiries] = useState<number | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/inquiries?count=new", {
+          cache: "no-store",
+        });
+        const json = await res.json();
+        if (!active) return;
+        if (json?.ok && typeof json.count === "number") {
+          setNewInquiries(json.count);
+        } else {
+          setNewInquiries(0);
+        }
+      } catch {
+        if (active) setNewInquiries(0);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const soldOut = products.filter(
     (p) => !p.isAvailable || p.badge === "sold-out",
   ).length;
   const pending = testimonials.filter((t) => t.status === "pending").length;
   const greeting = getTimeGreeting();
+  const inquiryCount = newInquiries ?? 0;
 
   const cards = [
     {
@@ -31,6 +59,14 @@ export function AdminOverview() {
       href: "/admin/produk",
       icon: Package,
       tone: "default" as const,
+    },
+    {
+      label: "Inquiry baru",
+      value: newInquiries === null ? "…" : String(inquiryCount),
+      hint: inquiryCount > 0 ? "Perlu di-follow-up" : "Tidak ada antrean",
+      href: "/admin/inquiries",
+      icon: Inbox,
+      tone: inquiryCount > 0 ? ("warn" as const) : ("default" as const),
     },
     {
       label: "Testimoni menunggu",
@@ -61,7 +97,7 @@ export function AdminOverview() {
             {greeting}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Kelola katalog & moderasi testimoni — order tetap via WhatsApp.
+            Kelola katalog, lead WhatsApp, dan moderasi testimoni.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -71,7 +107,14 @@ export function AdminOverview() {
               Tambah produk
             </Link>
           </Button>
-          {pending > 0 ? (
+          {inquiryCount > 0 ? (
+            <Button asChild variant="outline" size="sm">
+              <Link href="/admin/inquiries">
+                Lihat inquiry
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          ) : pending > 0 ? (
             <Button asChild variant="outline" size="sm">
               <Link href="/admin/testimoni">
                 Review testimoni
@@ -82,7 +125,7 @@ export function AdminOverview() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
@@ -93,11 +136,14 @@ export function AdminOverview() {
             >
               <div className="flex items-start justify-between gap-3">
                 <span
-                  className={
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-xl",
                     card.tone === "warn"
-                      ? "flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent-foreground"
-                      : "flex h-10 w-10 items-center justify-center rounded-xl bg-blush-50 text-primary"
-                  }
+                      ? "bg-accent/15 text-accent-foreground"
+                      : card.tone === "muted"
+                        ? "bg-secondary text-muted-foreground"
+                        : "bg-blush-50 text-primary",
+                  )}
                 >
                   <Icon className="h-4 w-4" />
                 </span>
@@ -116,6 +162,16 @@ export function AdminOverview() {
       <div className="rounded-2xl border border-border/50 bg-white p-5 shadow-sm">
         <h2 className="text-sm font-semibold tracking-tight">Aksi cepat</h2>
         <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+          <li>
+            <Link
+              href="/admin/inquiries"
+              className="text-foreground underline-offset-4 hover:underline"
+            >
+              Inquiry WhatsApp
+            </Link>
+            {" — "}
+            triage lead baru / sudah dihubungi
+          </li>
           <li>
             <Link
               href="/admin/produk"
