@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { cache } from "react";
 import { PRODUCT_IMAGES_BUCKET } from "@/lib/product-images";
 import { getBrowserSupabaseClient, getServerSupabaseClient } from "@/lib/supabase";
 import { rowToProduct } from "@/lib/product-store";
@@ -70,43 +71,50 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
   return data ? rowToProduct(data) : null;
 }
 
-/** Ambil produk best-seller (untuk homepage featured).
- *  Jika best-seller kurang dari limit, sisa slot diisi produk terbaru
- *  agar grid unggulan selalu penuh. */
-export async function fetchFeaturedProducts(limit = 4): Promise<Product[]> {
-  const client = getBrowserSupabaseClient();
-  const { data, error } = await client
-    .from(TABLE)
-    .select("*")
-    .eq("badge", "best-seller")
-    .eq("is_available", true)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+/**
+ * Ambil produk best-seller (untuk homepage featured).
+ * Jika best-seller kurang dari limit, sisa slot diisi produk terbaru
+ * agar grid unggulan selalu penuh.
+ *
+ * Dibungkus React.cache agar Hero + FeaturedProducts di request yang sama
+ * berbagi satu query (dedupe per render tree).
+ */
+export const fetchFeaturedProducts = cache(
+  async (limit = 4): Promise<Product[]> => {
+    const client = getBrowserSupabaseClient();
+    const { data, error } = await client
+      .from(TABLE)
+      .select("*")
+      .eq("badge", "best-seller")
+      .eq("is_available", true)
+      .order("created_at", { ascending: false })
+      .limit(limit);
 
-  if (error) throw error;
-  const featured = (data ?? []).map(rowToProduct);
-  if (featured.length >= limit) return featured;
+    if (error) throw error;
+    const featured = (data ?? []).map(rowToProduct);
+    if (featured.length >= limit) return featured;
 
-  const excludeIds = featured.map((p) => p.id);
-  let fillQuery = client
-    .from(TABLE)
-    .select("*")
-    .eq("is_available", true)
-    .order("created_at", { ascending: false })
-    .limit(limit - featured.length);
-  if (excludeIds.length > 0) {
-    fillQuery = fillQuery.not(
-      "id",
-      "in",
-      `(${excludeIds.map((id) => `"${id}"`).join(",")})`,
-    );
-  }
-  const { data: fillData, error: fillError } = await fillQuery;
+    const excludeIds = featured.map((p) => p.id);
+    let fillQuery = client
+      .from(TABLE)
+      .select("*")
+      .eq("is_available", true)
+      .order("created_at", { ascending: false })
+      .limit(limit - featured.length);
+    if (excludeIds.length > 0) {
+      fillQuery = fillQuery.not(
+        "id",
+        "in",
+        `(${excludeIds.map((id) => `"${id}"`).join(",")})`,
+      );
+    }
+    const { data: fillData, error: fillError } = await fillQuery;
 
-  // Jika query pengisi gagal, tetap tampilkan best-seller yang ada.
-  if (fillError) return featured;
-  return [...featured, ...(fillData ?? []).map(rowToProduct)];
-}
+    // Jika query pengisi gagal, tetap tampilkan best-seller yang ada.
+    if (fillError) return featured;
+    return [...featured, ...(fillData ?? []).map(rowToProduct)];
+  },
+);
 
 /** Ambil semua slug produk (untuk generateStaticParams). */
 export async function fetchAllSlugs(): Promise<string[]> {
@@ -181,7 +189,11 @@ export async function updateProduct(
   return data ? rowToProduct(data) : null;
 }
 
-export async function deleteProduct(id: string): Promise<void> {
+/**
+ * Hapus produk by id.
+ * @returns true jika baris terhapus, false jika id tidak ada.
+ */
+export async function deleteProduct(id: string): Promise<boolean> {
   const client = getServerSupabaseClient();
 
   // Ambil images dulu untuk cleanup Storage.
@@ -191,14 +203,17 @@ export async function deleteProduct(id: string): Promise<void> {
     .eq("id", id)
     .maybeSingle();
 
+  if (!existing) return false;
+
   const { error } = await client.from(TABLE).delete().eq("id", id);
   if (error) throw error;
 
-  if (existing && typeof existing === "object" && "images" in existing) {
+  if (typeof existing === "object" && "images" in existing) {
     await removeProductImagesFromStorage(
       (existing as { images: string[] | null }).images,
     );
   }
+  return true;
 }
 
 /** Ambil produk by id (server) — untuk revalidate path by slug. */
@@ -216,9 +231,26 @@ export async function fetchProductById(id: string): Promise<Product | null> {
 /** Hapus semua produk & re-seed dari data statis (untuk tombol "Reset data"). */
 export async function resetProducts(seed: Product[]): Promise<void> {
   const client = getServerSupabaseClient();
+
+  // Ambil images dulu untuk cleanup Storage (best-effort).
+  const { data: existingRows } = await client.from(TABLE).select("images");
+  const allImages = (existingRows ?? []).flatMap((row) => {
+    if (row && typeof row === "object" && "images" in row) {
+      const imgs = (row as { images: string[] | null }).images;
+      return Array.isArray(imgs) ? imgs : [];
+    }
+    return [];
+  });
+
   const { error: delErr } = await client.from(TABLE).delete().neq("id", "");
   if (delErr) throw delErr;
 
+  // Best-effort hapus file Storage produk lama (jangan gagalkan re-seed).
+  if (allImages.length > 0) {
+    await removeProductImagesFromStorage(allImages);
+  }
+
+  const now = new Date().toISOString();
   const rows = seed.map((p) => ({
     id: p.id,
     slug: p.slug,
@@ -230,6 +262,7 @@ export async function resetProducts(seed: Product[]): Promise<void> {
     badge: p.badge ?? null,
     is_available: p.isAvailable,
     created_at: p.createdAt,
+    updated_at: now,
   }));
 
   const { error: insErr } = await client.from(TABLE).insert(rows);

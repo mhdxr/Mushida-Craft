@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    await recordLoginFailure(ip);
+    // Body invalid tidak dihitung sebagai percobaan gagal (hindari lockout scanner).
     return NextResponse.json(
       { ok: false, message: "Data login tidak valid." },
       { status: 400 },
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
   const result = loginSchema.safeParse(body);
   if (!result.success) {
-    await recordLoginFailure(ip);
+    // Validasi gagal (format) ≠ credential mismatch — jangan burn rate limit.
     return NextResponse.json(
       { ok: false, message: "Data login tidak valid." },
       { status: 400 },

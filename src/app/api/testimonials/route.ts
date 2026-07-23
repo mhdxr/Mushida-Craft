@@ -61,18 +61,6 @@ export async function POST(req: Request) {
 
   try {
     const ip = getClientIp(req);
-    const { allowed } = await consumeTestimonialSubmit(ip);
-    if (!allowed) {
-      return NextResponse.json(
-        {
-          ok: false,
-          message:
-            "Terlalu banyak testimoni dari perangkat ini. Coba lagi nanti.",
-        },
-        { status: 429 },
-      );
-    }
-
     const contentType = req.headers.get("content-type") || "";
     let name = "";
     let message = "";
@@ -125,6 +113,19 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { ok: false, message: first || "Data testimoni tidak valid." },
         { status: 400 },
+      );
+    }
+
+    // Rate limit setelah validasi — body invalid tidak menghabiskan kuota.
+    const { allowed } = await consumeTestimonialSubmit(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message:
+            "Terlalu banyak testimoni dari perangkat ini. Coba lagi nanti.",
+        },
+        { status: 429 },
       );
     }
 

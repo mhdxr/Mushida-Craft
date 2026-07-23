@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthenticated } from "@/lib/auth";
+import { guardAdminRequest } from "@/lib/admin-guard";
 import {
   updateInquiryStatus,
   type InquiryStatus,
@@ -19,12 +19,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    if (!(await isAdminAuthenticated())) {
-      return NextResponse.json(
-        { ok: false, message: "Unauthorized. Silakan login terlebih dahulu." },
-        { status: 401 },
-      );
-    }
+    const denied = await guardAdminRequest(req);
+    if (denied) return denied;
 
     const { id } = await params;
     if (!id?.trim()) {

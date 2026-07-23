@@ -45,7 +45,11 @@ function seedAsRecords(): CategoryRecord[] {
   }));
 }
 
-/** Public: kategori aktif, urut sort_order. Fallback seed bila DB gagal/kosong. */
+/**
+ * Public: kategori aktif, urut sort_order.
+ * - Query sukses + kosong → [] (jangan resurrect seed; admin bisa nonaktifkan semua).
+ * - Error / DB unconfigured → seed (agar build & dev tanpa Supabase tetap jalan).
+ */
 export async function fetchCategories(options?: {
   includeInactive?: boolean;
 }): Promise<CategoryRecord[]> {
@@ -63,10 +67,9 @@ export async function fetchCategories(options?: {
     const { data, error } = await query;
     if (error) throw error;
 
-    const rows = (data ?? []).map((r) => rowToCategory(r as CategoryRow));
-    if (rows.length === 0) return seedAsRecords();
-    return rows;
+    return (data ?? []).map((r) => rowToCategory(r as CategoryRow));
   } catch {
+    // Hanya fallback seed saat DB gagal — empty sukses dihormati.
     return seedAsRecords();
   }
 }

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
-import { isAdminAuthenticated } from "@/lib/auth";
+import { guardAdminRequest } from "@/lib/admin-guard";
 import {
   MAX_IMAGE_FILE_SIZE,
   MAX_PRODUCT_IMAGES,
@@ -61,12 +61,8 @@ function hasValidImageSignature(
 /** POST /api/admin/upload - upload banyak gambar produk ke Supabase Storage. */
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthenticated())) {
-      return NextResponse.json(
-        { ok: false, message: "Unauthorized. Silakan login terlebih dahulu." },
-        { status: 401 },
-      );
-    }
+    const denied = await guardAdminRequest(req);
+    if (denied) return denied;
 
     const contentLength = Number(req.headers.get("content-length"));
     if (Number.isFinite(contentLength) && contentLength > MAX_UPLOAD_REQUEST_SIZE) {

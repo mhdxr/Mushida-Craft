@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { isAdminAuthenticated } from "@/lib/auth";
+import { guardAdminRequest } from "@/lib/admin-guard";
 import { updateCategory } from "@/lib/category-api";
 import type { ProductCategory } from "@/types";
 
@@ -30,12 +30,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    if (!(await isAdminAuthenticated())) {
-      return NextResponse.json(
-        { ok: false, message: "Unauthorized. Silakan login terlebih dahulu." },
-        { status: 401 },
-      );
-    }
+    const denied = await guardAdminRequest(req);
+    if (denied) return denied;
 
     const { id } = await params;
     if (!id || !ALLOWED.has(id)) {

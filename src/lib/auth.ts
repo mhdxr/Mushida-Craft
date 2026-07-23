@@ -67,7 +67,17 @@ export async function setAdminSessionCookie(email: string) {
 /** Hapus cookie sesi admin (dipanggil dari API route logout). */
 export async function clearAdminSessionCookie() {
   const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE);
+  // Mirror atribut saat set (path/secure/sameSite) + maxAge 0 agar benar-benar
+  // terhapus di semua runtime; delete-by-name saja bisa gagal bila atribut beda.
+  cookieStore.set({
+    name: SESSION_COOKIE,
+    value: "",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
 }
 
 // ---------------------------------------------------------------------------

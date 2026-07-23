@@ -138,7 +138,8 @@ function TestimonialRow({
 }
 
 export function TestimonialModeration() {
-  const { testimonials, isLoading, approve, remove } = useTestimonials();
+  const { testimonials, isLoading, error, refresh, approve, remove } =
+    useTestimonials();
   const [busyId, setBusyId] = useState<string | null>(null);
   // Default: antrean menunggu — job harian admin.
   const [filter, setFilter] = useState<Filter>("pending");
@@ -247,6 +248,18 @@ export function TestimonialModeration() {
               </div>
             </div>
           ))}
+        </div>
+      ) : error ? (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center">
+          <p className="text-sm font-medium text-destructive">{error}</p>
+          <Button
+            size="sm"
+            variant="outline"
+            className="mt-4"
+            onClick={() => void refresh()}
+          >
+            Coba lagi
+          </Button>
         </div>
       ) : testimonials.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border/70 bg-secondary/20 p-10 text-center">

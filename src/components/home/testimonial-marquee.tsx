@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Quote, Star } from "lucide-react";
 import type { Testimonial } from "@/types";
 
@@ -140,6 +140,8 @@ function MarqueeRow({
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const rafRef = useRef<number | null>(null);
+  // Default false di SSR + first paint agar tidak mismatch hidrasi.
+  const [reduceMotion, setReduceMotion] = useState(false);
   // Stabilkan dependency: id list, bukan referensi array baru tiap poll.
   // Key stabil: hindari remount loop saat parent kirim array baru isi sama.
   const itemsKey = items.map((t) => t.id).join("|");
@@ -151,8 +153,23 @@ function MarqueeRow({
   );
 
   useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setReduceMotion(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
     const track = trackRef.current;
     if (!track || items.length === 0) return;
+
+    // Reduced motion: baris statis, tanpa rAF.
+    if (reduceMotion) {
+      track.style.transform = "translate3d(0,0,0)";
+      offsetRef.current = 0;
+      return;
+    }
 
     const dir = direction === "left" ? 1 : -1;
     let last = performance.now();
@@ -198,9 +215,12 @@ function MarqueeRow({
     };
     // itemsKey cukup: daftar id sama = konten track sama.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional stable key
-  }, [itemsKey, direction, speed, pausedRef]);
+  }, [itemsKey, direction, speed, pausedRef, reduceMotion]);
 
   if (items.length === 0) return null;
+
+  // Reduced motion: tampilkan set items sekali saja (tanpa duplikat loop).
+  const visibleItems = reduceMotion ? items : loop;
 
   return (
     <div className="overflow-hidden">
@@ -209,7 +229,7 @@ function MarqueeRow({
         className="flex w-max gap-3 will-change-transform"
         style={{ transform: "translate3d(0,0,0)" }}
       >
-        {loop.map((t, i) => (
+        {visibleItems.map((t, i) => (
           <TestimonialCard key={`${rowKey}-${t.id}-${i}`} t={t} />
         ))}
       </div>

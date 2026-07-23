@@ -62,29 +62,35 @@ export function ProductDetailContent({
 
     (async () => {
       try {
-        // Ambil detail + list paralel, lalu hitung related dari produk final
-        // (hindari race: related dihitung dari product state yang masih lama).
-        const [detailRes, listRes] = await Promise.all([
-          fetch(`/api/products?slug=${encodeURIComponent(slug)}`, {
-            cache: "no-store",
-          }),
-          fetch("/api/products", { cache: "no-store" }),
+        // Bila SSR sudah punya produk: skip fetch detail (hemat round-trip),
+        // hanya ambil list untuk related. Tanpa SSR: fetch detail + list.
+        const listPromise = fetch("/api/products", { cache: "no-store" });
+        const detailPromise = initialProduct
+          ? null
+          : fetch(`/api/products?slug=${encodeURIComponent(slug)}`, {
+              cache: "no-store",
+            });
+
+        const [listRes, detailRes] = await Promise.all([
+          listPromise,
+          detailPromise,
         ]);
 
         if (!active) return;
 
-        const detailJson = await detailRes.json().catch(() => null);
         const listJson = await listRes.json().catch(() => null);
-
         let resolved: Product | null = initialProduct ?? null;
 
-        if (detailRes.ok && detailJson?.ok && detailJson.product) {
-          resolved = detailJson.product as Product;
-          setProduct(resolved);
-          setStatus("found");
-        } else if (!initialProduct) {
-          setStatus("not-found");
-          return;
+        if (detailRes) {
+          const detailJson = await detailRes.json().catch(() => null);
+          if (detailRes.ok && detailJson?.ok && detailJson.product) {
+            resolved = detailJson.product as Product;
+            setProduct(resolved);
+            setStatus("found");
+          } else if (!initialProduct) {
+            setStatus("not-found");
+            return;
+          }
         }
 
         if (

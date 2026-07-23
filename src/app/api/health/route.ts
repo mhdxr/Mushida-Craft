@@ -31,11 +31,14 @@ function checkOptional(key: string): { key: string; status: CheckStatus } {
 /**
  * GET /api/health — readiness env (tanpa membocorkan secret values).
  *
+ * Public (production): hanya { ok, status } — cegah recon nama env.
+ * Detail penuh: header `x-health-detail: 1` ATAU non-production.
+ *
  * - 200 + status "ok" — required lengkap; di production Upstash juga ada
  * - 200 + status "degraded" — required lengkap tapi rate-limit in-memory di prod
  * - 503 + status "error" — ada required env yang hilang
  */
-export async function GET() {
+export async function GET(req: Request) {
   const required = [
     checkRequired("NEXT_PUBLIC_SUPABASE_URL"),
     checkRequired("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
@@ -71,11 +74,19 @@ export async function GET() {
   if (missingRequired.length > 0) status = "error";
   else if (rateLimitDegraded) status = "degraded";
 
-  const body = {
+  // Public body minimal di production (kecuali operator minta detail).
+  const wantDetail =
+    !production || req.headers.get("x-health-detail") === "1";
+
+  const publicBody = {
     ok: status === "ok",
     status,
-    production,
     timestamp: new Date().toISOString(),
+  };
+
+  const detailedBody = {
+    ...publicBody,
+    production,
     checks: {
       required: Object.fromEntries(
         required.map((c) => [c.key, c.status === "ok"]),
@@ -98,7 +109,7 @@ export async function GET() {
     ].filter(Boolean),
   };
 
-  return NextResponse.json(body, {
+  return NextResponse.json(wantDetail ? detailedBody : publicBody, {
     status: status === "error" ? 503 : 200,
     headers: {
       "Cache-Control": "no-store",

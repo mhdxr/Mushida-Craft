@@ -154,14 +154,14 @@ export function CustomOrderForm() {
         </div>
 
         <div className="space-y-2">
-          <Label>Jenis bouquet</Label>
+          <Label htmlFor="bouquetType">Jenis bouquet</Label>
           <Select
             value={bouquetType}
             onValueChange={(v) =>
               setValue("bouquetType", v, { shouldValidate: true })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger id="bouquetType" aria-label="Jenis bouquet">
               <SelectValue placeholder="Pilih jenis bouquet" />
             </SelectTrigger>
             <SelectContent>
@@ -180,14 +180,14 @@ export function CustomOrderForm() {
         </div>
 
         <div className="space-y-2">
-          <Label>Momen</Label>
+          <Label htmlFor="occasion">Momen</Label>
           <Select
             value={occasion}
             onValueChange={(v) =>
               setValue("occasion", v, { shouldValidate: true })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger id="occasion" aria-label="Momen">
               <SelectValue placeholder="Pilih momen" />
             </SelectTrigger>
             <SelectContent>
@@ -204,14 +204,14 @@ export function CustomOrderForm() {
         </div>
 
         <div className="space-y-2">
-          <Label>Budget</Label>
+          <Label htmlFor="budget">Budget</Label>
           <Select
             value={budget}
             onValueChange={(v) =>
               setValue("budget", v, { shouldValidate: true })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger id="budget" aria-label="Budget">
               <SelectValue placeholder="Pilih kisaran budget" />
             </SelectTrigger>
             <SelectContent>
@@ -228,14 +228,14 @@ export function CustomOrderForm() {
         </div>
 
         <div className="space-y-2">
-          <Label>Area pengiriman</Label>
+          <Label htmlFor="deliveryArea">Area pengiriman</Label>
           <Select
             value={deliveryArea}
             onValueChange={(v) =>
               setValue("deliveryArea", v, { shouldValidate: true })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger id="deliveryArea" aria-label="Area pengiriman">
               <SelectValue placeholder="Pilih area tujuan" />
             </SelectTrigger>
             <SelectContent>
@@ -262,6 +262,7 @@ export function CustomOrderForm() {
           <Input
             id="neededDate"
             type="date"
+            min={new Date().toLocaleDateString("en-CA")}
             {...register("neededDate")}
           />
           {errors.neededDate && (

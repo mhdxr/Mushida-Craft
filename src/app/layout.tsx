@@ -3,7 +3,7 @@ import { Cormorant_Garamond, Inter } from "next/font/google";
 import { StoreChrome } from "@/components/layout/store-chrome";
 import { Toaster } from "@/components/common/toaster";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
-import { buildLocalBusinessJsonLd, getSiteUrl } from "@/lib/site";
+import { buildLocalBusinessJsonLd, getSiteUrl, safeJsonLd } from "@/lib/site";
 import { fetchApprovedRatingStats } from "@/lib/testimonial-api";
 import "./globals.css";
 
@@ -115,7 +115,7 @@ export default async function RootLayout({
       <body className="font-sans antialiased">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(businessJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(businessJsonLd) }}
         />
         <PostHogProvider>
           {/* StoreChrome: nav/footer/FAB toko; disembunyikan di /admin/* */}

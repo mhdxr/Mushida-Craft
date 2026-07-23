@@ -90,20 +90,17 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     let active = true;
     const load = async () => {
       try {
+        // Endpoint count ringan — jangan unduh full list hanya untuk badge.
         const [tRes, iRes] = await Promise.all([
-          fetch("/api/admin/testimonials", { cache: "no-store" }),
+          fetch("/api/admin/testimonials?count=pending", { cache: "no-store" }),
           fetch("/api/admin/inquiries?count=new", { cache: "no-store" }),
         ]);
         const tJson = await tRes.json().catch(() => null);
         const iJson = await iRes.json().catch(() => null);
         if (!active) return;
 
-        if (tJson?.ok && Array.isArray(tJson.testimonials)) {
-          setPendingTestimonials(
-            tJson.testimonials.filter(
-              (t: { status?: string }) => t.status === "pending",
-            ).length,
-          );
+        if (tJson?.ok && typeof tJson.count === "number") {
+          setPendingTestimonials(tJson.count);
         }
         if (iJson?.ok && typeof iJson.count === "number") {
           setNewInquiries(iJson.count);

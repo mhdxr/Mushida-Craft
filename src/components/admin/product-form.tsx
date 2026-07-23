@@ -101,7 +101,8 @@ export function ProductForm({
       // PATCH harus mengirim badge eksplisit untuk menghapusnya di DB.
       badge: !data.badge ? null : (data.badge as ProductBadge),
       isAvailable: data.isAvailable,
-      slug: initial?.slug ?? slugify(data.name),
+      // Pastikan slug valid (huruf kecil + hubung) — cocok dengan productSchema.
+      slug: initial?.slug ?? (slugify(data.name) || "produk"),
     };
     await onSubmit(payload);
   });

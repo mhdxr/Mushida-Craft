@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthenticated } from "@/lib/auth";
+import { guardAdminRequest } from "@/lib/admin-guard";
 import { createProduct, resetProducts } from "@/lib/product-api";
 import { products as seedProducts } from "@/data/products";
 import { revalidateStorefront } from "@/lib/revalidate-storefront";
@@ -19,12 +19,8 @@ export const GET = publicProductsGet;
  */
 export async function POST(req: Request) {
   try {
-    if (!(await isAdminAuthenticated())) {
-      return NextResponse.json(
-        { ok: false, message: "Unauthorized. Silakan login terlebih dahulu." },
-        { status: 401 },
-      );
-    }
+    const denied = await guardAdminRequest(req);
+    if (denied) return denied;
 
     let body: unknown;
     try {
@@ -85,13 +81,7 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("Gagal membuat produk:", err);
     return NextResponse.json(
-      {
-        ok: false,
-        message:
-          err instanceof Error && err.message
-            ? err.message
-            : "Terjadi kesalahan pada server.",
-      },
+      { ok: false, message: "Terjadi kesalahan pada server." },
       { status: 500 },
     );
   }
