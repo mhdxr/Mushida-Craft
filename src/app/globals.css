@@ -103,6 +103,24 @@
       transparent
     );
   }
+
+  @keyframes marquee-left {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-50% - 12px)); }
+  }
+
+  @keyframes marquee-right {
+    from { transform: translateX(calc(-50% - 12px)); }
+    to { transform: translateX(0); }
+  }
+
+  .animate-marquee-left {
+    animation: marquee-left var(--duration, 40s) linear infinite;
+  }
+
+  .animate-marquee-right {
+    animation: marquee-right var(--duration, 40s) linear infinite;
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -114,7 +132,11 @@
     scroll-behavior: auto;
   }
 
-  *,
+  /*
+   * Mengecualikan .animate-marquee-left dan .animate-marquee-right dari aturan reduced-motion
+   * agar animasi Marquee tetap berjalan meskipun setelan OS mematikan animasi.
+   */
+  *:not(.animate-marquee-left):not(.animate-marquee-right),
   *::before,
   *::after {
     animation-duration: 0.01ms !important;

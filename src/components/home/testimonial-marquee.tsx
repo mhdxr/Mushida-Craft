@@ -1,16 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Quote, Star } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Star } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import type { Testimonial } from "@/types";
 
 /** 2 baris — lebih boutique; 3 baris terasa ramai di homepage. */
 const ROW_COUNT = 2;
 /** Minimal item per baris agar loop marquee terasa penuh. */
 const MIN_PER_ROW = 4;
-/** Kecepatan geser (px/detik) — beda tipis per baris biar tidak sinkron kaku. */
-const ROW_SPEEDS = [34, 28] as const;
 
 function getInitials(name: string): string {
   return name
@@ -24,7 +27,7 @@ function getInitials(name: string): string {
 function StarRating({ rating }: { rating: number }) {
   return (
     <div
-      className="flex items-center gap-0.5"
+      className="flex items-center gap-1"
       aria-label={`Rating ${rating} dari 5`}
     >
       {Array.from({ length: 5 }, (_, i) => {
@@ -34,8 +37,8 @@ function StarRating({ rating }: { rating: number }) {
             key={i}
             className={`h-3 w-3 ${
               filled
-                ? "fill-amber-400 text-amber-400"
-                : "fill-transparent text-border"
+                ? "fill-primary/60 text-primary/60"
+                : "fill-transparent text-primary/10"
             }`}
           />
         );
@@ -45,51 +48,104 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 /**
- * Kartu compact untuk 2-row marquee.
- * ~288px — sedikit lebih lapang biar terasa premium, tetap kebaca di HP.
+ * Kartu boutique untuk 2-row marquee.
+ * Didesain menyerupai kartu ucapan (gift card) yang disematkan pada buket.
  */
 function TestimonialCard({ t }: { t: Testimonial }) {
-  return (
-    <article className="group relative flex h-full w-[min(80vw,18rem)] shrink-0 flex-col overflow-hidden rounded-2xl border border-border/50 bg-white/95 p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md hover:shadow-primary/10">
+  const [open, setOpen] = useState(false);
+
+  // Bagian inti visual dari kartu dipisahkan menjadi konstanta agar dapat digunakan
+  // sebagai pemicu (trigger) pada Dialog.
+  // Menyusutkan ukuran agar kompak: lebar 18rem (dari 22rem), padding 6 (dari 8)
+  const cardContent = (
+    <article className="group relative flex h-full w-[min(80vw,18rem)] shrink-0 flex-col overflow-hidden rounded-xl bg-white/70 p-6 shadow-[0_4px_24px_-8px_rgba(255,196,213,0.15)] backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:bg-white/90 hover:shadow-[0_8px_32px_-8px_rgba(255,196,213,0.3)] text-left cursor-pointer">
+      {/* Watermark Quote elegan sebagai signature */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-5 -top-5 h-16 w-16 rounded-full bg-primary/5 transition-transform duration-300 group-hover:scale-110"
-      />
-
-      <div className="relative flex items-start justify-between gap-2">
-        <StarRating rating={t.rating} />
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blush-50 text-primary/65">
-          <Quote className="h-3 w-3" aria-hidden />
-        </span>
+        className="pointer-events-none absolute -left-2 -top-4 font-serif text-[6rem] leading-none text-blush-100/50 transition-transform duration-500 group-hover:-translate-y-2 group-hover:text-blush-100/70"
+      >
+        &ldquo;
       </div>
 
-      <blockquote className="relative mt-3 flex-1">
-        <p className="line-clamp-3 text-[13px] leading-relaxed text-foreground/80">
-          “{t.message}”
-        </p>
-      </blockquote>
+      <div className="relative z-10 flex flex-col h-full justify-between gap-4">
+        <StarRating rating={t.rating} />
 
-      <footer className="relative mt-4 flex items-center gap-2.5 border-t border-border/40 pt-3.5">
-        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary/15 to-blush-50 text-[10px] font-semibold text-primary shadow-sm ring-2 ring-white">
-          {t.avatar ? (
-            <Image
-              src={t.avatar}
-              alt={t.name}
-              fill
-              sizes="36px"
-              className="object-cover"
-            />
-          ) : (
-            <span aria-hidden>{getInitials(t.name) || "?"}</span>
-          )}
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold tracking-tight">
-            {t.name}
+        <blockquote className="flex-1">
+          {/* Dibatasi maksimal 3 baris teks pada slider agar tidak memakan ruang vertikal */}
+          <p className="line-clamp-3 font-serif text-[1rem] italic leading-relaxed text-foreground/80">
+            {t.message}
           </p>
-        </div>
-      </footer>
+        </blockquote>
+
+        <footer className="flex items-center gap-3 pt-4 border-t border-blush-100/50 mt-auto">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blush-50 text-[10px] font-semibold text-primary">
+            {t.avatar ? (
+              <Image
+                src={t.avatar}
+                alt={t.name}
+                fill
+                sizes="36px"
+                className="object-cover"
+              />
+            ) : (
+              <span aria-hidden className="font-serif text-xs">{getInitials(t.name) || "?"}</span>
+            )}
+          </div>
+          <div>
+            <p className="text-[10px] font-semibold tracking-[0.08em] text-foreground/70 uppercase">
+              {t.name}
+            </p>
+          </div>
+        </footer>
+      </div>
     </article>
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {/* asChild memastikan bahwa DialogTrigger merender <article> langsung tanpa membungkusnya dalam <button> */}
+        {cardContent}
+      </DialogTrigger>
+
+      {/* Jendela Modal / Popup ketika diklik */}
+      <DialogContent className="max-w-xl p-8 border-blush-200/50 sm:p-12">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-between">
+             <StarRating rating={t.rating} />
+             <div aria-hidden className="font-serif text-6xl leading-none text-blush-200/50">&ldquo;</div>
+          </div>
+
+          <blockquote className="my-2">
+            <p className="font-serif text-xl italic leading-relaxed text-foreground/90 whitespace-pre-line">
+              {t.message}
+            </p>
+          </blockquote>
+
+          <footer className="flex items-center gap-4 pt-6 mt-2 border-t border-blush-100/50">
+            <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blush-50 text-[14px] font-semibold text-primary ring-4 ring-white">
+              {t.avatar ? (
+                <Image
+                  src={t.avatar}
+                  alt={t.name}
+                  fill
+                  sizes="56px"
+                  className="object-cover"
+                />
+              ) : (
+                <span aria-hidden className="font-serif text-lg">{getInitials(t.name) || "?"}</span>
+              )}
+            </div>
+            <div>
+              <p className="text-sm font-semibold tracking-[0.1em] text-foreground uppercase">
+                {t.name}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Pelanggan Mushida-Craft</p>
+            </div>
+          </footer>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -122,114 +178,40 @@ function splitIntoRows(items: Testimonial[], rows: number): Testimonial[][] {
 
 /**
  * Satu baris marquee — arah kiri/kanan.
- * Pause hanya saat hover pointer fine (bukan touch sticky).
+ * Pause saat hover ditangani oleh parent via tailwind group-hover (hover:pause) di CSS.
  */
 function MarqueeRow({
   items,
   direction,
   speed,
-  pausedRef,
   rowKey,
 }: {
   items: Testimonial[];
   direction: "left" | "right";
   speed: number;
-  pausedRef: React.MutableRefObject<boolean>;
   rowKey: string;
 }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef(0);
-  const rafRef = useRef<number | null>(null);
-  // Default false di SSR + first paint agar tidak mismatch hidrasi.
-  const [reduceMotion, setReduceMotion] = useState(false);
-  // Stabilkan dependency: id list, bukan referensi array baru tiap poll.
-  // Key stabil: hindari remount loop saat parent kirim array baru isi sama.
   const itemsKey = items.map((t) => t.id).join("|");
   const loop = useMemo(
     () => [...items, ...items],
-    // itemsKey merepresentasikan identitas isi; items ikut agar isi loop akurat.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional stable key
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [itemsKey],
   );
 
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const apply = () => setReduceMotion(mq.matches);
-    apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
-  }, []);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track || items.length === 0) return;
-
-    // Reduced motion: baris statis, tanpa rAF.
-    if (reduceMotion) {
-      track.style.transform = "translate3d(0,0,0)";
-      offsetRef.current = 0;
-      return;
-    }
-
-    const dir = direction === "left" ? 1 : -1;
-    let last = performance.now();
-    let running = true;
-
-    const tick = (now: number) => {
-      if (!running) return;
-      const dt = Math.min(64, now - last) / 1000;
-      last = now;
-
-      if (!pausedRef.current) {
-        const half = track.scrollWidth / 2;
-        if (half > 1) {
-          offsetRef.current += speed * dt * dir;
-          // Normalisasi ke [0, half)
-          while (offsetRef.current >= half) offsetRef.current -= half;
-          while (offsetRef.current < 0) offsetRef.current += half;
-          track.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`;
-        }
-      }
-
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-
-    // Recalc saat layout/gambar berubah
-    const ro =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => {
-            const half = track.scrollWidth / 2;
-            if (half > 1 && offsetRef.current >= half) {
-              offsetRef.current %= half;
-            }
-          })
-        : null;
-    ro?.observe(track);
-
-    return () => {
-      running = false;
-      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
-      ro?.disconnect();
-    };
-    // itemsKey cukup: daftar id sama = konten track sama.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional stable key
-  }, [itemsKey, direction, speed, pausedRef, reduceMotion]);
-
   if (items.length === 0) return null;
 
-  // Reduced motion: tampilkan set items sekali saja (tanpa duplikat loop).
-  const visibleItems = reduceMotion ? items : loop;
+  // Hapus blokade 'prefers-reduced-motion' yang menahan animasi
+  const animationClass =
+    direction === "left" ? "animate-marquee-left" : "animate-marquee-right";
 
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden py-4 w-full" style={{ "--duration": `${speed}s` } as React.CSSProperties}>
+      {/* Container ini dibuat 2x lipat lebih lebar agar cukup untuk bergeser setengahnya tanpa putus.
+          Ditambahkan items-stretch agar setiap kartu dalam satu baris memiliki tinggi yang sama persis */}
       <div
-        ref={trackRef}
-        className="flex w-max gap-3 will-change-transform"
-        style={{ transform: "translate3d(0,0,0)" }}
+        className={`flex w-max items-stretch gap-6 ${animationClass} hover:[animation-play-state:paused] group-hover/marquee:[animation-play-state:paused]`}
       >
-        {visibleItems.map((t, i) => (
+        {loop.map((t, i) => (
           <TestimonialCard key={`${rowKey}-${t.id}-${i}`} t={t} />
         ))}
       </div>
@@ -239,36 +221,23 @@ function MarqueeRow({
 
 /**
  * 2 baris marquee bergiliran.
- * Pause: hanya hover desktop (pointer fine) — touch tidak membuat pause macet.
  */
 export function TestimonialMarquee({ items }: { items: Testimonial[] }) {
-  const pausedRef = useRef(false);
-  // Key stabil agar poll API tidak mereset baris tanpa perlu.
   const itemsKey = items.map((t) => t.id).join("|");
 
   const rows = useMemo(
     () => splitIntoRows(items, ROW_COUNT),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional stable key
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [itemsKey],
   );
 
-  // Desktop hover pause only — hindari mouseenter sticky di touch.
-  const isFinePointer = () =>
-    typeof window !== "undefined" &&
-    Boolean(
-      window.matchMedia?.("(hover: hover) and (pointer: fine)").matches,
-    );
-
+  // Menambahkan fitur group/marquee pada container utama agar kita
+  // bisa melakukan pause secara global, misalnya ketika popup ulasan terbuka.
+  // CSS: group-has-[[data-state=open]]:[--play-state:paused]
   return (
     <div
-      className="testimonial-marquee relative mt-12 space-y-4"
+      className="testimonial-marquee group/marquee relative mt-12 space-y-4"
       aria-label="Testimoni pelanggan"
-      onMouseEnter={() => {
-        if (isFinePointer()) pausedRef.current = true;
-      }}
-      onMouseLeave={() => {
-        pausedRef.current = false;
-      }}
     >
       {rows.map((rowItems, idx) => (
         <MarqueeRow
@@ -276,8 +245,7 @@ export function TestimonialMarquee({ items }: { items: Testimonial[] }) {
           rowKey={`row-${idx}`}
           items={rowItems}
           direction={idx % 2 === 0 ? "left" : "right"}
-          speed={ROW_SPEEDS[idx] ?? 36}
-          pausedRef={pausedRef}
+          speed={idx % 2 === 0 ? 55 : 65} // speed di sini berarti durasi (detik) untuk 1 loop penuh
         />
       ))}
     </div>

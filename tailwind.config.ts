@@ -108,12 +108,22 @@ const config: Config = {
           "0%": { backgroundPosition: "-1000px 0" },
           "100%": { backgroundPosition: "1000px 0" },
         },
+        "marquee-left": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(calc(-50% - 12px))" }, // -12px setengah dari gap-6 (24px)
+        },
+        "marquee-right": {
+          from: { transform: "translateX(calc(-50% - 12px))" },
+          to: { transform: "translateX(0)" },
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.6s ease-out",
         shimmer: "shimmer 2s linear infinite",
+        "marquee-left": "marquee-left var(--duration, 40s) linear infinite",
+        "marquee-right": "marquee-right var(--duration, 40s) linear infinite",
       },
     },
   },

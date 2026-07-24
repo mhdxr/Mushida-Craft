@@ -27,9 +27,9 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={`/produk/${product.slug}`}
-      className="group block overflow-hidden rounded-2xl border border-border/50 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/10"
+      className="group block overflow-hidden rounded-2xl bg-white shadow-[0_4px_24px_-8px_rgba(255,196,213,0.12)] border border-blush-100/30 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_16px_40px_-16px_rgba(255,196,213,0.35)]"
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-secondary/60">
+      <div className="relative aspect-[4/5] overflow-hidden bg-secondary/30">
         <Image
           src={product.images[0] ?? "/placeholder.png"}
           alt={product.name}
@@ -38,28 +38,28 @@ export function ProductCard({ product }: ProductCardProps) {
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
         {product.badge && (
-          <div className="absolute left-3 top-3">
+          <div className="absolute left-3.5 top-3.5">
             <Badge variant={badgeMap[product.badge].variant}>
               {badgeMap[product.badge].label}
             </Badge>
           </div>
         )}
         {isSoldOut && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/35 backdrop-blur-[1px]">
-            <span className="rounded-full bg-white/95 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-foreground">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/25 backdrop-blur-[1px]">
+            <span className="rounded-full bg-white/95 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-foreground shadow-sm">
               Sold Out
             </span>
           </div>
         )}
       </div>
-      <div className="space-y-1.5 px-4 py-4 md:px-5 md:py-5">
-        <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-primary/90">
+      <div className="space-y-2 px-5 py-5 md:px-6 md:py-6">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary/80">
           {cat?.name}
         </p>
-        <h3 className="font-serif text-lg font-medium leading-snug md:text-xl">
+        <h3 className="font-serif text-lg font-medium leading-snug md:text-[1.25rem] text-foreground/90 group-hover:text-primary transition-colors duration-300">
           {product.name}
         </h3>
-        <p className="pt-0.5 text-sm font-medium text-foreground/90">
+        <p className="pt-0.5 text-sm font-semibold text-foreground/70">
           {formatCurrency(product.price)}
         </p>
       </div>

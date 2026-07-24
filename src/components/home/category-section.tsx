@@ -23,30 +23,42 @@ export async function CategorySection() {
   const categories = await fetchCategories();
 
   return (
-    <section id="kategori" className="section-soft py-16 md:py-24">
+    <section id="kategori" className="relative py-20 md:py-32">
+      {/* Latar editorial halus dengan gradien dan blur */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,196,213,0.15),transparent_50%)]"
+      />
+
       <div className="container">
         <SectionHeading
           eyebrow="Kategori"
           title="Rangkaian untuk setiap momen"
           description="Snack, money, artifisial, graduation, dan satin — pilih yang paling dekat dengan ceritamu."
         />
-        <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-5">
+
+        {/* Mengubah kotak (cards) menjadi gaya pill/elemen mengambang yang lebih modern */}
+        <div className="mt-16 flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8">
           {categories.map((cat) => {
             const Icon = categoryIcons[cat.id] ?? Sparkles;
             return (
               <Link
                 key={cat.id}
                 href={`/katalog?category=${cat.id}`}
-                className="group flex h-full flex-col items-center gap-3.5 rounded-2xl border border-border/50 bg-white/90 px-4 py-7 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-md hover:shadow-primary/10"
+                className="group relative flex flex-col items-center gap-4 transition-all duration-300 hover:-translate-y-2"
               >
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blush-50 to-cream-100 text-primary ring-1 ring-primary/10 transition-transform duration-300 group-hover:scale-105">
-                  <Icon className="h-6 w-6" />
-                </span>
-                <div className="space-y-1.5">
-                  <h3 className="font-serif text-[15px] font-semibold tracking-tight">
+                {/* Lingkaran ikon premium yang besar dan lapang */}
+                <div className="relative flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-white/60 shadow-[0_8px_32px_-8px_rgba(255,196,213,0.25)] ring-1 ring-blush-100/50 backdrop-blur-md transition-all duration-500 group-hover:bg-white/90 group-hover:shadow-[0_16px_48px_-12px_rgba(255,196,213,0.4)] group-hover:ring-primary/20">
+                  <div className="absolute inset-2 rounded-full border border-dashed border-blush-200/50 transition-all duration-500 group-hover:rotate-12 group-hover:scale-105" />
+                  <Icon className="relative z-10 h-8 w-8 text-primary/70 transition-colors duration-300 group-hover:text-primary" strokeWidth={1.5} />
+                </div>
+
+                {/* Teks tanpa wadah (borderless) */}
+                <div className="text-center space-y-1 max-w-[8rem] sm:max-w-[10rem]">
+                  <h3 className="font-serif text-[17px] font-semibold tracking-tight text-foreground/80 group-hover:text-primary transition-colors">
                     {cat.name}
                   </h3>
-                  <p className="text-[11px] leading-relaxed text-muted-foreground">
+                  <p className="text-[11px] leading-relaxed text-muted-foreground line-clamp-2">
                     {cat.description}
                   </p>
                 </div>

@@ -160,62 +160,62 @@ export function ProductDetailContent({
     <div className="container py-10 md:py-14">
       <Link
         href="/katalog"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
         Kembali ke katalog
       </Link>
 
-      <div className="mt-6 grid gap-10 md:grid-cols-2 md:gap-12">
+      <div className="mt-8 grid gap-10 md:grid-cols-2 md:gap-14">
         <ProductGallery images={product.images} alt={product.name} />
 
         <div className="flex flex-col">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-primary/80">
             {cat?.name}
           </p>
-          <h1 className="mt-2 font-serif text-[2rem] font-medium leading-[1.15] md:text-[2.75rem]">
+          <h1 className="mt-3 font-serif text-[2.25rem] font-medium leading-[1.15] md:text-[3.25rem]">
             {product.name}
           </h1>
-          <p className="mt-4 font-serif text-[1.85rem] font-medium text-foreground md:text-[2.15rem]">
+          <p className="mt-4 font-serif text-[2rem] font-medium text-foreground md:text-[2.25rem]">
             {formatCurrency(product.price)}
           </p>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="mt-5 flex flex-wrap items-center gap-2.5">
             {product.badge === "best-seller" && <Badge>Best Seller</Badge>}
             {product.badge === "new" && <Badge variant="accent">New</Badge>}
             {isAvailable ? (
-              <Badge variant="success">
-                <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
+              <Badge variant="success" className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100/80 border-emerald-200/60">
+                <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
                 Tersedia
               </Badge>
             ) : (
-              <Badge variant="muted">
-                <XCircle className="mr-1 h-3.5 w-3.5" />
+              <Badge variant="muted" className="bg-secondary text-muted-foreground border-border/40">
+                <XCircle className="mr-1.5 h-3.5 w-3.5" />
                 Sold Out
               </Badge>
             )}
           </div>
 
-          <Separator className="my-6" />
+          <Separator className="my-8 bg-blush-100/40" />
 
-          <div className="space-y-3">
-            <h2 className="font-serif text-lg font-semibold">Deskripsi</h2>
-            <p className="text-sm leading-relaxed text-muted-foreground">
+          <div className="space-y-4">
+            <h2 className="font-serif text-xl italic text-foreground/90">Kisah Rangkaian Ini</h2>
+            <p className="text-[0.95rem] leading-[1.8] text-muted-foreground">
               {product.description}
             </p>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-8">
             <DeliveryNote showWhatsAppCta />
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <OrderButton product={product} className="w-full sm:w-auto" />
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+            <OrderButton product={product} className="w-full sm:w-auto rounded-full py-6 text-sm font-semibold tracking-wide shadow-sm hover:scale-[1.02] transition-transform" />
             <Button
               asChild
               variant="outline"
               size="lg"
-              className="w-full tracking-wide sm:w-auto"
+              className="w-full tracking-wide sm:w-auto rounded-full py-6 text-sm font-semibold border-blush-200/60 hover:border-primary/30 hover:bg-blush-50 transition-colors"
             >
               <Link href="/custom-order">Custom Bouquet</Link>
             </Button>
@@ -224,13 +224,13 @@ export function ProductDetailContent({
       </div>
 
       {related.length > 0 && (
-        <section className="mt-20">
+        <section className="mt-24 md:mt-32 border-t border-blush-100/50 pt-16">
           <SectionHeading
             eyebrow="Produk terkait"
-            title="Mungkin kamu juga suka"
+            title="Mungkin Anda juga suka"
             description="Pilihan rangkaian serupa dari kategori yang sama."
           />
-          <div className="mt-10">
+          <div className="mt-12">
             <ProductGrid products={related} />
           </div>
         </section>

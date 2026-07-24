@@ -29,7 +29,7 @@ const steps = [
 
 export function HowToOrder() {
   return (
-    <section id="cara-order" className="section-soft py-16 md:py-24">
+    <section id="cara-order" className="section-soft py-16 md:py-24 overflow-hidden">
       <div className="container">
         <SectionHeading
           eyebrow="Cara order"
@@ -37,48 +37,66 @@ export function HowToOrder() {
           description="Empat langkah elegan dari pilih rangkaian hingga sampai ke tangan tersayang."
         />
 
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((s, idx) => (
-            <div
-              key={s.title}
-              className="relative rounded-2xl border border-border/50 bg-white/90 p-7 shadow-sm"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-blush-50 text-primary">
-                  <s.icon className="h-5 w-5" />
-                </span>
-                <span className="font-serif text-sm tracking-[0.18em] text-primary/50">
-                  0{idx + 1}
-                </span>
+        {/* Alur horizontal dengan garis penghubung — bukan kotak-kotak berulang */}
+        <div className="relative mt-16 mx-auto max-w-5xl">
+          {/* Garis penghubung horizontal — hanya di desktop */}
+          <div
+            aria-hidden
+            className="absolute top-8 left-[12%] right-[12%] hidden h-px bg-gradient-to-r from-transparent via-blush-200 to-transparent lg:block"
+          />
+
+          <div className="relative grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+            {steps.map((s, idx) => (
+              <div
+                key={s.title}
+                className="relative flex flex-col items-center text-center group"
+              >
+                {/* Lingkaran ikon — titik utama pada alur */}
+                <div className="relative z-10 mb-5">
+                  <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white ring-1 ring-blush-100 shadow-[0_4px_16px_-4px_rgba(255,196,213,0.35)] text-primary transition-all duration-300 group-hover:ring-primary/40 group-hover:scale-105">
+                    <s.icon className="h-6 w-6" />
+                  </span>
+                  {/* Nomor bertengger di atas lingkaran */}
+                  <span
+                    aria-hidden
+                    className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary/90 font-serif text-[10px] font-semibold text-white shadow-sm"
+                  >
+                    {idx + 1}
+                  </span>
+                </div>
+
+                <h3 className="font-serif text-lg font-semibold tracking-tight md:text-xl">
+                  {s.title}
+                </h3>
+                <p className="mt-2 max-w-[15rem] text-sm leading-relaxed text-muted-foreground">
+                  {s.description}
+                </p>
               </div>
-              <h3 className="mt-6 font-serif text-lg font-semibold tracking-tight">
-                {s.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {s.description}
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <div className="mt-14 flex flex-col items-center gap-5 text-center">
-          <div className="max-w-md space-y-2">
-            <p className="font-serif text-xl font-semibold tracking-tight md:text-2xl">
-              Siap merangkai momenmu?
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Mulai dari katalog siap kirim, atau request custom sesuai ceritamu.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg" className="min-w-[10.5rem] tracking-wide">
+        {/* CTA bawah — bergaya editorial, senada dengan bagian lain */}
+        <div className="mt-20 flex flex-col items-center gap-4 text-center border-t border-blush-100/60 pt-12 mx-auto max-w-2xl">
+          <p className="font-serif text-2xl italic text-foreground/80 md:text-3xl">
+            Siap merangkai momen spesial Anda?
+          </p>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            Mulai dari katalog siap kirim, atau ceritakan ide kamu untuk custom order.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
+            <Button
+              asChild
+              size="lg"
+              className="rounded-full bg-primary/90 px-8 py-6 text-sm font-semibold tracking-wide hover:bg-primary shadow-sm transition-all hover:scale-105"
+            >
               <Link href="/katalog">Lihat Katalog</Link>
             </Button>
             <Button
               asChild
               variant="outline"
               size="lg"
-              className="min-w-[10.5rem] border-border/70 bg-white/70 tracking-wide"
+              className="rounded-full border-blush-200/60 bg-white/70 px-8 py-6 text-sm font-semibold tracking-wide backdrop-blur-sm hover:bg-white hover:border-primary/30 transition-all"
             >
               <Link href="/custom-order">Custom Bouquet</Link>
             </Button>

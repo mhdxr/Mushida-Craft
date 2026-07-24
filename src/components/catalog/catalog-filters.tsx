@@ -87,21 +87,21 @@ export function CatalogFilters({
     value.price !== "all";
 
   return (
-    <div className="space-y-4">
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    <div className="space-y-6">
+      <div className="relative max-w-xl mx-auto md:mx-0">
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/40" />
         <Input
-          placeholder="Cari nama bouquet..."
+          placeholder="Cari nama atau jenis bouquet..."
           aria-label="Cari bouquet"
           value={value.search}
           onChange={(e) => onChange({ ...value, search: e.target.value })}
-          className="h-11 rounded-full border-border/60 bg-secondary/30 pl-10 pr-4 shadow-none focus-visible:bg-white"
+          className="h-12 rounded-full border-blush-200/50 bg-white/70 pl-11 pr-4 shadow-[0_2px_12px_-4px_rgba(255,196,213,0.15)] focus-visible:ring-primary/20 focus-visible:bg-white backdrop-blur-sm transition-all hover:bg-white"
         />
       </div>
 
-      {/* Chip kategori — tenang, tanpa emoji berisik */}
+      {/* Chip kategori — elegan, melayang halus */}
       <div
-        className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="-mx-1 flex gap-2.5 overflow-x-auto px-1 pb-2 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="listbox"
         aria-label="Filter kategori"
       >
@@ -120,10 +120,10 @@ export function CatalogFilters({
                 })
               }
               className={cn(
-                "inline-flex shrink-0 items-center rounded-full border px-3.5 py-2 text-[13px] font-medium tracking-wide transition-all",
+                "inline-flex shrink-0 items-center rounded-full px-5 py-2.5 text-[13px] font-medium tracking-wide transition-all duration-300",
                 active
-                  ? "border-primary/30 bg-blush-50 text-foreground shadow-sm"
-                  : "border-border/60 bg-white text-muted-foreground hover:border-primary/25 hover:text-foreground",
+                  ? "bg-primary text-white shadow-[0_4px_12px_-2px_rgba(255,196,213,0.6)] scale-[1.02]"
+                  : "bg-white/80 border border-blush-100/60 text-muted-foreground hover:bg-white hover:text-foreground hover:border-primary/30 hover:shadow-sm"
               )}
             >
               {chip.name}
@@ -132,8 +132,8 @@ export function CatalogFilters({
         })}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-4">
-        <div className="flex min-w-0 flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-4">
           <Select
             value={value.price}
             onValueChange={(v) =>
@@ -141,24 +141,24 @@ export function CatalogFilters({
             }
           >
             <SelectTrigger
-              className="h-9 w-auto min-w-[10rem] rounded-full border-border/60 bg-white px-3 text-xs md:min-w-[12.5rem] md:text-sm"
+              className="h-10 w-auto min-w-[11rem] rounded-full border-blush-200/50 bg-white/80 px-4 text-xs md:min-w-[13.5rem] md:text-sm hover:bg-white hover:border-primary/30 transition-colors shadow-sm"
               aria-label="Filter harga"
             >
-              <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+              <SlidersHorizontal className="mr-2 h-3.5 w-3.5 text-primary/50" />
               <SelectValue placeholder="Rentang harga" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl border-blush-100/60 shadow-lg">
               {priceOptions.map((p) => (
-                <SelectItem key={p.value} value={p.value}>
+                <SelectItem key={p.value} value={p.value} className="rounded-lg hover:bg-blush-50 cursor-pointer">
                   {p.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
 
-          <p className="text-sm text-muted-foreground">
-            <strong className="font-medium text-foreground">{total}</strong>{" "}
-            produk
+          <p className="text-[13px] text-muted-foreground/80 hidden sm:block">
+            <strong className="font-serif text-base italic font-semibold text-foreground/90">{total}</strong>{" "}
+            rangkaian ditemukan
           </p>
         </div>
 
@@ -166,13 +166,13 @@ export function CatalogFilters({
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-full text-muted-foreground hover:text-foreground"
+            className="rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 px-4"
             onClick={() =>
               onChange({ search: "", category: "all", price: "all" })
             }
           >
-            <X className="h-3.5 w-3.5" />
-            Reset
+            <X className="mr-1.5 h-3.5 w-3.5" />
+            Reset Filter
           </Button>
         )}
       </div>

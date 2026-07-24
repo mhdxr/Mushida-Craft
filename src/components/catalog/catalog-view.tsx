@@ -138,72 +138,82 @@ export function CatalogView({ initialProducts }: CatalogViewProps) {
   }
 
   return (
-    <div className="container py-10 md:py-14">
-      <CatalogHeader categoryTitle={categoryTitle} />
-
-      <div
-        ref={filtersRef}
-        className="mb-8 scroll-mt-24 rounded-2xl border border-border/50 bg-white/90 p-4 shadow-sm md:p-5"
-      >
-        <CatalogFilters
-          value={filters}
-          onChange={setFilters}
-          total={filtered.length}
-        />
+    <div>
+      {/* Banner header editorial — latar gradien tematik, tidak putih polos */}
+      <div className="relative overflow-hidden bg-[radial-gradient(ellipse_at_top_left,rgba(255,196,213,0.35),transparent_55%),radial-gradient(ellipse_at_bottom_right,rgba(252,232,200,0.4),transparent_50%)] py-14 md:py-20">
+        <div className="container">
+          <CatalogHeader categoryTitle={categoryTitle} />
+        </div>
+        {/* Elemen dekoratif — bunga abstrak latar */}
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-blush-100/30 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-10 left-1/3 h-48 w-48 rounded-full bg-cream-200/40 blur-2xl" />
       </div>
 
-      {isFiltered && (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-          <p>
-            <strong className="font-medium text-foreground">
-              {filtered.length}
-            </strong>{" "}
-            produk
-            {activeParts.length > 0 ? (
-              <span className="text-muted-foreground">
-                {" "}
-                · {activeParts.join(" · ")}
-              </span>
-            ) : null}
-          </p>
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="font-medium tracking-wide text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
-          >
-            Reset filter
-          </button>
-        </div>
-      )}
-
-      {filtered.length === 0 ? (
-        <EmptyState
-          onReset={resetFilters}
-          title="Tidak ada yang cocok"
-          description="Coba ubah kata kunci, kategori, atau rentang harga — atau request custom sesuai momenmu."
-          primaryHref="/custom-order"
-          primaryLabel="Request custom"
-        />
-      ) : (
-        <ProductGrid products={filtered} />
-      )}
-
-      <div className="mt-14 flex flex-col items-start justify-between gap-4 rounded-2xl border border-border/50 bg-secondary/30 px-6 py-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="font-serif text-lg font-semibold tracking-tight">
-            Belum ketemu yang pas?
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Ceritakan ide kamu — kami bantu rancang custom via WhatsApp.
-          </p>
-        </div>
-        <Link
-          href="/custom-order"
-          className="group inline-flex shrink-0 items-center gap-1.5 border-b border-foreground/20 pb-0.5 text-sm font-medium tracking-wide transition-colors hover:border-primary hover:text-primary"
+      <div className="container py-8 md:py-12">
+        {/* Filter — tanpa kotak, menyatu dengan latar halaman */}
+        <div
+          ref={filtersRef}
+          className="mb-8 scroll-mt-24"
         >
-          Custom bouquet
-          <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-        </Link>
+          <CatalogFilters
+            value={filters}
+            onChange={setFilters}
+            total={filtered.length}
+          />
+        </div>
+
+        {isFiltered && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+            <p>
+              <strong className="font-medium text-foreground">
+                {filtered.length}
+              </strong>{" "}
+              produk
+              {activeParts.length > 0 ? (
+                <span className="text-muted-foreground">
+                  {" "}
+                  · {activeParts.join(" · ")}
+                </span>
+              ) : null}
+            </p>
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="font-medium tracking-wide text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
+            >
+              Reset filter
+            </button>
+          </div>
+        )}
+
+        {filtered.length === 0 ? (
+          <EmptyState
+            onReset={resetFilters}
+            title="Tidak ada yang cocok"
+            description="Coba ubah kata kunci, kategori, atau rentang harga — atau request custom sesuai momenmu."
+            primaryHref="/custom-order"
+            primaryLabel="Request custom"
+          />
+        ) : (
+          <ProductGrid products={filtered} />
+        )}
+
+        {/* CTA bawah — bergaya editorial, bukan kotak abu-abu */}
+        <div className="mt-16 flex flex-col items-center gap-4 text-center border-t border-blush-100/60 pt-12">
+          <p className="font-serif text-2xl italic text-foreground/80 md:text-3xl">
+            Tidak menemukan yang pas?
+          </p>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            Ceritakan ide kamu — kami bantu rancang bouquet impian via WhatsApp.
+          </p>
+          <Link
+            href="/custom-order"
+            className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary/90 px-8 py-3 text-sm font-semibold tracking-wide text-white shadow-sm transition-all hover:bg-primary hover:scale-105"
+          >
+            Request Custom Bouquet
+            <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -122,14 +122,15 @@ export function CustomOrderForm() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-5 rounded-2xl border border-border/60 bg-white p-6 shadow-sm md:p-8"
+      className="space-y-7 rounded-2xl bg-white/70 p-6 shadow-[0_4px_32px_-8px_rgba(255,196,213,0.2)] backdrop-blur-md md:p-10"
     >
-      <div className="grid gap-5 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="name">Nama lengkap</Label>
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-2.5">
+          <Label htmlFor="name" className="font-serif text-base italic text-foreground/80">Nama lengkap</Label>
           <Input
             id="name"
             placeholder="cth. Anindya Putri"
+            className="h-11 border-blush-200/50 bg-white/50 focus-visible:ring-primary/30"
             {...register("name")}
           />
           {errors.name && (
@@ -137,13 +138,14 @@ export function CustomOrderForm() {
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="whatsapp">Nomor WhatsApp</Label>
+        <div className="space-y-2.5">
+          <Label htmlFor="whatsapp" className="font-serif text-base italic text-foreground/80">Nomor WhatsApp</Label>
           <Input
             id="whatsapp"
             placeholder="cth. 081234567890"
             inputMode="tel"
             autoComplete="tel"
+            className="h-11 border-blush-200/50 bg-white/50 focus-visible:ring-primary/30"
             {...register("whatsapp")}
           />
           {errors.whatsapp && (
@@ -153,15 +155,15 @@ export function CustomOrderForm() {
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="bouquetType">Jenis bouquet</Label>
+        <div className="space-y-2.5">
+          <Label htmlFor="bouquetType" className="font-serif text-base italic text-foreground/80">Jenis bouquet</Label>
           <Select
             value={bouquetType}
             onValueChange={(v) =>
               setValue("bouquetType", v, { shouldValidate: true })
             }
           >
-            <SelectTrigger id="bouquetType" aria-label="Jenis bouquet">
+            <SelectTrigger id="bouquetType" aria-label="Jenis bouquet" className="h-11 border-blush-200/50 bg-white/50">
               <SelectValue placeholder="Pilih jenis bouquet" />
             </SelectTrigger>
             <SelectContent>
@@ -179,15 +181,15 @@ export function CustomOrderForm() {
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="occasion">Momen</Label>
+        <div className="space-y-2.5">
+          <Label htmlFor="occasion" className="font-serif text-base italic text-foreground/80">Momen</Label>
           <Select
             value={occasion}
             onValueChange={(v) =>
               setValue("occasion", v, { shouldValidate: true })
             }
           >
-            <SelectTrigger id="occasion" aria-label="Momen">
+            <SelectTrigger id="occasion" aria-label="Momen" className="h-11 border-blush-200/50 bg-white/50">
               <SelectValue placeholder="Pilih momen" />
             </SelectTrigger>
             <SelectContent>
@@ -203,15 +205,15 @@ export function CustomOrderForm() {
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="budget">Budget</Label>
+        <div className="space-y-2.5">
+          <Label htmlFor="budget" className="font-serif text-base italic text-foreground/80">Budget</Label>
           <Select
             value={budget}
             onValueChange={(v) =>
               setValue("budget", v, { shouldValidate: true })
             }
           >
-            <SelectTrigger id="budget" aria-label="Budget">
+            <SelectTrigger id="budget" aria-label="Budget" className="h-11 border-blush-200/50 bg-white/50">
               <SelectValue placeholder="Pilih kisaran budget" />
             </SelectTrigger>
             <SelectContent>
@@ -227,15 +229,15 @@ export function CustomOrderForm() {
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="deliveryArea">Area pengiriman</Label>
+        <div className="space-y-2.5">
+          <Label htmlFor="deliveryArea" className="font-serif text-base italic text-foreground/80">Area pengiriman</Label>
           <Select
             value={deliveryArea}
             onValueChange={(v) =>
               setValue("deliveryArea", v, { shouldValidate: true })
             }
           >
-            <SelectTrigger id="deliveryArea" aria-label="Area pengiriman">
+            <SelectTrigger id="deliveryArea" aria-label="Area pengiriman" className="h-11 border-blush-200/50 bg-white/50">
               <SelectValue placeholder="Pilih area tujuan" />
             </SelectTrigger>
             <SelectContent>
@@ -257,12 +259,13 @@ export function CustomOrderForm() {
           </p>
         </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="neededDate">Tanggal dibutuhkan</Label>
+        <div className="space-y-2.5 md:col-span-2">
+          <Label htmlFor="neededDate" className="font-serif text-base italic text-foreground/80">Tanggal dibutuhkan</Label>
           <Input
             id="neededDate"
             type="date"
             min={new Date().toLocaleDateString("en-CA")}
+            className="h-11 border-blush-200/50 bg-white/50 focus-visible:ring-primary/30"
             {...register("neededDate")}
           />
           {errors.neededDate && (
@@ -272,11 +275,12 @@ export function CustomOrderForm() {
           )}
         </div>
 
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="notes">Catatan tambahan (opsional)</Label>
+        <div className="space-y-2.5 md:col-span-2">
+          <Label htmlFor="notes" className="font-serif text-base italic text-foreground/80">Catatan tambahan <span className="font-sans text-xs not-italic text-muted-foreground">(opsional)</span></Label>
           <Textarea
             id="notes"
             placeholder="Misal: warna favorit, tema, alamat lengkap, dll"
+            className="border-blush-200/50 bg-white/50 focus-visible:ring-primary/30 resize-none"
             {...register("notes")}
           />
           {errors.notes && (
@@ -285,8 +289,13 @@ export function CustomOrderForm() {
         </div>
       </div>
 
-      <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-        <MessageCircle className="h-4 w-4" />
+      <Button
+        type="submit"
+        size="lg"
+        disabled={isSubmitting}
+        className="w-full rounded-full bg-primary/90 py-6 text-sm font-semibold tracking-wide hover:bg-primary shadow-sm transition-all hover:scale-[1.02]"
+      >
+        <MessageCircle className="mr-2 h-4 w-4" />
         Kirim ke WhatsApp
       </Button>
 

@@ -114,10 +114,10 @@ export function Footer() {
                   href="https://www.instagram.com/mushida_craft"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+                  className="group inline-flex items-center gap-3 transition-colors hover:text-foreground"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-foreground shadow-sm ring-1 ring-border/50">
-                    <Camera className="h-3.5 w-3.5" />
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-primary/70 shadow-sm ring-1 ring-blush-100/50 transition-colors group-hover:bg-blush-50 group-hover:text-primary group-hover:ring-primary/20">
+                    <Camera className="h-4 w-4" />
                   </span>
                   @mushida_craft
                 </a>
@@ -125,10 +125,10 @@ export function Footer() {
               <li>
                 <a
                   href="mailto:mushidacraft@gmail.com"
-                  className="inline-flex items-center gap-2 transition-colors hover:text-foreground"
+                  className="group inline-flex items-center gap-3 transition-colors hover:text-foreground"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-foreground shadow-sm ring-1 ring-border/50">
-                    <Mail className="h-3.5 w-3.5" />
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-primary/70 shadow-sm ring-1 ring-blush-100/50 transition-colors group-hover:bg-blush-50 group-hover:text-primary group-hover:ring-primary/20">
+                    <Mail className="h-4 w-4" />
                   </span>
                   mushidacraft@gmail.com
                 </a>

@@ -129,31 +129,17 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="relative overflow-hidden rounded-2xl border border-border/60 bg-white p-6 shadow-sm md:p-8"
+      className="relative"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/5"
-      />
-
-      <div className="relative mb-6">
-        <h3 className="font-serif text-xl font-semibold tracking-tight">
-          Bagikan pengalamanmu
-        </h3>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          Testimoni akan ditinjau terlebih dahulu sebelum tampil di situs.
-        </p>
-      </div>
-
-      <div className="relative grid gap-5">
+      <div className="relative grid gap-8">
         {/* Foto profil opsional */}
-        <div className="space-y-2">
-          <Label>
-            Foto profil{" "}
-            <span className="text-muted-foreground">(opsional)</span>
+        <div className="space-y-3">
+          <Label className="font-serif text-lg italic text-foreground/80">
+            Foto Profil{" "}
+            <span className="font-sans text-xs not-italic text-muted-foreground ml-1">(opsional)</span>
           </Label>
-          <div className="flex items-center gap-4">
-            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/60 bg-secondary/50 text-muted-foreground">
+          <div className="flex items-center gap-5">
+            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-blush-200/60 bg-blush-50/50 text-primary/60">
               {avatarPreview ? (
                 // eslint-disable-next-line @next/next/no-img-element -- blob: preview, bukan remote URL
                 <img
@@ -180,38 +166,41 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
                   type="button"
                   variant="outline"
                   size="sm"
+                  className="border-blush-200/60 hover:bg-blush-50 hover:text-primary transition-colors text-xs"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <Camera className="h-4 w-4" />
-                  {avatarFile ? "Ganti foto" : "Pilih foto"}
+                  <Camera className="h-3.5 w-3.5 mr-1" />
+                  {avatarFile ? "Ganti" : "Pilih foto"}
                 </Button>
                 {avatarFile ? (
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs"
                     onClick={clearAvatar}
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5 mr-1" />
                     Hapus
                   </Button>
                 ) : null}
               </div>
-              <p className="text-xs text-muted-foreground">
-                JPEG/PNG/WebP · maks. 1 MB · tanpa foto pakai inisial nama
+              <p className="text-[11px] text-muted-foreground/70">
+                Maks. 1 MB (JPEG/PNG). Inisial nama akan digunakan jika kosong.
               </p>
               {avatarError ? (
-                <p className="text-xs text-destructive">{avatarError}</p>
+                <p className="text-xs text-destructive mt-1">{avatarError}</p>
               ) : null}
             </div>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="testimonial-name">Nama</Label>
+        <div className="space-y-3">
+          <Label htmlFor="testimonial-name" className="font-serif text-lg italic text-foreground/80">Nama Anda</Label>
           <Input
             id="testimonial-name"
-            placeholder="Nama kamu"
+            placeholder="Tuliskan nama Anda"
+            className="border-blush-200/50 focus-visible:ring-primary/30 h-11 bg-white/50"
             {...register("name")}
           />
           {errors.name && (
@@ -219,10 +208,10 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label>Rating</Label>
+        <div className="space-y-3">
+          <Label className="font-serif text-lg italic text-foreground/80">Beri Nilai Bintang</Label>
           <div
-            className="flex items-center gap-1 rounded-xl border border-border/60 bg-secondary/40 px-3 py-2.5"
+            className="flex items-center gap-1.5"
             role="radiogroup"
             aria-label="Rating bintang"
           >
@@ -236,7 +225,7 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
                   role="radio"
                   aria-checked={rating === value}
                   aria-label={`${value} bintang`}
-                  className="rounded-md p-0.5 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="rounded-full p-1 transition-all duration-300 hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                   onMouseEnter={() => setHoverRating(value)}
                   onMouseLeave={() => setHoverRating(0)}
                   onClick={() =>
@@ -247,30 +236,29 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
                   }
                 >
                   <Star
-                    className={`h-7 w-7 transition-colors ${
+                    className={`h-8 w-8 transition-colors duration-300 ${
                       active
-                        ? "fill-amber-400 text-amber-400"
-                        : "text-muted-foreground/35"
+                        ? "fill-primary/70 text-primary/70 drop-shadow-[0_2px_8px_rgba(255,196,213,0.5)]"
+                        : "text-blush-200/60"
                     }`}
+                    strokeWidth={active ? 1 : 1.5}
                   />
                 </button>
               );
             })}
-            <span className="ml-2 text-sm font-medium text-muted-foreground">
-              {rating}/5
-            </span>
           </div>
           {errors.rating && (
             <p className="text-xs text-destructive">{errors.rating.message}</p>
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="testimonial-message">Testimoni</Label>
+        <div className="space-y-3">
+          <Label htmlFor="testimonial-message" className="font-serif text-lg italic text-foreground/80">Pesan Anda</Label>
           <Textarea
             id="testimonial-message"
-            rows={4}
-            placeholder="Ceritakan pengalamanmu memesan di Mushida Craft..."
+            rows={5}
+            className="border-blush-200/50 focus-visible:ring-primary/30 bg-white/50 resize-none"
+            placeholder="Goreskan pengalaman Anda menerima atau memesan buket dari Mushida Craft..."
             {...register("message")}
           />
           {errors.message && (
@@ -279,10 +267,14 @@ export function TestimonialForm({ onSuccess }: { onSuccess?: () => void }) {
         </div>
       </div>
 
-      <div className="relative mt-6 flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>
-          <Send className="h-4 w-4" />
-          {isSubmitting ? "Mengirim..." : "Kirim testimoni"}
+      <div className="relative mt-10 flex justify-end">
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="rounded-full bg-primary/90 px-8 py-6 text-sm font-semibold tracking-wide hover:bg-primary shadow-sm transition-all hover:scale-105"
+        >
+          <Send className="mr-2 h-4 w-4" />
+          {isSubmitting ? "Mengirim Pesan..." : "Kirim Pesan"}
         </Button>
       </div>
     </form>

@@ -47,7 +47,7 @@ export function Navbar() {
     (href !== "/" && !href.startsWith("/#") && pathname.startsWith(href));
 
   return (
-    <header className="sticky top-0 z-50 isolate w-full border-b border-border/30 bg-white/75 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 isolate w-full border-b border-blush-100/30 bg-white/70 backdrop-blur-md shadow-[0_4px_24px_-8px_rgba(255,196,213,0.08)]">
       <div className="container relative z-[60] flex h-[4.25rem] items-center justify-between gap-6">
         <BrandLogo size="sm" priority />
 
