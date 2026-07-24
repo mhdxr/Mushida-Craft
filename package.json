@@ -26,7 +26,7 @@
     "@radix-ui/react-toast": "^1.2.19",
     "@sentry/nextjs": "^10.65.0",
     "@supabase/supabase-js": "^2.110.2",
-    "@tailwindcss/postcss": "^4.3.2",
+    "@tailwindcss/postcss": "^4.3.3",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "class-variance-authority": "^0.7.1",
