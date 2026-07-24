@@ -5,6 +5,7 @@ import { Toaster } from "@/components/common/toaster";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import { buildLocalBusinessJsonLd, getSiteUrl, safeJsonLd } from "@/lib/site";
 import { fetchApprovedRatingStats } from "@/lib/testimonial-api";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 /**
@@ -122,6 +123,7 @@ export default async function RootLayout({
           <StoreChrome>{children}</StoreChrome>
         </PostHogProvider>
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );
