@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { StoreChrome } from "@/components/layout/store-chrome";
 import { Toaster } from "@/components/common/toaster";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
@@ -122,6 +124,8 @@ export default async function RootLayout({
           <StoreChrome>{children}</StoreChrome>
         </PostHogProvider>
         <Toaster />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
