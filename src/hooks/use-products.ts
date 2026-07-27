@@ -11,7 +11,6 @@ import type { Product } from "@/types";
  * Create: POST /api/admin/products          (admin only)
  * Update: PATCH /api/admin/products/[id]    (admin only)
  * Delete: DELETE /api/admin/products/[id]   (admin only)
- * Reset:  POST /api/admin/products { action: "reset" }  (admin only, non-prod)
  * Upload: POST /api/admin/upload            (admin only)
  */
 export function useProducts() {
@@ -110,23 +109,6 @@ export function useProducts() {
     [refresh, router],
   );
 
-  const reset = useCallback(async () => {
-    const res = await fetch("/api/admin/products", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "reset" }),
-    });
-    if (res.status === 401) {
-      router.replace("/admin/login");
-      throw new Error("Sesi berakhir. Silakan login ulang.");
-    }
-    const json = await res.json();
-    if (!res.ok || !json.ok) {
-      throw new Error(json.message || "Gagal reset data.");
-    }
-    await refresh();
-  }, [refresh, router]);
-
   const uploadImages = useCallback(
     async (files: File[]): Promise<string[]> => {
       const formData = new FormData();
@@ -167,7 +149,6 @@ export function useProducts() {
     create,
     update,
     remove,
-    reset,
     uploadImages,
   };
 }

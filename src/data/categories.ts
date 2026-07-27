@@ -42,14 +42,9 @@ export const categories: CategoryInfo[] = [
  * Lookup kategori by id (semua ProductCategory terjamin ada).
  * Dipakai catalog filter summary, product card, admin table.
  */
-export const categoryMap: Record<ProductCategory, CategoryInfo> =
-  categories.reduce(
-    (acc, c) => {
-      acc[c.id] = c;
-      return acc;
-    },
-    {} as Record<ProductCategory, CategoryInfo>,
-  );
+export const categoryMap = Object.fromEntries(
+  categories.map((c) => [c.id, c]),
+) as Record<ProductCategory, CategoryInfo>;
 
 /** Daftar id kategori (untuk filter / allowlist). */
 export const categoryIds: ProductCategory[] = categories.map((c) => c.id);

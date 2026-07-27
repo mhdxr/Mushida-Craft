@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import { guardAdminRequest } from "@/lib/admin-guard";
-import { createProduct, resetProducts } from "@/lib/product-api";
-import { products as seedProducts } from "@/data/products";
+import { createProduct } from "@/lib/product-api";
 import { revalidateStorefront } from "@/lib/revalidate-storefront";
 import { productSchema } from "@/lib/validations";
 import { GET as publicProductsGet } from "@/app/api/products/route";
-import type { Product } from "@/types";
 
 /**
  * GET /api/admin/products — alias baca (deprecated).
@@ -13,10 +11,7 @@ import type { Product } from "@/types";
  */
 export const GET = publicProductsGet;
 
-/**
- * POST /api/admin/products — create / reset seed (admin only).
- * Reset diblokir di production.
- */
+/** POST /api/admin/products — create produk (admin only). */
 export async function POST(req: Request) {
   try {
     const denied = await guardAdminRequest(req);
@@ -30,26 +25,6 @@ export async function POST(req: Request) {
         { ok: false, message: "Data produk tidak valid." },
         { status: 400 },
       );
-    }
-
-    if (
-      typeof body === "object" &&
-      body !== null &&
-      (body as { action?: unknown }).action === "reset"
-    ) {
-      if (process.env.NODE_ENV === "production") {
-        return NextResponse.json(
-          {
-            ok: false,
-            message:
-              "Reset seed dinonaktifkan di production. Gunakan di development saja.",
-          },
-          { status: 403 },
-        );
-      }
-      await resetProducts(seedProducts as Product[]);
-      revalidateStorefront();
-      return NextResponse.json({ ok: true, message: "Data direset ke seed." });
     }
 
     const result = productSchema.safeParse(body);

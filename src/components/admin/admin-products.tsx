@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, Plus, RotateCcw, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { ProductForm } from "@/components/admin/product-form";
 import { ProductTable } from "@/components/admin/product-table";
@@ -28,12 +28,10 @@ export function AdminProducts() {
     create,
     update,
     remove,
-    reset,
     uploadImages,
   } = useProducts();
   const [editing, setEditing] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [resetting, setResetting] = useState(false);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<ProductCategory | "all">("all");
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
@@ -136,33 +134,6 @@ export function AdminProducts() {
     }
   };
 
-  const handleReset = async () => {
-    if (
-      !window.confirm(
-        "Reset data ke seed default? Semua perubahan produk akan hilang.",
-      )
-    )
-      return;
-    // Konfirmasi ketik di production-like — API juga memblokir NODE_ENV=production.
-    if (process.env.NODE_ENV === "production") {
-      toast.error("Reset seed dinonaktifkan di production.");
-      return;
-    }
-    setResetting(true);
-    try {
-      await reset();
-      toast.success("Data produk direset ke seed default.");
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Gagal mereset data produk.",
-      );
-    } finally {
-      setResetting(false);
-    }
-  };
-
-  const showReset = process.env.NODE_ENV !== "production";
-
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -182,21 +153,6 @@ export function AdminProducts() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {showReset ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleReset}
-              disabled={resetting || isLoading}
-            >
-              {resetting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <RotateCcw className="h-4 w-4" />
-              )}
-              Reset seed
-            </Button>
-          ) : null}
           <Button size="sm" onClick={openCreate}>
             <Plus className="h-4 w-4" />
             Tambah produk

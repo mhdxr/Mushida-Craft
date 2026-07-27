@@ -228,46 +228,5 @@ export async function fetchProductById(id: string): Promise<Product | null> {
   return data ? rowToProduct(data) : null;
 }
 
-/** Hapus semua produk & re-seed dari data statis (untuk tombol "Reset data"). */
-export async function resetProducts(seed: Product[]): Promise<void> {
-  const client = getServerSupabaseClient();
-
-  // Ambil images dulu untuk cleanup Storage (best-effort).
-  const { data: existingRows } = await client.from(TABLE).select("images");
-  const allImages = (existingRows ?? []).flatMap((row) => {
-    if (row && typeof row === "object" && "images" in row) {
-      const imgs = (row as { images: string[] | null }).images;
-      return Array.isArray(imgs) ? imgs : [];
-    }
-    return [];
-  });
-
-  const { error: delErr } = await client.from(TABLE).delete().neq("id", "");
-  if (delErr) throw delErr;
-
-  // Best-effort hapus file Storage produk lama (jangan gagalkan re-seed).
-  if (allImages.length > 0) {
-    await removeProductImagesFromStorage(allImages);
-  }
-
-  const now = new Date().toISOString();
-  const rows = seed.map((p) => ({
-    id: p.id,
-    slug: p.slug,
-    name: p.name,
-    description: p.description,
-    price: p.price,
-    category: p.category,
-    images: p.images,
-    badge: p.badge ?? null,
-    is_available: p.isAvailable,
-    created_at: p.createdAt,
-    updated_at: now,
-  }));
-
-  const { error: insErr } = await client.from(TABLE).insert(rows);
-  if (insErr) throw insErr;
-}
-
 /** Generate slug unik berdasarkan nama. */
 export { slugify };
