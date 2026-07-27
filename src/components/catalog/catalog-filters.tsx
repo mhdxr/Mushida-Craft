@@ -95,7 +95,7 @@ export function CatalogFilters({
           aria-label="Cari bouquet"
           value={value.search}
           onChange={(e) => onChange({ ...value, search: e.target.value })}
-          className="h-12 rounded-full border-blush-200/50 bg-white/70 pl-11 pr-4 shadow-[0_2px_12px_-4px_rgba(255,196,213,0.15)] focus-visible:ring-primary/20 focus-visible:bg-white backdrop-blur-sm transition-all hover:bg-white"
+          className="h-12 rounded-full border-blush-200/50 bg-white/70 pl-11 pr-4 shadow-[0_2px_12px_-4px_rgba(var(--shadow-blush-rgb),0.15)] focus-visible:ring-primary/20 focus-visible:bg-white backdrop-blur-sm transition-all hover:bg-white"
         />
       </div>
 
