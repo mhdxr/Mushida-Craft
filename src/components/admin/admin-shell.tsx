@@ -130,7 +130,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   if (!authChecked) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#faf7f5]">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--surface-admin)]">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           Memuat admin...
@@ -140,7 +140,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#faf7f5]">
+    <div className="flex min-h-screen bg-[var(--surface-admin)]">
       {/* Sidebar desktop */}
       <aside
         className={cn(

@@ -34,6 +34,16 @@
     --ring: 345 78% 70%;
 
     --radius: 0.85rem;
+
+    /* Surface & efek dekoratif — sebelumnya hardcode di komponen/utility. */
+    --surface-warm: #fff8f5;
+    --surface-warm-deep: #fff5f1;
+    --surface-soft: #fffaf6;
+    --surface-admin: #faf7f5;
+    --shadow-blush-rgb: 255, 196, 213;
+    --glow-blush: rgba(255, 196, 213, 0.55);
+    --glow-cream: rgba(252, 232, 200, 0.7);
+    --whatsapp: #25d366;
   }
 
   * {
@@ -71,19 +81,19 @@
   .hero-gradient {
     background: radial-gradient(
         circle at 10% 0%,
-        rgba(255, 196, 213, 0.55) 0%,
+        var(--glow-blush) 0%,
         transparent 45%
       ),
       radial-gradient(
         circle at 95% 10%,
-        rgba(252, 232, 200, 0.7) 0%,
+        var(--glow-cream) 0%,
         transparent 50%
       ),
-      linear-gradient(180deg, #fff8f5 0%, #fff5f1 100%);
+      linear-gradient(180deg, var(--surface-warm) 0%, var(--surface-warm-deep) 100%);
   }
 
   .section-soft {
-    background: linear-gradient(180deg, #fffaf6 0%, #fff5f1 100%);
+    background: linear-gradient(180deg, var(--surface-soft) 0%, var(--surface-warm-deep) 100%);
   }
 
   /* Marquee testimoni — fade di tepi (animasi di client component). */
@@ -132,11 +142,7 @@
     scroll-behavior: auto;
   }
 
-  /*
-   * Mengecualikan .animate-marquee-left dan .animate-marquee-right dari aturan reduced-motion
-   * agar animasi Marquee tetap berjalan meskipun setelan OS mematikan animasi.
-   */
-  *:not(.animate-marquee-left):not(.animate-marquee-right),
+  *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;

@@ -58,7 +58,7 @@ function TestimonialCard({ t }: { t: Testimonial }) {
   // sebagai pemicu (trigger) pada Dialog.
   // Menyusutkan ukuran agar kompak: lebar 18rem (dari 22rem), padding 6 (dari 8)
   const cardContent = (
-    <article className="group relative flex h-full w-[min(80vw,18rem)] shrink-0 flex-col overflow-hidden rounded-xl bg-white/70 p-6 shadow-[0_4px_24px_-8px_rgba(255,196,213,0.15)] backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:bg-white/90 hover:shadow-[0_8px_32px_-8px_rgba(255,196,213,0.3)] text-left cursor-pointer">
+    <article className="group relative flex h-full w-[min(80vw,18rem)] shrink-0 flex-col overflow-hidden rounded-xl bg-white/70 p-6 shadow-[0_4px_24px_-8px_rgba(var(--shadow-blush-rgb),0.15)] backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:bg-white/90 hover:shadow-[0_8px_32px_-8px_rgba(var(--shadow-blush-rgb),0.3)] text-left cursor-pointer">
       {/* Watermark Quote elegan sebagai signature */}
       <div
         aria-hidden
