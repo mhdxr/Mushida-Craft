@@ -34,6 +34,16 @@
     --ring: 345 78% 70%;
 
     --radius: 0.85rem;
+
+    /* Surface & efek dekoratif — sebelumnya hardcode di komponen/utility. */
+    --surface-warm: #fff8f5;
+    --surface-warm-deep: #fff5f1;
+    --surface-soft: #fffaf6;
+    --surface-admin: #faf7f5;
+    --shadow-blush-rgb: 255, 196, 213;
+    --glow-blush: rgba(255, 196, 213, 0.55);
+    --glow-cream: rgba(252, 232, 200, 0.7);
+    --whatsapp: #25d366;
   }
 
   * {
