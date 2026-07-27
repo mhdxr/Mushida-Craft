@@ -15,6 +15,7 @@ import { useProducts } from "@/hooks/use-products";
 import { useTestimonials } from "@/hooks/use-testimonials";
 import { getTimeGreeting } from "@/lib/greeting";
 import { cn } from "@/lib/utils";
+import { AnalyticsChart } from "@/components/admin/analytics-chart";
 
 export function AdminOverview() {
   const { products, isLoading: productsLoading } = useProducts();
@@ -159,9 +160,20 @@ export function AdminOverview() {
         })}
       </div>
 
-      <div className="rounded-2xl border border-border/50 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-semibold tracking-tight">Aksi cepat</h2>
-        <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="rounded-2xl border border-border/50 bg-white p-5 shadow-sm md:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-sm font-semibold tracking-tight">Performa Mingguan</h2>
+            <Link href="/admin/inquiries" className="text-xs text-primary hover:underline">
+              Lihat Laporan
+            </Link>
+          </div>
+          <AnalyticsChart />
+        </div>
+
+        <div className="rounded-2xl border border-border/50 bg-white p-5 shadow-sm">
+          <h2 className="text-sm font-semibold tracking-tight">Aksi cepat</h2>
+          <ul className="mt-3 space-y-3 text-sm text-muted-foreground">
           <li>
             <Link
               href="/admin/inquiries"
@@ -203,6 +215,7 @@ export function AdminOverview() {
             cek tampilan publik
           </li>
         </ul>
+      </div>
       </div>
     </div>
   );
