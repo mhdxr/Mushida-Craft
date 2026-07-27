@@ -81,15 +81,15 @@
   .hero-gradient {
     background: radial-gradient(
         circle at 10% 0%,
-        rgba(255, 196, 213, 0.55) 0%,
+        var(--glow-blush) 0%,
         transparent 45%
       ),
       radial-gradient(
         circle at 95% 10%,
-        rgba(252, 232, 200, 0.7) 0%,
+        var(--glow-cream) 0%,
         transparent 50%
       ),
-      linear-gradient(180deg, #fff8f5 0%, #fff5f1 100%);
+      linear-gradient(180deg, var(--surface-warm) 0%, var(--surface-warm-deep) 100%);
   }
 
   .section-soft {
