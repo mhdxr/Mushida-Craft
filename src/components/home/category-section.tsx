@@ -27,7 +27,7 @@ export async function CategorySection() {
       {/* Latar editorial halus dengan gradien dan blur */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_bottom_right,rgba(255,196,213,0.15),transparent_50%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_bottom_right,rgba(var(--shadow-blush-rgb),0.15),transparent_50%)]"
       />
 
       <div className="container">
