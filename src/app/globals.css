@@ -93,7 +93,7 @@
   }
 
   .section-soft {
-    background: linear-gradient(180deg, #fffaf6 0%, #fff5f1 100%);
+    background: linear-gradient(180deg, var(--surface-soft) 0%, var(--surface-warm-deep) 100%);
   }
 
   /* Marquee testimoni — fade di tepi (animasi di client component). */
