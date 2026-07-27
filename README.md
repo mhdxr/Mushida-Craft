@@ -242,7 +242,7 @@ Migration `0002_product_images_storage.sql` membuat bucket publik `product-image
 | `/api/products` | GET | Public | List semua produk |
 | `/api/products?slug=xxx` | GET | Public | Ambil produk by slug |
 | `/api/admin/products` | GET | Public | Alias baca (deprecated; prefer `/api/products`) |
-| `/api/admin/products` | POST | Admin | Buat produk / reset seed (**reset diblokir di production**) |
+| `/api/admin/products` | POST | Admin | Buat produk |
 | `/api/admin/products/[id]` | PATCH | Admin | Update produk (+ revalidate storefront) |
 | `/api/admin/products/[id]` | DELETE | Admin | Hapus produk + cleanup Storage |
 | `/api/inquiries` | POST | Public | Log klik WA / custom order |
@@ -272,7 +272,7 @@ Migration `0002_product_images_storage.sql` membuat bucket publik `product-image
 1. Set `ADMIN_EMAIL`, `ADMIN_PASSWORD`, dan `SESSION_SECRET` di `.env.local`.
 2. Buka `/admin` → otomatis redirect ke `/admin/login`.
 3. Login dengan kredensial di env → API route set HTTP-only cookie sesi.
-4. Di dashboard, kamu bisa: tambah produk, upload atau tempel beberapa URL gambar, mengatur urutan/gambar utama, edit, hapus, atau reset data ke seed.
+4. Di dashboard, kamu bisa: tambah produk, upload atau tempel beberapa URL gambar, mengatur urutan/gambar utama, edit, atau hapus produk.
 
 > **Arsitektur:** Login admin memakai env credentials (bukan Supabase Auth). Sesi disimpan di HTTP-only cookie yang ditandatangani HMAC-SHA256 (dibaca server untuk verifikasi API routes). Data produk disimpan di Supabase — admin writes lewat API route dengan service role key, public reads lewat anon key (RLS enforced).
 

@@ -64,8 +64,7 @@ Store chrome (navbar/footer/FAB) is **hidden** on `/admin/*` via `StoreChrome`. 
 | `/admin/testimoni` | Moderation queue (default filter: pending) |
 | `/admin/dashboard` | Redirect → `/admin` |
 
-Shell: `src/components/admin/admin-shell.tsx` + `src/app/admin/layout.tsx`.  
-Product seed reset (`POST { action: "reset" }`) is **blocked in production**.
+Shell: `src/components/admin/admin-shell.tsx` + `src/app/admin/layout.tsx`.
 
 ### Public API surface (high level)
 
