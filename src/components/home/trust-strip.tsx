@@ -19,7 +19,7 @@ export function TrustStrip() {
       {/* Gradien latar radial halus agar tidak polos */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,196,213,0.08),transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--shadow-blush-rgb),0.08),transparent_70%)]"
       />
 
       <div className="container relative py-10 md:py-12">
