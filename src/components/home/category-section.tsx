@@ -48,7 +48,7 @@ export async function CategorySection() {
                 className="group relative flex flex-col items-center gap-4 transition-all duration-300 hover:-translate-y-2"
               >
                 {/* Lingkaran ikon premium yang besar dan lapang */}
-                <div className="relative flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-white/60 shadow-[0_8px_32px_-8px_rgba(255,196,213,0.25)] ring-1 ring-blush-100/50 backdrop-blur-md transition-all duration-500 group-hover:bg-white/90 group-hover:shadow-[0_16px_48px_-12px_rgba(255,196,213,0.4)] group-hover:ring-primary/20">
+                <div className="relative flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-full bg-white/60 shadow-[0_8px_32px_-8px_rgba(var(--shadow-blush-rgb),0.25)] ring-1 ring-blush-100/50 backdrop-blur-md transition-all duration-500 group-hover:bg-white/90 group-hover:shadow-[0_16px_48px_-12px_rgba(var(--shadow-blush-rgb),0.4)] group-hover:ring-primary/20">
                   <div className="absolute inset-2 rounded-full border border-dashed border-blush-200/50 transition-all duration-500 group-hover:rotate-12 group-hover:scale-105" />
                   <Icon className="relative z-10 h-8 w-8 text-primary/70 transition-colors duration-300 group-hover:text-primary" strokeWidth={1.5} />
                 </div>
