@@ -142,11 +142,7 @@
     scroll-behavior: auto;
   }
 
-  /*
-   * Mengecualikan .animate-marquee-left dan .animate-marquee-right dari aturan reduced-motion
-   * agar animasi Marquee tetap berjalan meskipun setelan OS mematikan animasi.
-   */
-  *:not(.animate-marquee-left):not(.animate-marquee-right),
+  *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
