@@ -13,6 +13,9 @@
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "verify": "npm run type-check && npm run lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "audit:ci": "npm audit --omit=dev --audit-level=high",
     "db:setup": "node scripts/setup-db.mjs"
   },
   "dependencies": {
@@ -33,15 +36,20 @@
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
     "lucide-react": "^1.24.0",
-    "next": "^16.2.10",
+    "next": "^16.2.12",
     "pg": "^8.22.0",
     "posthog-js": "^1.399.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-hook-form": "^7.81.0",
+    "sharp": "^0.35.3",
     "tailwind-merge": "^3.6.0",
     "tw-animate-css": "^1.4.0",
     "zod": "^4.4.3"
+  },
+  "overrides": {
+    "postcss": "^8.5.18",
+    "sharp": "^0.35.3"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
@@ -54,6 +62,7 @@
     "tailwindcss": "^4.3.2",
     "ts-api-utils": "^2.5.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.63.0"
+    "typescript-eslint": "^8.63.0",
+    "vitest": "^4.1.10"
   }
 }

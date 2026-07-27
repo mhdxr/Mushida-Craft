@@ -1,34 +1,57 @@
-# Fondasi quality gate — jalan di setiap push/PR ke master.
 name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
-
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [main]
 
 jobs:
-  verify:
-    name: type-check + lint
+  build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify (tsc + eslint)
+      - name: Type-check & Lint
         run: npm run verify
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          # Build must not fail on missing runtime secrets; provide safe placeholders.
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  security-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Fail the pipeline only on production-facing high/critical vulnerabilities.
+      # Dev-only tooling (eslint/vitest transitive) is excluded via --omit=dev.
+      - name: npm audit (production deps)
+        run: npm run audit:ci
