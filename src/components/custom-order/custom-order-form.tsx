@@ -130,11 +130,15 @@ export function CustomOrderForm() {
           <Input
             id="name"
             placeholder="cth. Anindya Putri"
+            aria-invalid={errors.name ? true : undefined}
+            aria-describedby={errors.name ? "name-error" : undefined}
             className="h-11 border-blush-200/50 bg-white/50 focus-visible:ring-primary/30"
             {...register("name")}
           />
           {errors.name && (
-            <p className="text-xs text-destructive">{errors.name.message}</p>
+            <p id="name-error" className="text-xs text-destructive">
+              {errors.name.message}
+            </p>
           )}
         </div>
 
@@ -145,11 +149,13 @@ export function CustomOrderForm() {
             placeholder="cth. 081234567890"
             inputMode="tel"
             autoComplete="tel"
+            aria-invalid={errors.whatsapp ? true : undefined}
+            aria-describedby={errors.whatsapp ? "whatsapp-error" : undefined}
             className="h-11 border-blush-200/50 bg-white/50 focus-visible:ring-primary/30"
             {...register("whatsapp")}
           />
           {errors.whatsapp && (
-            <p className="text-xs text-destructive">
+            <p id="whatsapp-error" className="text-xs text-destructive">
               {errors.whatsapp.message}
             </p>
           )}
@@ -265,11 +271,13 @@ export function CustomOrderForm() {
             id="neededDate"
             type="date"
             min={new Date().toLocaleDateString("en-CA")}
+            aria-invalid={errors.neededDate ? true : undefined}
+            aria-describedby={errors.neededDate ? "neededDate-error" : undefined}
             className="h-11 border-blush-200/50 bg-white/50 focus-visible:ring-primary/30"
             {...register("neededDate")}
           />
           {errors.neededDate && (
-            <p className="text-xs text-destructive">
+            <p id="neededDate-error" className="text-xs text-destructive">
               {errors.neededDate.message}
             </p>
           )}
@@ -280,11 +288,15 @@ export function CustomOrderForm() {
           <Textarea
             id="notes"
             placeholder="Misal: warna favorit, tema, alamat lengkap, dll"
+            aria-invalid={errors.notes ? true : undefined}
+            aria-describedby={errors.notes ? "notes-error" : undefined}
             className="border-blush-200/50 bg-white/50 focus-visible:ring-primary/30 resize-none"
             {...register("notes")}
           />
           {errors.notes && (
-            <p className="text-xs text-destructive">{errors.notes.message}</p>
+            <p id="notes-error" className="text-xs text-destructive">
+              {errors.notes.message}
+            </p>
           )}
         </div>
       </div>

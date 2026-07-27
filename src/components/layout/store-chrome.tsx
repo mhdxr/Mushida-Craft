@@ -19,8 +19,16 @@ export function StoreChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-primary focus:px-5 focus:py-2.5 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      >
+        Lewati ke konten utama
+      </a>
       <Navbar />
-      <main className="min-h-screen">{children}</main>
+      <main id="main-content" className="min-h-screen">
+        {children}
+      </main>
       <Footer />
       <WhatsAppFab />
     </>

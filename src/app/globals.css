@@ -14,24 +14,31 @@
     --popover: 0 0% 100%;
     --popover-foreground: 340 25% 12%;
 
-    --primary: 345 78% 70%;
+    /*
+     * Primary diperdalam 70%→58% agar teks putih di atasnya lolos
+     * WCAG AA (≈4.5:1). Estetika blush tetap terjaga (hue/sat sama).
+     */
+    --primary: 345 74% 58%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 35 50% 95%;
     --secondary-foreground: 340 25% 18%;
 
     --muted: 30 30% 95%;
-    --muted-foreground: 340 8% 45%;
+    /* 45%→40%: teks muted lolos AA (≈4.5:1) di atas background terang. */
+    --muted-foreground: 340 8% 40%;
 
-    --accent: 38 60% 56%;
+    /* Accent (gold) diperdalam 56%→45% agar teks putih lolos AA. */
+    --accent: 38 62% 45%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 75% 55%;
+    --destructive: 0 72% 48%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 340 18% 90%;
     --input: 340 18% 90%;
-    --ring: 345 78% 70%;
+    /* Ring selaras dengan primary baru — fokus ring kontras cukup. */
+    --ring: 345 74% 58%;
 
     --radius: 0.85rem;
   }

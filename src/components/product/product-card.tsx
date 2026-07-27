@@ -37,7 +37,8 @@ export function ProductCard({ product }: ProductCardProps) {
           sizes="(max-width: 768px) 50vw, 25vw"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
         />
-        {product.badge && (
+        {/* Saat sold-out, overlay sudah menyampaikannya — hindari badge ganda. */}
+        {product.badge && !isSoldOut && (
           <div className="absolute left-3.5 top-3.5">
             <Badge variant={badgeMap[product.badge].variant}>
               {badgeMap[product.badge].label}
@@ -53,7 +54,7 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
       <div className="space-y-2 px-5 py-5 md:px-6 md:py-6">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary/80">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
           {cat?.name}
         </p>
         <h3 className="font-serif text-lg font-medium leading-snug md:text-[1.25rem] text-foreground/90 group-hover:text-primary transition-colors duration-300">

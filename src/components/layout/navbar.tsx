@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { BrandLogo } from "@/components/common/brand-logo";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const menuId = useId();
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setOpen(false);
@@ -27,10 +29,42 @@ export function Navbar() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        // Kembalikan fokus ke tombol pemicu setelah menutup.
+        toggleRef.current?.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  // Focus trap: fokus otomatis ke link pertama & putar Tab di dalam drawer.
+  useEffect(() => {
+    if (!open) return;
+    const drawer = drawerRef.current;
+    if (!drawer) return;
+
+    const focusables = drawer.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled])',
+    );
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    first?.focus();
+
+    const onTrap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || focusables.length === 0) return;
+      const active = document.activeElement;
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last?.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first?.focus();
+      }
+    };
+    drawer.addEventListener("keydown", onTrap);
+    return () => drawer.removeEventListener("keydown", onTrap);
   }, [open]);
 
   useEffect(() => {
@@ -87,6 +121,7 @@ export function Navbar() {
 
         {/* z tinggi + di atas overlay — pastikan selalu bisa diklik di mobile */}
         <button
+          ref={toggleRef}
           type="button"
           aria-label={open ? "Tutup menu" : "Buka menu"}
           aria-expanded={open}
@@ -125,7 +160,11 @@ export function Navbar() {
           />
 
           <div
+            ref={drawerRef}
             id={menuId}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu navigasi"
             className="absolute inset-x-0 top-full z-[56] origin-top border-b border-border/40 bg-white/95 shadow-xl shadow-primary/5 backdrop-blur-xl md:hidden"
           >
             <div className="container flex flex-col gap-1 py-5">
