@@ -13,7 +13,7 @@ import {
  *
  * Operasi tulis tetap dilindungi lagi di API routes via isAdminAuthenticated().
  */
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const isLogin =
     pathname === "/admin/login" || pathname.startsWith("/admin/login/");
