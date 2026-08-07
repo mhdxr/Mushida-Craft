@@ -15,7 +15,9 @@ npm run dev          # dev server → http://localhost:3000
 npm run build        # production build (Sentry source-map upload if SENTRY_AUTH_TOKEN set)
 npm run start        # serve production build
 npm run lint         # ESLint
-npm run type-check   # tsc --noEmit — no test suite configured
+npm run type-check   # tsc --noEmit
+npm run test         # Vitest unit tests (src/**/*.test.ts)
+npm run test:e2e     # Playwright e2e (butuh build + server lokal)
 npm run verify       # type-check + lint (use before commit/PR)
 npm run db:setup     # apply supabase/migrations/*.sql (needs SUPABASE_DB_URL)
 ```
