@@ -6,6 +6,7 @@ import {
   MAX_PRODUCT_IMAGES,
   PRODUCT_IMAGE_EXTENSIONS,
   PRODUCT_IMAGES_BUCKET,
+  hasValidImageSignature,
   isProductImageMimeType,
   type ProductImageMimeType,
 } from "@/lib/product-images";
@@ -17,45 +18,6 @@ const MAX_UPLOAD_REQUEST_SIZE =
 
 function invalidUpload(message: string) {
   return NextResponse.json({ ok: false, message }, { status: 400 });
-}
-
-function matchesBytes(
-  bytes: Uint8Array,
-  offset: number,
-  signature: number[],
-): boolean {
-  return signature.every((value, index) => bytes[offset + index] === value);
-}
-
-function hasValidImageSignature(
-  bytes: Uint8Array,
-  mimeType: ProductImageMimeType,
-): boolean {
-  if (mimeType === "image/jpeg") {
-    return matchesBytes(bytes, 0, [0xff, 0xd8, 0xff]);
-  }
-  if (mimeType === "image/png") {
-    return matchesBytes(bytes, 0, [
-      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-    ]);
-  }
-  if (mimeType === "image/webp") {
-    return (
-      matchesBytes(bytes, 0, [0x52, 0x49, 0x46, 0x46]) &&
-      matchesBytes(bytes, 8, [0x57, 0x45, 0x42, 0x50])
-    );
-  }
-
-  if (!matchesBytes(bytes, 4, [0x66, 0x74, 0x79, 0x70])) return false;
-  for (let offset = 8; offset <= Math.min(bytes.length - 4, 32); offset += 4) {
-    if (
-      matchesBytes(bytes, offset, [0x61, 0x76, 0x69, 0x66]) ||
-      matchesBytes(bytes, offset, [0x61, 0x76, 0x69, 0x73])
-    ) {
-      return true;
-    }
-  }
-  return false;
 }
 
 /** POST /api/admin/upload - upload banyak gambar produk ke Supabase Storage. */
