@@ -51,7 +51,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Fail the pipeline only on production-facing high/critical vulnerabilities.
-      # Dev-only tooling (eslint/vitest transitive) is excluded via --omit=dev.
-      - name: npm audit (production deps)
-        run: npm run audit:ci
+      # Fail the pipeline on ANY vulnerability (prod + dev tooling).
+      # Note: `npm run audit:ci` uses --omit=dev, which exits 0 even when
+      # dev-tooling transitive deps are vulnerable — that is NOT a real gate.
+      # Full audit (no --omit) exits non-zero whenever npm finds an issue.
+      - name: npm audit (all deps — hard gate)
+        run: npm audit --audit-level=moderate

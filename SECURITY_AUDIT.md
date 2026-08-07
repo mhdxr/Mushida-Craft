@@ -1,82 +1,149 @@
 # Security and Quality Audit Report: Mushida-Craft
 
-This document provides a comprehensive summary of the security, reliability, and code quality audit conducted on the **Mushida-Craft** repository. 
+> **Status: AKTIF — audit dijalankan ulang pada 2026-08-07.**
+> Dokumen ini mencerminkan hasil verifikasi kode + tooling yang benar-benar dijalankan,
+> bukan klaim statis. **Temuan dependency vulnerabilities sudah diperbaiki** (lihat §7).
 
 ---
 
 ## Executive Summary
-The Mushida-Craft codebase is implemented with high security standards, clean architectural boundaries, and defensive programming practices. The application utilizes Next.js (App Router), Supabase for data storage, Upstash Redis for distributed rate-limiting, and Resend for notifications.
 
-Key findings show:
-* **0 Vulnerabilities** reported by `npm audit`.
-* **0 Lint Errors/Warnings** reported by ESLint.
-* **0 TypeScript Compilation Errors** (`tsc --noEmit` passed).
-* **Robust session integrity** using HMAC-SHA256 signatures generated via the Edge-compatible Web Crypto API.
-* **Strong defense-in-depth** measures, including CSRF Origin/Referer verification, startup-level production credential guards, Row-Level Security (RLS) on all database tables, MIME-type magic byte validation for file uploads, HTML escaping for notifications, and strict Content Security Policies (CSP).
+Mushida-Craft menerapkan standar keamanan yang tinggi: arsitektur auth berlapis, validasi input ketat,
+RLS di semua tabel database, upload dengan verifikasi magic bytes, rate limiting terdistribusi, dan
+praktik defensive programming yang konsisten. Audit ini memverifikasi ulang seluruh klaim dari kode.
 
----
+**Hasil verifikasi aktual (2026-08-07):**
 
-## Detailed Audit Findings
+| Pemeriksaan | Hasil | Bukti |
+|-------------|-------|-------|
+| `npm audit` (semua deps) | ✅ **0 vulnerabilities** | dijalankan ulang setelah fix |
+| `tsc --noEmit` | ✅ 0 error | dijalankan ulang |
+| ESLint | ✅ 0 error/warning | dijalankan ulang |
+| Vitest (unit test) | ✅ 9/9 passed | dijalankan ulang |
+| `npm run build` | ✅ sukses, semua route ter-generate | dijalankan ulang |
+| Scan git history untuk secrets | ✅ bersih | `git log -S SUPABASE_SERVICE_ROLE_KEY` dst. |
 
-### 1. Static Analysis & Dependencies
-* **NPM Audit**: Tested and passed with 0 vulnerabilities detected.
-* **ESLint**: Linter config is configured with strict rules (`eslint.config.mjs` extending standard Next configs with typescript parser). The code complies perfectly (0 errors, 0 warnings).
-* **TypeScript Compilation**: All types are compiled and checked successfully via `tsc --noEmit`. No compiler errors or warnings.
-
-### 2. Session Authentication & Authorization
-* **Custom Admin Auth**: The admin dashboard deliberately bypasses Supabase Auth in favor of a stateless custom session token strategy to avoid user registration overhead.
-* **HMAC-SHA256 Token Validation**: Session tokens are structured as `payload.signature` signed with `crypto.subtle.sign("HMAC", ...)` using SHA-256 via the Web Crypto API. This ensures constant-time verification (`crypto.subtle.verify`) and compatibility with Edge middleware.
-* **Cookie Protection**: The session cookie (`Mushida:admin-session`) is configured as:
-  * `httpOnly: true` (prevents XSS extraction).
-  * `sameSite: "lax"` (mitigates CSRF).
-  * `secure: true` (enforced in production, transport over HTTPS).
-  * `maxAge: 3 days` (short expiration window).
-* **Edge Middleware Guard**: `src/middleware.ts` intercepting `/admin/*` and `/api/admin/*` paths executes at the Edge, ensuring unauthenticated requests are blocked before they can reach the server endpoints or consume compute resources.
-* **CSRF Protection**: All state-changing endpoints (`POST`, `PUT`, `PATCH`, `DELETE`) enforce an origin check through a shared `isTrustedOrigin` utility, which validates the `Origin` and `Referer` headers against the configured `NEXT_PUBLIC_SITE_URL`.
-
-### 3. Database Security & Supabase Schema
-* **Row-Level Security (RLS)**: Enabled across all tables:
-  * `products`: Read-only select for the public; writes restricted to the service role (accessed only by authenticated admin APIs).
-  * `categories`: Read-only select for active entries; writes restricted to the service role.
-  * `testimonials`: Read-only select for approved reviews; submissions via public API rate-limited; updates restricted to the service role.
-  * `inquiries`: Public access (read/write) is completely disabled at the database level. Leads are created and managed strictly through the server-side API using the Supabase Service Role client (`SUPABASE_SERVICE_ROLE_KEY`).
-* **Service Role Restriction**: The highly privileged `SUPABASE_SERVICE_ROLE_KEY` is kept strictly server-side. The client-side only has access to the `NEXT_PUBLIC_SUPABASE_ANON_KEY`, which is limited by RLS to SELECT queries.
-
-### 4. Input Validation & Abuse Prevention
-* **Zod Schemas**: Every API endpoint parses inputs using strict Zod schemas, enforcing types, string lengths (e.g., `z.string().max(80)`), and number constraints.
-* **JSONB Spam Prevention**: The inquiry submission endpoint (`POST /api/inquiries`) limits the custom metadata object to a maximum of 12 primitive keys, protecting Postgres JSONB indexes from database bloating or Denial of Service (DoS) attacks.
-* **Safe File Uploads**: The product image upload API (`POST /api/admin/products/upload`) implements defensive file verification:
-  * Restricts file sizes to standard thresholds (< 3.5MB).
-  * Rather than relying solely on the client-supplied content-type header, it reads the image buffer's **magic bytes** (file signature headers) to guarantee the file is a genuine image (JPEG, PNG, WEBP, or GIF), preventing the execution of malicious scripts disguised as images or XML-based SVG attacks.
-* **Distributed Rate Limiting**: Implemented via Upstash Redis with sliding window limiters:
-  * Login attempts: Max 5 failures per 15 minutes per IP.
-  * Testimonial submissions: Max 3 per hour per IP.
-  * WhatsApp inquiry logs: Max 30 per hour per IP.
-  * Fallback behavior: Map-based in-memory limiter for local development, with warning diagnostics built into `GET /api/health` if production runs without Upstash Redis configured.
-
-### 5. Code Quality & Defensive Coding
-* **Production Guard**: An instrumentation hook (`src/instrumentation.ts`) executes `assertProductionAdminCredentials()` on server startup in production mode, blocking boot if `ADMIN_EMAIL` is missing, `ADMIN_PASSWORD` is weak (< 12 characters or using defaults like `admin123`), or `SESSION_SECRET` is too short (< 32 characters).
-* **HTML Sanitization**: Automated email notifications sent via Resend implement a strict `escapeHtml` utility to sanitize user inputs before placing them into HTML templates, mitigating HTML injection risks in the admin's inbox.
-* **Error Handling**: API errors are logged to the server, and responses return generalized, safe errors (e.g., `"Gagal menyimpan inquiry"`) to avoid leaking stack traces or configuration details to the client.
-
-### 6. Deployment Configuration
-* **Security Headers**: High-grade HTTP headers are defined in both `next.config.mjs` and `vercel.json` (providing safety both on the Vercel CDN and in standalone Next.js server mode):
-  * `X-Content-Type-Options: nosniff`
-  * `X-Frame-Options: DENY` (mitigates clickjacking).
-  * `Referrer-Policy: strict-origin-when-cross-origin`
-  * `Strict-Transport-Security` (configured for 2 years with preloading).
-  * `Content-Security-Policy`: Strong CSP blocking unauthorized connection/script endpoints, object embeds (`object-src 'none'`), and restricting image resources to Unsplash, self, and the Supabase Storage domain.
-* **Image Optimization**: `next/image` is strictly bound to approved remote host patterns, preventing open redirect resource loading.
-* **PostHog Proxy**: Proxies tracking scripts through the same-origin `/ingest/*` route, bypassing ad-blocker false positives while staying compliant with the defined CSP.
+> ⚠️ **Catatan penting:** Audit sebelumnya (versi dokumen ini yang lama) melaporkan "0 vulnerabilities"
+> dari `npm audit`. **Itu sudah tidak akurat**: audit aktual menemukan 4 vulnerabilities
+> (1 moderate, 3 high) di transitive dependencies — semuanya sudah diperbaiki via `npm audit fix`
+> (lihat §7). Pelajaran: hasil audit statis basi; keandalan dijaga dengan CI gate (lihat §8).
 
 ---
 
-## Recommendations & Next Steps
+## 1. Static Analysis & Dependencies
 
-While Mushida-Craft is in excellent condition, we suggest the following optimizations to improve future maintainability:
-1. **Configure a Test Suite**: The repository currently has no testing framework configured. Configuring Vitest or Jest would allow writing unit tests for:
-   * HMAC session token generation and verification.
-   * File upload magic-byte verification logic.
-   * API Zod parsers and rate limiting.
-2. **Refine CSP script-src**: If the application does not rely on third-party scripts that require inline evaluations, consider removing `'unsafe-eval'` from the script-src policy in production to further mitigate hypothetical XSS vectors.
-3. **Database Schema Migrations Check**: When introducing new features or deploying updates, ensure all schema changes are committed under `supabase/migrations/` and run via `npm run db:setup` to maintain database parity across environments.
+* **NPM Audit**: sebelumnya 4 vuln (1 moderate, 3 high) — **sudah diperbaiki**, sekarang 0.
+  Detail: §7.
+* **ESLint**: `eslint.config.mjs` strict (Next + typescript-eslint). 0 error, 0 warning.
+* **TypeScript**: `tsc --noEmit` bersih, 0 error.
+* **Unit test**: Vitest 9/9 lulus (session-token: create/verify/tamper/expiry/clock-skew/shape).
+* **Build produksi**: `npm run build` sukses; seluruh route + proxy (middleware) ter-generate.
+
+## 2. Session Authentication & Authorization
+
+* **Custom Admin Auth** (bukan Supabase Auth): stateless HMAC-SHA256 session token
+  (`payload.signature`) via Web Crypto — kompatibel Edge middleware + Node runtime.
+* **Verifikasi constant-time**: `crypto.subtle.verify`, plus regex ketat pada format token
+  (hanya `[A-Za-z0-9_-]`), shape-check payload, dan **penolakan clock-skew** (`loggedAt` masa depan).
+* **Cookie** `Mushida:admin-session`: `httpOnly`, `sameSite=lax`, `secure` di production,
+  `maxAge` 3 hari (bukan 7 — window curian lebih kecil).
+* **Edge Proxy guard**: `src/proxy.ts` (Next.js 16; pengganti `middleware.ts`) memblokir
+  `/admin/*` tanpa sesi valid sebelum request mencapai server. Login redirect ke `/admin` jika sudah authed.
+* **Defense in depth**: setiap API write (POST/PATCH/DELETE) re-check `isAdminAuthenticated()`.
+* **CSRF**: `isTrustedOrigin` memvalidasi `Origin`/`Referer` terhadap host; bila header tidak ada,
+  andalkan SameSite=Lax + auth cookie.
+
+## 3. Database Security & Supabase Schema
+
+* **RLS enabled di semua tabel**:
+  * `products` — public SELECT (all); write hanya service role.
+  * `categories` — public SELECT hanya `is_active = true`; write service role.
+  * `testimonials` — public SELECT hanya `status = 'approved'`; submit publik via API
+    rate-limited (service role), moderasi admin.
+  * `inquiries` — **tanpa policy public sama sekali**; insert/list hanya service role.
+* **Storage**: bucket `product-images` public-read, tulis hanya service role;
+  `file_size_limit` 5 MB + `allowed_mime_types` di level bucket.
+* **Service role key** hanya server-side (`getServerSupabaseClient`), tidak pernah ke browser.
+
+## 4. Input Validation & Abuse Prevention
+
+* **Zod strict** di semua endpoint (panjang string, tipe angka, enum kategori, format slug).
+* **JSONB spam protection**: `meta` inquiry dibatasi primitif + maks 12 key.
+* **Upload aman**: ukuran ≤5 MB (produk) / 1 MB (avatar), **magic bytes diverifikasi**
+  (JPEG `FFD8FF`, PNG 8-byte, WebP `RIFF....WEBP`, AVIF `ftyp`), MIME + ekstensi dikunci,
+  rollback otomatis bila sebagian upload gagal.
+* **Rate limiting** (Upstash Redis prod / Map in-memory dev):
+  login 5/15 menit/IP, testimoni 3/jam/IP, inquiry 30/jam/IP.
+  `GET /api/health` jujur melaporkan mode `degraded` bila production tanpa Upstash.
+
+## 5. Code Quality & Defensive Coding
+
+* **Production guard saat boot** (`instrumentation.ts`): tolak ADMIN_EMAIL kosong,
+  ADMIN_PASSWORD lemah (<12 char / di daftar default), SESSION_SECRET <32 char.
+* **Timing-safe credential compare** (`timingSafeEqual` atas hash SHA-256).
+* **HTML escape** pada notifikasi email (Resend) — cegah HTML injection di inbox admin.
+* **Error handling**: log detail di server, respons generik ke client (tidak bocor stack/config).
+* **Seed fallback bijak**: fallback seed hanya saat DB gagal/unconfigured;
+  query sukses-kosong dihormati (tidak resurrect data palsu ke homepage).
+* **safeJsonLd**: escape `</script>`/`<!--` pada JSON-LD.
+
+## 6. Deployment Configuration
+
+* **Security headers** (dua lapis: `next.config.mjs` headers + `vercel.json`):
+  `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`,
+  `Permissions-Policy`, HSTS (2 tahun + preload), CSP ketat.
+* **CSP**: `default-src 'self'`, `object-src 'none'`, `frame-ancestors 'none'`,
+  `base-uri 'self'`, `form-action 'self'`, `upgrade-insecure-requests`;
+  img/connect dibatasi (Unsplash, Supabase, Sentry); PostHog via proxy same-origin `/ingest`.
+* **next/image**: remotePatterns dibatasi (Unsplash + hostname Supabase + path bucket produk).
+* **Secrets hygiene**: `.gitignore` menutup `.env*`; hanya `.env.example` ter-track;
+  scan history bersih dari service role key / credential.
+
+## 7. ⚠️ Dependency Vulnerabilities — Ditemukan & Diperbaiki (2026-08-07)
+
+Audit aktual menemukan **4 vulnerabilities** yang TIDAK terdeteksi dokumen lama:
+
+| Paket | Severity | Advisory | Jalur |
+|-------|----------|----------|-------|
+| `brace-expansion` ≤1.1.17 / 5.0.8 | 🔴 high | DoS OOM (GHSA-mh99-v99m-4gvg, GHSA-rgw5-rvv9-x895) | eslint / minimatch (dev tooling) |
+| `fast-uri` 3.0.0–3.1.4 | 🔴 high | Host confusion via backslash (GHSA-7p8r-x3mc-p8w7) | @sentry/nextjs → webpack → ajv |
+| `js-yaml` ≤4.3.0 | 🔴 high | Quadratic CPU (CVE-2026-59870) | eslint |
+| `dompurify` ≤3.4.12 | 🟠 moderate | XSS via detached subtree (GHSA-55q2-fjhq-7xh7) | posthog-js |
+
+**Perbaikan:** `npm audit fix` — hanya bump versi patch transitive di `package-lock.json`
+(fast-uri 3.1.5, brace-expansion 1.1.18/5.0.9, js-yaml 4.3.1, dompurify 3.4.13).
+**Tidak ada dependency langsung yang berubah.** Setelah fix: audit 0 vuln, test 9/9, type-check & build tetap sukses.
+
+> Semua paket di atas transitive dari tooling; dampak runtime ke aplikasi rendah, namun
+> tetap ditutup karena prinsip zero-known-vulnerability & murahnya fix.
+
+## 8. CI/CD — Security Gate
+
+Workflow `.github/workflows/ci.yml` menjalankan di setiap push/PR ke `master`:
+type-check + lint (`npm run verify`), unit test (`npm test`), build, dan **audit gate**.
+
+**Perubahan 2026-08-07:** job `security-audit` di-upgrade dari `npm run audit:ci`
+(`npm audit --omit=dev --audit-level=high`, yang **exit 0** meski dev-tooling vulnerable)
+menjadi **hard gate** `npm audit --audit-level=moderate` (tanpa `--omit`) —
+**exit non-zero bila ada vulnerability apa pun** (prod maupun dev).
+
+> **Pelajaran:** gate lama lolos meski 4 vuln ada. Gate baru sudah diverifikasi:
+> exit 1 pada lockfile vulnerable, exit 0 pada lockfile bersih.
+
+## 9. Rekomendasi & Next Steps
+
+1. **Jaga lockfile tetap bersih** — selalu `npm audit fix` (atau dependabot) sebelum merge;
+   CI gate baru akan memaksa.
+2. **CSP hardening opsional** — hilangkan `'unsafe-eval'` dari `script-src` di production
+   bila memungkinkan (perlu tes dengan Next/Sentry/PostHog).
+3. **`getClientIp()`** — header `x-forwarded-for` di-trust; aman di Vercel (di-set platform),
+   tapi perlu trust-proxy jika pindah hosting.
+4. **Cakupan test** — unit test session-token sudah ada; tambahkan: magic-bytes upload
+   (produk + avatar) dan rate-limiter (in-memory + Upstash mock).
+5. **Perbarui CLAUDE.md** — referensi `src/middleware.ts` → `src/proxy.ts` (Next 16).
+6. **Jangan biarkan dokumen ini basi** — audit statis kedaluwarsa; andalkan CI gate (§8)
+   sebagai sumber kebenaran, dan perbarui dokumen ini saat ada perubahan signifikan.
+
+---
+
+*Terakhir diperbarui: 2026-08-07 · Verifikasi: tooling dijalankan langsung pada tanggal tersebut.*

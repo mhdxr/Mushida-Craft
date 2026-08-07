@@ -48,7 +48,7 @@ Admin login uses env credentials (`ADMIN_EMAIL` / `ADMIN_PASSWORD`), not Supabas
 
 - `src/lib/session-token.ts` — pure token create/verify via Web Crypto (Edge + Node). Keep free of `next/headers` so middleware can use it.
 - `src/lib/auth.ts` — server cookie read/write. **Next 16: always `await cookies()`.**
-- `src/middleware.ts` — Edge guard on `/admin/*` except login; authed users hitting login redirect to `/admin`.
+- `src/proxy.ts` — Edge guard on `/admin/*` except login (Next.js 16: `middleware.ts` diganti `proxy.ts`); authed users hitting login redirect to `/admin`.
 - API write routes re-check `isAdminAuthenticated()` — defense in depth.
 - `src/lib/rate-limit.ts` — login (5/15min per IP) and testimonial submit (3/hr per IP). Prefers Upstash Redis; falls back to in-memory `Map` when Upstash env is absent.
 
