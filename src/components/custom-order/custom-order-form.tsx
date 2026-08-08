@@ -21,7 +21,7 @@ import {
 } from "@/lib/validations";
 import { AnalyticsEvent, track } from "@/lib/analytics";
 import { logInquiry } from "@/lib/log-inquiry";
-import { buildCustomOrderMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
+import { placeOrder } from "@/lib/order-api";
 import { toast } from "@/hooks/use-toast";
 
 const bouquetTypes = [
@@ -89,8 +89,19 @@ export function CustomOrderForm() {
   const occasion = watch("occasion");
   const deliveryArea = watch("deliveryArea");
 
-  const onSubmit = (data: CustomOrderSchema) => {
-    const url = buildWhatsAppUrl(buildCustomOrderMessage(data));
+  const onSubmit = async (data: CustomOrderSchema) => {
+    const result = await placeOrder({
+      source: "custom",
+      customerName: data.name,
+      customerWa: data.whatsapp,
+      bouquetType: data.bouquetType,
+      occasion: data.occasion,
+      budget: data.budget,
+      neededDate: data.neededDate,
+      deliveryArea: data.deliveryArea,
+      notes: data.notes,
+    });
+
     track(AnalyticsEvent.SUBMIT_CUSTOM_ORDER, {
       bouquet_type: data.bouquetType,
       budget: data.budget,
@@ -113,9 +124,13 @@ export function CustomOrderForm() {
       },
     });
     setSubmitted(true);
-    toast.success("Form terkirim. Membuka WhatsApp...");
+    toast.success(
+      result.ok
+        ? "Order tersimpan. Membuka WhatsApp..."
+        : "Form terkirim. Membuka WhatsApp...",
+    );
     if (typeof window !== "undefined") {
-      window.open(url, "_blank", "noopener,noreferrer");
+      window.open(result.waLink, "_blank", "noopener,noreferrer");
     }
   };
 

@@ -1,13 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AnalyticsEvent, track } from "@/lib/analytics";
-import { logInquiry } from "@/lib/log-inquiry";
-import {
-  buildProductOrderMessage,
-  buildWhatsAppUrl,
-} from "@/lib/whatsapp";
+import { OrderModal } from "@/components/product/order-modal";
 import type { Product } from "@/types";
 
 interface OrderButtonProps {
@@ -21,7 +17,7 @@ export function OrderButton({
   className,
   size = "lg",
 }: OrderButtonProps) {
-  const url = buildWhatsAppUrl(buildProductOrderMessage(product));
+  const [modalOpen, setModalOpen] = useState(false);
   const disabled = !product.isAvailable || product.badge === "sold-out";
 
   if (disabled) {
@@ -33,33 +29,17 @@ export function OrderButton({
   }
 
   return (
-    <Button asChild size={size} className={className}>
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={() => {
-          track(AnalyticsEvent.CLICK_WA_PRODUCT, {
-            product_id: product.id,
-            product_slug: product.slug,
-            product_name: product.name,
-            price: product.price,
-            category: product.category,
-            source: "pdp_inline",
-          });
-          logInquiry({
-            source: "pdp_inline",
-            productId: product.id,
-            productSlug: product.slug,
-            productName: product.name,
-            productPrice: product.price,
-            meta: { category: product.category },
-          });
-        }}
-      >
+    <>
+      <Button size={size} className={className} onClick={() => setModalOpen(true)}>
         <MessageCircle className="h-4 w-4" />
         Order via WhatsApp
-      </a>
-    </Button>
+      </Button>
+      <OrderModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        product={product}
+        inquirySource="pdp_inline"
+      />
+    </>
   );
 }

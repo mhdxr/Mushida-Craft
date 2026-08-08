@@ -90,7 +90,19 @@ const nextConfig = {
    * @see https://posthog.com/docs/advanced/proxy/nextjs
    */
   async rewrites() {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL?.trim();
+    const apiRewrite = apiBase
+      ? [
+          {
+            // Proxy order ke API backend (mushida-craft-api).
+            // Same-origin → tidak ada CORS; NEXT_PUBLIC_API_URL cukup di server.
+            source: "/api/orders-proxy",
+            destination: `${apiBase.replace(/\/$/, "")}/orders`,
+          },
+        ]
+      : [];
     return [
+      ...apiRewrite,
       {
         source: "/ingest/static/:path*",
         destination: `${POSTHOG_ASSETS_HOST}/static/:path*`,
