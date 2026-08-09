@@ -95,7 +95,7 @@ export function CatalogFilters({
           aria-label="Cari bouquet"
           value={value.search}
           onChange={(e) => onChange({ ...value, search: e.target.value })}
-          className="h-12 rounded-full border-blush-200/50 bg-white/70 pl-11 pr-4 shadow-[0_2px_12px_-4px_rgba(255,196,213,0.15)] focus-visible:ring-primary/20 focus-visible:bg-white backdrop-blur-sm transition-all hover:bg-white"
+          className="h-12 rounded-full border-blush-200/50 bg-white/70 pl-11 pr-4 shadow-[0_2px_12px_-4px_rgba(var(--shadow-blush-rgb),0.15)] focus-visible:ring-primary/20 focus-visible:bg-white backdrop-blur-sm transition-all hover:bg-white"
         />
       </div>
 
@@ -122,7 +122,7 @@ export function CatalogFilters({
               className={cn(
                 "inline-flex shrink-0 items-center rounded-full px-5 py-2.5 text-[13px] font-medium tracking-wide transition-all duration-300",
                 active
-                  ? "bg-primary text-white shadow-[0_4px_12px_-2px_rgba(255,196,213,0.6)] scale-[1.02]"
+                  ? "bg-primary text-white shadow-[0_4px_12px_-2px_rgba(var(--shadow-blush-rgb),0.6)] scale-[1.02]"
                   : "bg-white/80 border border-blush-100/60 text-muted-foreground hover:bg-white hover:text-foreground hover:border-primary/30 hover:shadow-sm"
               )}
             >

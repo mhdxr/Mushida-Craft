@@ -53,7 +53,7 @@ export function HowToOrder() {
               >
                 {/* Lingkaran ikon — titik utama pada alur */}
                 <div className="relative z-10 mb-5">
-                  <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white ring-1 ring-blush-100 shadow-[0_4px_16px_-4px_rgba(255,196,213,0.35)] text-primary transition-all duration-300 group-hover:ring-primary/40 group-hover:scale-105">
+                  <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white ring-1 ring-blush-100 shadow-[0_4px_16px_-4px_rgba(var(--shadow-blush-rgb),0.35)] text-primary transition-all duration-300 group-hover:ring-primary/40 group-hover:scale-105">
                     <s.icon className="h-6 w-6" />
                   </span>
                   {/* Nomor bertengger di atas lingkaran */}

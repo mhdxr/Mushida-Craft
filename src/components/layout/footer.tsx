@@ -47,7 +47,7 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="border-t border-border/40 bg-[linear-gradient(180deg,#fffaf6_0%,#fff5f1_100%)]">
+    <footer className="border-t border-border/40 bg-[linear-gradient(180deg,var(--surface-soft)_0%,var(--surface-warm-deep)_100%)]">
       <div className="container py-14 md:py-16">
         <div className="grid gap-12 md:grid-cols-12 md:gap-10">
           <div className="space-y-5 md:col-span-4">
